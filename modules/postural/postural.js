@@ -1,7 +1,6 @@
-import { SECTIONS, ALL_ITEMS, MAX_POINTS, computeScore } from "./tests.js";
+import { SECTIONS, ALL_ZONES, MAX_POINTS, computeScore, selectedOptions } from "./tests.js";
 import { saveScore, getScores, scoreLabel } from "../../shared/scores.js";
 
-const LEVEL_TAG = ["Marcada", "Leve", "Correcto"];
 const form = document.getElementById("form");
 const progress = document.getElementById("progress");
 const calcBtn = document.getElementById("calc");
@@ -20,28 +19,27 @@ function el(tag, attrs = {}, ...children) {
 function render() {
   for (const section of SECTIONS) {
     form.append(el("h2", {}, section.title), el("p", { class: "lead" }, section.intro));
-    for (const item of section.items) {
-      const options = el("div", { class: "options", role: "radiogroup" });
-      // Mostrar de mejor a peor: correcto, leve, marcada
-      for (const value of [2, 1, 0]) {
-        const input = el("input", { type: "radio", name: item.id, value: String(value) });
+    for (const zone of section.zones) {
+      const options = el("div", { class: "options" });
+      for (const opt of zone.options) {
+        const input = el("input", { type: "checkbox", class: "circle", name: zone.id, value: opt.id });
         input.addEventListener("change", () => {
-          answers[item.id] = value;
+          answers[zone.id] = [...form.querySelectorAll(`input[name="${zone.id}"]:checked`)].map((i) => i.value);
           update();
         });
         options.append(
-          el("label", {}, input, el("span", {}, el("span", { class: `tag l${value}` }, LEVEL_TAG[value]), " ", item.levels[value]))
+          el("label", {}, input, el("span", {}, el("strong", {}, opt.name), el("br"), el("span", { class: "note" }, opt.hint)))
         );
       }
-      form.append(el("div", { class: "card" }, el("h3", {}, item.name), el("p", { class: "how" }, item.how), options));
+      form.append(el("div", { class: "card" }, el("h3", {}, zone.name), el("p", { class: "how" }, zone.how), options));
     }
   }
+  form.append(el("p", { class: "note" }, "Si no marcas ninguna opción en una zona, se considera sin alteración."));
 }
 
 function update() {
-  const n = Object.keys(answers).length;
-  progress.textContent = `${n} / ${ALL_ITEMS.length} respondidas`;
-  calcBtn.disabled = n < ALL_ITEMS.length;
+  const n = ALL_ZONES.filter((z) => (answers[z.id] || []).length).length;
+  progress.textContent = n ? `${n} de ${ALL_ZONES.length} zonas con alteración` : "Sin alteraciones marcadas";
 }
 
 function showResult() {
@@ -54,19 +52,14 @@ function showResult() {
 
   const fixes = document.getElementById("fixes");
   fixes.replaceChildren();
-  const issues = ALL_ITEMS.filter((i) => answers[i.id] < 2).sort(
-    (a, b) => answers[a.id] - answers[b.id] || b.weight - a.weight
-  );
+  const issues = selectedOptions(answers);
   if (!issues.length) {
     fixes.append(el("div", { class: "card" }, "¡Postura excelente! Mantén tu rutina de fuerza y movilidad."));
   }
-  for (const item of issues) {
-    const v = answers[item.id];
+  for (const opt of issues) {
     const list = el("ul", { class: "fix" });
-    item.fix.forEach((f) => list.append(el("li", {}, f)));
-    fixes.append(
-      el("div", { class: "card" }, el("h3", {}, item.name, " ", el("span", { class: `tag l${v}` }, LEVEL_TAG[v])), list)
-    );
+    opt.fix.forEach((f) => list.append(el("li", {}, f)));
+    fixes.append(el("div", { class: "card" }, el("h3", {}, `${opt.zone.name}: ${opt.name}`), list));
   }
   const result = document.getElementById("result");
   result.classList.remove("hidden");
@@ -76,16 +69,19 @@ function showResult() {
 function restore() {
   const saved = getScores().postural?.detail?.answers;
   if (!saved) return;
-  for (const [id, value] of Object.entries(saved)) {
-    const input = form.querySelector(`input[name="${id}"][value="${value}"]`);
-    if (input) {
-      input.checked = true;
-      answers[id] = value;
+  for (const zone of ALL_ZONES) {
+    const ids = Array.isArray(saved[zone.id]) ? saved[zone.id] : [];
+    for (const id of ids) {
+      const input = form.querySelector(`input[name="${zone.id}"][value="${id}"]`);
+      if (input) input.checked = true;
     }
+    answers[zone.id] = ids.filter((id) => zone.options.some((o) => o.id === id));
   }
   update();
 }
 
 render();
 restore();
+update();
+calcBtn.disabled = false;
 calcBtn.addEventListener("click", showResult);
