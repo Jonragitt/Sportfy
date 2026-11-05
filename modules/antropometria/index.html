@@ -5,25 +5,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Evaluación antropométrica · Forty5</title>
   <link rel="icon" href="../../shared/logo/icono.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css?v=202611051840" />
   <link rel="stylesheet" href="../../shared/resultados.css" />
 </head>
 <body>
   <header class="top">
-    <a class="marca" href="../../index.html" aria-label="Forty5 · Inicio"><svg class="logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 336 96" role="img" aria-label="Forty5">
-  <g fill="currentColor">
-    <text x="0" y="72" font-family="'Arial Black','Helvetica Neue',Inter,system-ui,sans-serif" font-weight="900" font-style="italic" font-size="70" letter-spacing="-3">FORTY</text>
-  </g>
-  <g transform="translate(290 50)">
-    <rect x="-7" y="-46" width="14" height="8" rx="2" fill="currentColor"/>
-    <rect x="-2.5" y="-40" width="5" height="6" fill="currentColor"/>
-    <circle r="34" fill="none" stroke="currentColor" stroke-opacity=".18" stroke-width="9"/>
-    <circle r="34" fill="none" stroke="#e4572e" stroke-width="9" stroke-linecap="round"
-            stroke-dasharray="160.2 213.6" transform="rotate(-90)"/>
-    <text x="1" y="21" text-anchor="middle" font-family="'Arial Black','Helvetica Neue',Inter,system-ui,sans-serif" font-weight="900" font-style="italic" font-size="58" fill="#e4572e">5</text>
-  </g>
-</svg>
-</a> <a class="perfil-link" href="../../perfil.html">Mi perfil</a>
+    <nav class="topbar" aria-label="Navegación">
+      <a class="icon-btn" id="atras" href="../../index.html" aria-label="Volver atrás">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+      <a class="topbar-logo" href="../../index.html" aria-label="Forty5 · Inicio"><img class="logo-img" src="../../shared/logo/forty5-titulo.png" alt="Forty5" width="900" height="214"></a>
+      <a class="icon-btn" href="../../index.html" aria-label="Menú principal">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 11L12 4l8.5 7M6 9.5V20h4.5v-5.5h3V20H18V9.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+    </nav>
+    <script>
+      document.getElementById("atras").addEventListener("click", (e) => {
+        if (history.length > 1 && document.referrer.startsWith(location.origin)) { e.preventDefault(); history.back(); }
+      });
+    </script>
     <h1>Evaluación antropométrica</h1>
     <p>Introduce los datos de tu báscula de bioimpedancia y obtén tu nota de composición corporal sobre 15 puntos.</p>
   </header>
