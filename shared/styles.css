@@ -121,3 +121,32 @@ input.circle:focus-visible { outline: 2px solid var(--accent); outline-offset: 2
 .lado-cel { justify-self: center; display: grid; place-content: center; width: 44px; height: 44px; cursor: pointer; }
 .vista { font-size: 0.72rem; font-weight: 700; color: var(--muted); border: 1px solid var(--border); border-radius: 99px; padding: 1px 6px; white-space: nowrap; }
 ul.chips .tag { white-space: normal; }
+/* Barra superior: atrás, logo e inicio */
+.topbar { display: grid; grid-template-columns: 44px 1fr 44px; align-items: center; gap: 8px; margin: 0 0 8px; }
+.topbar-logo { justify-self: center; color: var(--text); }
+.topbar-logo .logo { width: min(180px, 50vw); margin: 0; }
+.icon-btn {
+  width: 44px; height: 44px; border-radius: 50%; display: grid; place-content: center;
+  color: var(--text); background: var(--surface); border: 1px solid var(--border);
+  box-shadow: 0 2px 8px rgba(20,24,32,.08);
+}
+.icon-btn svg { width: 22px; height: 22px; }
+.icon-btn:hover { border-color: var(--accent); color: var(--accent); }
+/* Fondo con imagen (evaluación postural) */
+body.con-fondo { background: #0b0b0d; }
+body.con-fondo::before {
+  content: ""; position: fixed; inset: 0; z-index: -1;
+  background:
+    linear-gradient(180deg, rgba(0,0,0,.45) 0%, rgba(0,0,0,.72) 45%, rgba(0,0,0,.85) 100%),
+    url("fondos/postural.jpg") center top / cover no-repeat;
+}
+body.con-fondo main > h1,
+body.con-fondo main > .lead,
+body.con-fondo #form > h2,
+body.con-fondo #form > .lead,
+body.con-fondo #form > .note,
+body.con-fondo #result > h2,
+body.con-fondo #result > .lead,
+body.con-fondo #result > .note { color: #fff; text-shadow: 0 1px 6px rgba(0,0,0,.6); }
+body.con-fondo #form > .lead, body.con-fondo #result > .lead, body.con-fondo main > .lead { color: rgba(255,255,255,.85); }
+body.con-fondo .topbar-logo, body.con-fondo .topbar-logo .logo { color: #fff; }

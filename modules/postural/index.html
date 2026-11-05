@@ -8,9 +8,13 @@
   <link rel="stylesheet" href="../../shared/styles.css">
   <link rel="stylesheet" href="../../shared/resultados.css">
 </head>
-<body>
+<body class="con-fondo">
   <main class="wrap">
-    <p style="display:flex;justify-content:space-between;align-items:center;margin:0"><a href="../../index.html" aria-label="Forty5 · Inicio" style="color:var(--text)"><svg class="logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 336 96" role="img" aria-label="Forty5">
+    <nav class="topbar" aria-label="Navegación">
+      <a class="icon-btn" id="atras" href="../../index.html" aria-label="Volver atrás">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+      <a class="topbar-logo" href="../../index.html" aria-label="Forty5 · Inicio"><svg class="logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 336 96" role="img" aria-label="Forty5">
   <g fill="currentColor">
     <text x="0" y="72" font-family="'Arial Black','Helvetica Neue',Inter,system-ui,sans-serif" font-weight="900" font-style="italic" font-size="70" letter-spacing="-3">FORTY</text>
   </g>
@@ -22,8 +26,16 @@
             stroke-dasharray="160.2 213.6" transform="rotate(-90)"/>
     <text x="1" y="21" text-anchor="middle" font-family="'Arial Black','Helvetica Neue',Inter,system-ui,sans-serif" font-weight="900" font-style="italic" font-size="58" fill="#e4572e">5</text>
   </g>
-</svg>
-</a> <a href="../../perfil.html" style="font-weight:600">Mi perfil</a></p>
+</svg></a>
+      <a class="icon-btn" href="../../index.html" aria-label="Menú principal">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 11L12 4l8.5 7M6 9.5V20h4.5v-5.5h3V20H18V9.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+    </nav>
+    <script>
+      document.getElementById("atras").addEventListener("click", (e) => {
+        if (history.length > 1 && document.referrer.startsWith(location.origin)) { e.preventDefault(); history.back(); }
+      });
+    </script>
     <h1>Evaluación postural</h1>
     <p class="lead">Marca en cada zona la alteración o alteraciones que observes. Evalúa descalzo, con ropa ajustada y, si puedes, con fotos de perfil, de frente y de espaldas.</p>
 

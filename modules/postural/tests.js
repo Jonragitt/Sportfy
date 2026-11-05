@@ -280,6 +280,80 @@ export const SECTIONS = [
       },
     ],
   },
+  {
+    id: "slb",
+    title: "Puente de cadera a una pierna (SLB)",
+    bilateral: true,
+    intro:
+      "Tumbado boca arriba, rodillas flexionadas y brazos cruzados sobre el pecho. Estira una pierna y eleva la cadera con la otra hasta alinear hombro, cadera y rodilla. Mantén 5 segundos y repite con cada pierna. Marca el lado de la pierna de apoyo: I (izquierda) o D (derecha).",
+    zones: [
+      {
+        id: "slbPuente",
+        name: "Puente a una pierna",
+        how: "La pelvis debe quedar nivelada y la cadera extendida sin arquear la zona lumbar.",
+        options: [
+          {
+            id: "slbCaidaPelvis",
+            name: "Caída de la pelvis",
+            view: "Ant",
+            hint: "La cadera del lado de la pierna estirada cae hacia el suelo.",
+            fix: ["Plancha lateral 3×20 s por lado", "Puente a una pierna con pausa arriba 3×8 por lado", "Abducción de cadera tumbado 3×15"],
+          },
+          {
+            id: "slbRotacion",
+            name: "Rotación de la pelvis",
+            view: "Ant",
+            hint: "La pelvis gira hacia un lado en lugar de subir recta.",
+            fix: ["Dead bug 3×10", "Puente a una pierna con banda en rodillas 3×8 por lado", "Bird dog 3×10 por lado"],
+          },
+          {
+            id: "slbLumbar",
+            name: "Compensación lumbar",
+            view: "Lat",
+            hint: "Sube arqueando la zona lumbar en lugar de extender la cadera.",
+            fix: ["Basculaciones pélvicas 2×15", "Puente de glúteo con retroversión 3×12", "Estiramiento de psoas en zancada 3×30 s"],
+          },
+          {
+            id: "slbIsquios",
+            name: "Dominancia de isquiotibiales",
+            view: "Lat",
+            hint: "Siente el esfuerzo (o calambre) detrás del muslo en lugar del glúteo, o no llega a la altura.",
+            fix: ["Activación de glúteo con banda (clamshell) 2×15", "Puente con talones cerca del glúteo 3×12", "Hip thrust a una pierna 3×8 por lado"],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: "wallAngel",
+    title: "Wall angel test",
+    bilateral: true,
+    intro:
+      "De pie con talones, glúteos, espalda alta y cabeza apoyados en la pared. Coloca los brazos en W con codos y dorso de las manos contra la pared y deslízalos hacia arriba y abajo 5 veces. Marca el lado en que aparece cada compensación.",
+    zones: [
+      {
+        id: "wallAngelZona",
+        name: "Hombros y columna",
+        how: "Codos y manos deben mantener el contacto con la pared, sin que la espalda se despegue ni se arquee.",
+        options: [
+          {
+            id: "waNoApoya",
+            name: "No apoya codos / manos en la pared",
+            view: "Lat",
+            hint: "El codo o el dorso de la mano se separan de la pared.",
+            fix: ["Ángeles en la pared 3×10", "Estiramiento de pectoral en puerta 3×30 s", "Rotación externa con banda 3×15"],
+          },
+          {
+            id: "waCompensacion",
+            name: "Movimiento compensado lumbar / dorsal",
+            view: "Lat",
+            hint: "Arquea la zona lumbar o despega la espalda alta para poder subir los brazos.",
+            fix: ["Extensiones torácicas sobre foam roller 2×10", "Dead bug 3×10", "Estiramiento de dorsal 3×30 s"],
+          },
+        ],
+      },
+    ],
+  },
 ];
 
 export const ALL_ZONES = SECTIONS.flatMap((s) => s.zones);

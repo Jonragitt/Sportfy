@@ -13,7 +13,7 @@ test("una zona con dos opciones cuenta una sola vez", () => {
   const one = computeScore({ hombros: ["hombrosAntepulsion"] }); // 12 de 13 zonas
   const two = computeScore({ hombros: ["hombrosAntepulsion", "hombrosRetropulsion"] });
   assert.equal(one, two);
-  assert.equal(one, 9.2);
+  assert.equal(one, 9.3);
 });
 
 test("planos sagital y frontal tienen las zonas pedidas", () => {
@@ -21,6 +21,7 @@ test("planos sagital y frontal tienen las zonas pedidas", () => {
     "cabeza", "hombros", "cadera", "rodilla", "pie",
     "acromion", "escapulas", "crestas", "rodillaFrontal", "tobillo",
     "sohPies", "sohRodillas", "sohCLP",
+    "slbPuente", "wallAngelZona",
   ]);
 });
 
@@ -29,7 +30,7 @@ test("sentadilla profunda: lados I/D", () => {
   const sel = selectedOptions(answers);
   assert.deepEqual(sel.map((o) => [o.id, o.sides]), [["sohCargaAsimetrica", ["D"]], ["sohValgo", ["I", "D"]]]);
   assert.equal(optionLabel(sel[1]), "Rodillas: Valgo (I, D)");
-  assert.equal(computeScore(answers), Math.round((11 / 13) * 100) / 10);
+  assert.equal(computeScore(answers), Math.round((13 / 15) * 100) / 10);
 });
 
 test("cada opción tiene ejercicios y los ids son únicos", () => {
