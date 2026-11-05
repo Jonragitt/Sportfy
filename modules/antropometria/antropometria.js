@@ -1,4 +1,4 @@
-// Cálculos de la evaluación antropométrica de Sportfy.
+// Cálculos de la evaluación antropométrica de Forty5.
 // Datos de entrada: los que da una báscula de bioimpedancia.
 // Módulo puro (sin DOM) para poder testearlo con `node --test`.
 // Unidades: kg, cm, %, kcal, años.
