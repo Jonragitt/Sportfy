@@ -1,5 +1,5 @@
-import { SECTIONS, SIDES, ALL_ZONES, MAX_POINTS, computeScore, selectedOptions, optionLabel, alteredZoneCount } from "./tests.js?v=202611051715";
-import { saveScore, getScores, scoreLabel } from "../../shared/scores.js?v=202611051715";
+import { SECTIONS, SIDES, ALL_ZONES, MAX_POINTS, computeScore, selectedOptions, optionLabel, alteredZoneCount } from "./tests.js?v=202611051800";
+import { saveScore, getScores, scoreLabel } from "../../shared/scores.js?v=202611051800";
 import { marcarPendiente, quitarPendiente, montarTick } from "../../shared/perfil.js";
 
 const form = document.getElementById("form");
@@ -40,7 +40,7 @@ function circle(zone, value, label) {
 }
 
 // Botón "Ver ejemplo": despliega el GIF de la alteración (en bilaterales, izquierda y derecha).
-const GIF_V = "202611051715";
+const GIF_V = "202611051800";
 function demo(opt, sides) {
   const panel = el("div", { class: "demo hidden" });
   const btn = el("button", { type: "button", class: "ver-demo", "aria-expanded": "false" }, "▶ Ver ejemplo");
@@ -48,11 +48,15 @@ function demo(opt, sides) {
     e.preventDefault();
     e.stopPropagation();
     if (!panel.childElementCount) {
+      // Por cada lado: el GIF animado y, debajo, el PNG explicativo (correcto frente a alteración).
+      const pngs = [];
       for (const k of sides || [null]) {
-        const src = `gifs/${opt.id}${k ? "-" + k : ""}.gif?v=${GIF_V}`;
-        const alt = `${opt.name}${k ? ", lado " + SIDES[k].toLowerCase() : ""}: de postura correcta a alteración`;
-        panel.append(el("figure", {}, el("img", { src, alt, width: "360", height: "520", loading: "lazy" }), el("figcaption", {}, k ? SIDES[k] : "")));
+        const base = `gifs/${opt.id}${k ? "-" + k : ""}`;
+        const lado = k ? ", lado " + SIDES[k].toLowerCase() : "";
+        panel.append(el("figure", {}, el("img", { src: `${base}.gif?v=${GIF_V}`, alt: `${opt.name}${lado}: de postura correcta a alteración`, width: "380", height: "508", loading: "lazy" }), el("figcaption", {}, k ? SIDES[k] : "")));
+        pngs.push(el("figure", { class: "explica" }, el("img", { src: `${base}.png?v=${GIF_V}`, alt: `${opt.name}${lado}: comparación entre la postura correcta y la alteración, con lo que hay que mirar`, loading: "lazy" })));
       }
+      panel.append(...pngs);
     }
     const open = panel.classList.toggle("hidden") === false;
     btn.setAttribute("aria-expanded", String(open));

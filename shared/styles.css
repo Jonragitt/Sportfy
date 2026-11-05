@@ -166,6 +166,8 @@ body.con-fondo .sec-head a { color: #ff8a5c; text-shadow: 0 1px 6px rgba(0,0,0,.
 .demo img { width: 100%; height: auto; border-radius: 12px; display: block; background: #e5e5e5; }
 .demo figcaption { font-size: .8rem; font-weight: 700; color: var(--muted); margin-top: 4px; }
 .demo figcaption:empty { display: none; }
+.demo figure.explica { flex: 1 1 100%; max-width: 520px; }
+.demo figure.explica img { background: #fff; border: 1px solid #e3e3e3; }
 /* Explicación del ejercicio (GIF y fotos del test) */
 .ejercicio-media { display: grid; gap: 12px; grid-template-columns: minmax(0, 1fr) minmax(0, 2.4fr); align-items: start; }
 .ejercicio-media figure { margin: 0; text-align: center; }
