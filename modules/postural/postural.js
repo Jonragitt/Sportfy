@@ -1,5 +1,5 @@
-import { SECTIONS, SIDES, ALL_ZONES, MAX_POINTS, computeScore, selectedOptions, optionLabel, alteredZoneCount } from "./tests.js?v=202611051800";
-import { saveScore, getScores, scoreLabel } from "../../shared/scores.js?v=202611051800";
+import { SECTIONS, SIDES, ALL_ZONES, MAX_POINTS, computeScore, selectedOptions, optionLabel, alteredZoneCount } from "./tests.js?v=202611052135";
+import { saveScore, getScores, scoreLabel } from "../../shared/scores.js?v=202611052135";
 import { marcarPendiente, quitarPendiente, montarTick } from "../../shared/perfil.js";
 
 const form = document.getElementById("form");
@@ -40,7 +40,7 @@ function circle(zone, value, label) {
 }
 
 // Botón "Ver ejemplo": despliega el GIF de la alteración (en bilaterales, izquierda y derecha).
-const GIF_V = "202611051800";
+const GIF_V = "202611052135";
 function demo(opt, sides) {
   const panel = el("div", { class: "demo hidden" });
   const btn = el("button", { type: "button", class: "ver-demo", "aria-expanded": "false" }, "▶ Ver ejemplo");
@@ -137,17 +137,6 @@ function showResult() {
   document.getElementById("scoreLabel").textContent = scoreLabel(score, MAX_POINTS);
   document.getElementById("scoreBar").style.width = `${(score / MAX_POINTS) * 100}%`;
 
-  const fixes = document.getElementById("fixes");
-  fixes.replaceChildren();
-  const issues = selectedOptions(answers);
-  if (!issues.length) {
-    fixes.append(el("div", { class: "card" }, "¡Postura excelente! Mantén tu rutina de fuerza y movilidad."));
-  }
-  for (const opt of issues) {
-    const list = el("ul", { class: "fix" });
-    opt.fix.forEach((f) => list.append(el("li", {}, f)));
-    fixes.append(el("div", { class: "card" }, el("h3", {}, optionLabel(opt)), list));
-  }
   const result = document.getElementById("result");
   result.classList.remove("hidden");
   result.scrollIntoView({ behavior: "smooth" });

@@ -32,7 +32,6 @@ Baremo: 9-10 Excelente, 7-8,9 Bueno, 5-6,9 Aceptable, 0-4,9 Deficiente.
 Se guarda en `localStorage["sportfy.scores"].postural` como `{ score: puntos /10, max: 10, date, detail: { answers } }`
 y suma a la nota total /25 del panel principal (`index.html`).
 
-Al terminar se muestran ejercicios correctivos para cada alteración marcada.
 
 Tests: `node --test modules/postural/tests/*.test.js`
 

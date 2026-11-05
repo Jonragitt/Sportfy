@@ -33,8 +33,7 @@ test("sentadilla profunda: lados I/D", () => {
   assert.equal(computeScore(answers), Math.round((14 / 16) * 100) / 10);
 });
 
-test("cada opción tiene ejercicios y los ids son únicos", () => {
-  for (const o of ALL_OPTIONS) if (!o.normal) assert.ok(o.fix.length > 0, o.id);
+test("los ids son únicos", () => {
   assert.equal(new Set(ALL_OPTIONS.map((o) => o.id)).size, ALL_OPTIONS.length);
   assert.deepEqual(selectedOptions({ pie: ["navicularDrop"] }).map((o) => o.id), ["navicularDrop"]);
 });
