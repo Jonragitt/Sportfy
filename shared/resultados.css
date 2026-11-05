@@ -1,0 +1,57 @@
+/* Botón flotante "Resultados": cristal gris mientras faltan datos,
+   verde y más grande cuando el formulario está completo. */
+.resultados {
+  position: fixed; left: 50%; bottom: 16px; z-index: 20;
+  transform: translateX(-50%);
+  width: min(320px, calc(100% - 32px));
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: 12px 18px; margin: 0;
+  border-radius: 22px;
+  font: inherit; text-align: center; cursor: not-allowed;
+  color: #3f4550;
+  background: linear-gradient(135deg, rgba(250,251,253,.82), rgba(214,218,225,.72));
+  border: 1px solid rgba(255,255,255,.6);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.8), inset 0 -1px 0 rgba(0,0,0,.05), 0 8px 28px rgba(20,24,32,.16);
+  -webkit-backdrop-filter: blur(18px) saturate(170%);
+  backdrop-filter: blur(18px) saturate(170%);
+  transition: width .35s cubic-bezier(.2,.9,.3,1.3), padding .35s, background .35s, color .35s, box-shadow .35s;
+}
+.resultados .r-tit { font-weight: 800; font-size: 1.05rem; letter-spacing: .02em; transition: font-size .35s; }
+.resultados .r-sub { font-size: .8rem; opacity: .8; }
+.resultados.listo {
+  cursor: pointer;
+  width: min(440px, calc(100% - 24px));
+  padding: 18px 22px;
+  color: #fff;
+  background: linear-gradient(135deg, rgba(52,199,110,.92), rgba(24,150,80,.88));
+  border-color: rgba(255,255,255,.45);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.55), 0 12px 32px rgba(24,150,80,.38);
+  animation: resultados-pop .5s ease-out;
+}
+.resultados.listo .r-tit { font-size: 1.4rem; }
+.resultados.listo:hover { filter: brightness(1.06); }
+@keyframes resultados-pop { 0% { scale: .94; } 60% { scale: 1.05; } 100% { scale: 1; } }
+@media (prefers-color-scheme: dark) {
+  .resultados:not(.listo) {
+    color: #d5d9e0;
+    background: linear-gradient(135deg, rgba(70,75,86,.78), rgba(40,44,52,.78));
+    border-color: rgba(255,255,255,.18);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 8px 28px rgba(0,0,0,.45);
+  }
+}
+@media (prefers-reduced-motion: reduce) { .resultados, .resultados .r-tit { transition: none; } .resultados.listo { animation: none; } }
+
+/* Tick verde para confirmar los resultados y guardarlos en el perfil */
+.confirmar { display: flex; align-items: center; gap: 14px; margin: 20px 0; padding: 14px 16px; border-radius: 18px;
+  background: color-mix(in srgb, #1f9d55 10%, transparent); border: 1px solid color-mix(in srgb, #1f9d55 35%, transparent); }
+.confirmar p { margin: 0; font-size: .92rem; }
+.tick { flex: none; width: 64px !important; height: 64px; padding: 0 !important; border-radius: 50% !important; border: 0;
+  font-size: 2rem; line-height: 1; font-weight: 800; color: #fff; cursor: pointer;
+  background: linear-gradient(135deg, #34c76e, #189650) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.5), 0 8px 22px rgba(24,150,80,.4); transition: transform .15s; }
+.tick:hover { transform: scale(1.06); }
+.tick:active { transform: scale(.95); }
+.confirmado { display: flex; align-items: center; gap: 10px; margin: 20px 0; padding: 14px 16px; border-radius: 18px;
+  background: color-mix(in srgb, #1f9d55 14%, transparent); font-weight: 600; }
+.confirmado a { margin-left: auto; white-space: nowrap; }
+.resultados.oculto { display: none; }

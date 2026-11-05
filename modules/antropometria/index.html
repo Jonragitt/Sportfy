@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Evaluación antropométrica · Forty5</title>
+  <link rel="icon" href="../../shared/logo/icono.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="../../shared/resultados.css" />
+</head>
+<body>
+  <header class="top">
+    <a class="marca" href="../../index.html" aria-label="Forty5 · Inicio"><svg class="logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 336 96" role="img" aria-label="Forty5">
+  <g fill="currentColor">
+    <text x="0" y="72" font-family="'Arial Black','Helvetica Neue',Inter,system-ui,sans-serif" font-weight="900" font-style="italic" font-size="70" letter-spacing="-3">FORTY</text>
+  </g>
+  <g transform="translate(290 50)">
+    <rect x="-7" y="-46" width="14" height="8" rx="2" fill="currentColor"/>
+    <rect x="-2.5" y="-40" width="5" height="6" fill="currentColor"/>
+    <circle r="34" fill="none" stroke="currentColor" stroke-opacity=".18" stroke-width="9"/>
+    <circle r="34" fill="none" stroke="#e4572e" stroke-width="9" stroke-linecap="round"
+            stroke-dasharray="160.2 213.6" transform="rotate(-90)"/>
+    <text x="1" y="21" text-anchor="middle" font-family="'Arial Black','Helvetica Neue',Inter,system-ui,sans-serif" font-weight="900" font-style="italic" font-size="58" fill="#e4572e">5</text>
+  </g>
+</svg>
+</a> <a class="perfil-link" href="../../perfil.html">Mi perfil</a>
+    <h1>Evaluación antropométrica</h1>
+    <p>Introduce los datos de tu báscula de bioimpedancia y obtén tu nota de composición corporal sobre 15 puntos.</p>
+  </header>
+
+  <main>
+    <form id="form" novalidate>
+      <fieldset>
+        <legend>Datos personales <span class="req">obligatorio</span></legend>
+        <div class="grid">
+          <label>Sexo
+            <select name="sexo" required>
+              <option value="hombre">Hombre</option>
+              <option value="mujer">Mujer</option>
+            </select>
+          </label>
+          <label>Edad (años)<input name="edad" type="number" inputmode="numeric" min="14" max="99" required /></label>
+          <label>Altura (cm)<input name="altura" type="number" inputmode="decimal" step="0.1" min="120" max="230" required /></label>
+          <label>Peso (kg)<input name="peso" type="number" inputmode="decimal" step="0.1" min="30" max="300" required /></label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Báscula de bioimpedancia <span class="req">obligatorio</span></legend>
+        <label class="check"><input type="checkbox" name="soloKg" id="soloKg" /> Mi báscula solo mide el peso (kg)</label>
+        <p class="nota" id="soloKg-nota" hidden>Sin báscula de bioimpedancia no se puede calcular la nota sobre 15: verás tu IMC y tu peso quedará en el historial.</p>
+        <div class="grid" id="bio">
+          <label>% graso<input name="grasa" type="number" inputmode="decimal" step="0.1" min="2" max="70" /></label>
+          <label>% agua<input name="agua" type="number" inputmode="decimal" step="0.1" min="20" max="80" /></label>
+          <label>% muscular<input name="muscular" type="number" inputmode="decimal" step="0.1" min="10" max="95" /></label>
+          <label>Metabolismo basal (kcal)<input name="metabolismo" type="number" inputmode="numeric" min="600" max="5000" /></label>
+          <label>Edad metabólica (años)<input name="edadMetabolica" type="number" inputmode="numeric" min="10" max="99" /></label>
+          <label>Grasa visceral (nivel)<input name="visceral" type="number" inputmode="decimal" step="0.5" min="1" max="59" /></label>
+        </div>
+        <details>
+          <summary>Cómo pesarte para que los datos sean fiables</summary>
+          <ul>
+            <li>Por la mañana, en ayunas, después de ir al baño y antes de entrenar.</li>
+            <li>Descalzo y con los pies secos, bien apoyados en los electrodos.</li>
+            <li>No bebas mucha agua ni alcohol las horas previas: la hidratación cambia el % graso y el % agua.</li>
+            <li>Usa siempre la misma báscula y a la misma hora para comparar evaluaciones.</li>
+            <li><b>% muscular:</b> si tu báscula da valores de 25–45 % es músculo esquelético; si da 60–85 % es masa muscular total. La app lo detecta sola.</li>
+          </ul>
+        </details>
+      </fieldset>
+
+      <p id="error" class="error" role="alert" hidden></p>
+      <button type="submit" class="resultados" id="ver" aria-disabled="true">
+        <span class="r-tit">Resultados</span>
+        <span class="r-sub" id="faltan">Rellena todos los datos</span>
+      </button>
+    </form>
+
+    <section id="resultado" hidden aria-live="polite">
+      <div class="media">
+        <div class="media-num" id="media-num">–</div>
+        <div>
+          <div class="media-label">Nota antropométrica</div>
+          <div class="media-cal" id="media-cal"></div>
+          <div class="media-escala">Excelente ≥ 13,5 · Bueno ≥ 10,5 · Aceptable ≥ 7,5 · Deficiente &lt; 7,5</div>
+        </div>
+      </div>
+      <p id="media-aviso" class="aviso" hidden></p>
+      <p class="nota">5 pruebas (% graso, % agua, % muscular, edad metabólica y grasa visceral) × 3 puntos = 15 puntos. Cuenta para la nota global sobre 25 junto a la evaluación postural (/10).</p>
+      <ul id="metricas" class="metricas"></ul>
+      <h3 class="sub">Datos informativos (no puntúan)</h3>
+      <ul id="informativos" class="informativos"></ul>
+      <div id="tick"></div>
+    </section>
+
+    <section id="historial-sec">
+      <h2>Historial</h2>
+      <p id="historial-vacio" class="nota">Todavía no has guardado evaluaciones.</p>
+      <table id="historial" hidden>
+        <thead><tr><th>Fecha</th><th>Peso</th><th>% graso</th><th>% musc.</th><th>Nota</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </section>
+  </main>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

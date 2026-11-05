@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="Forty5">
+  <rect width="96" height="96" rx="22" fill="#15181e"/>
+  <g transform="translate(48 52)">
+    <rect x="-6" y="-42" width="12" height="7" rx="2" fill="#fff"/>
+    <circle r="30" fill="none" stroke="#fff" stroke-opacity=".2" stroke-width="8"/>
+    <circle r="30" fill="none" stroke="#e4572e" stroke-width="8" stroke-linecap="round" stroke-dasharray="141.4 188.5" transform="rotate(-90)"/>
+    <text x="0" y="14" text-anchor="middle" font-family="'Arial Black','Helvetica Neue',Inter,system-ui,sans-serif" font-weight="900" font-style="italic" font-size="38" fill="#fff" letter-spacing="-2">45</text>
+  </g>
+</svg>

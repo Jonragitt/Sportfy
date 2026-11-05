@@ -4,11 +4,26 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Evaluación postural · Forty5</title>
+  <link rel="icon" href="../../shared/logo/icono.svg" type="image/svg+xml">
   <link rel="stylesheet" href="../../shared/styles.css">
+  <link rel="stylesheet" href="../../shared/resultados.css">
 </head>
 <body>
   <main class="wrap">
-    <p><a href="../../index.html">← Forty5 · Volver al panel</a></p>
+    <p style="display:flex;justify-content:space-between;align-items:center;margin:0"><a href="../../index.html" aria-label="Forty5 · Inicio" style="color:var(--text)"><svg class="logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 336 96" role="img" aria-label="Forty5">
+  <g fill="currentColor">
+    <text x="0" y="72" font-family="'Arial Black','Helvetica Neue',Inter,system-ui,sans-serif" font-weight="900" font-style="italic" font-size="70" letter-spacing="-3">FORTY</text>
+  </g>
+  <g transform="translate(290 50)">
+    <rect x="-7" y="-46" width="14" height="8" rx="2" fill="currentColor"/>
+    <rect x="-2.5" y="-40" width="5" height="6" fill="currentColor"/>
+    <circle r="34" fill="none" stroke="currentColor" stroke-opacity=".18" stroke-width="9"/>
+    <circle r="34" fill="none" stroke="#e4572e" stroke-width="9" stroke-linecap="round"
+            stroke-dasharray="160.2 213.6" transform="rotate(-90)"/>
+    <text x="1" y="21" text-anchor="middle" font-family="'Arial Black','Helvetica Neue',Inter,system-ui,sans-serif" font-weight="900" font-style="italic" font-size="58" fill="#e4572e">5</text>
+  </g>
+</svg>
+</a> <a href="../../perfil.html" style="font-weight:600">Mi perfil</a></p>
     <h1>Evaluación postural</h1>
     <p class="lead">Marca en cada zona la alteración o alteraciones que observes. Evalúa descalzo, con ropa ajustada y, si puedes, con fotos de perfil, de frente y de espaldas.</p>
 
@@ -32,18 +47,17 @@
         </table>
       </div>
       <h2>Qué trabajar</h2>
-      <p class="lead">Ejercicios correctivos para tus desviaciones, de mayor a menor prioridad. Hazlos 3-4 días por semana como calentamiento.</p>
+      <p class="lead">Ejercicios correctivos para cada alteración marcada. Hazlos 3-4 días por semana como calentamiento.</p>
       <div id="fixes"></div>
+      <div id="tick"></div>
       <p class="note">Esta evaluación es orientativa y no sustituye un diagnóstico médico. Si tienes dolor o una asimetría marcada, consulta con un fisioterapeuta.</p>
     </section>
   </main>
 
-  <div class="sticky">
-    <div class="wrap">
-      <span class="progress" id="progress">Sin alteraciones marcadas</span>
-      <button class="btn" id="calc" type="button" disabled>Calcular nota</button>
-    </div>
-  </div>
+  <button class="resultados" id="calc" type="button" aria-disabled="false">
+    <span class="r-tit">Resultados</span>
+    <span class="r-sub" id="progress">Toca para ver tu evaluación</span>
+  </button>
 
   <script type="module" src="./postural.js"></script>
 </body>

@@ -1,5 +1,6 @@
 import { SECTIONS, ALL_ZONES, MAX_POINTS, computeScore, selectedOptions } from "./tests.js";
 import { saveScore, getScores, scoreLabel } from "../../shared/scores.js";
+import { marcarPendiente, quitarPendiente, montarTick } from "../../shared/perfil.js";
 
 const form = document.getElementById("form");
 const progress = document.getElementById("progress");
@@ -25,6 +26,7 @@ function render() {
         const input = el("input", { type: "checkbox", class: "circle", name: zone.id, value: opt.id });
         input.addEventListener("change", () => {
           answers[zone.id] = [...form.querySelectorAll(`input[name="${zone.id}"]:checked`)].map((i) => i.value);
+          calcBtn.classList.remove("oculto");
           update();
         });
         options.append(
@@ -37,14 +39,24 @@ function render() {
   form.append(el("p", { class: "note" }, "Si no marcas ninguna opción en una zona, se considera sin alteración."));
 }
 
+// Las zonas sin marcar cuentan como correctas, así que el resultado siempre está disponible.
 function update() {
   const n = ALL_ZONES.filter((z) => (answers[z.id] || []).length).length;
-  progress.textContent = n ? `${n} de ${ALL_ZONES.length} zonas con alteración` : "Sin alteraciones marcadas";
+  progress.textContent = n
+    ? `${n} de ${ALL_ZONES.length} zonas con alteración · Toca para ver tu evaluación`
+    : "Toca para ver tu evaluación";
+  calcBtn.classList.add("listo");
+  calcBtn.setAttribute("aria-disabled", "false");
 }
 
 function showResult() {
   const score = computeScore(answers);
-  saveScore("postural", score, { answers });
+  marcarPendiente("postural");
+  montarTick(document.getElementById("tick"), calcBtn, () => {
+    saveScore("postural", score, { answers: structuredClone(answers) });
+    guardarHistorial(score);
+    quitarPendiente("postural");
+  }, "../../perfil.html");
   const shown = score.toLocaleString("es-ES", { maximumFractionDigits: 1 });
   document.getElementById("scoreValue").textContent = `${shown} / ${MAX_POINTS}`;
   document.getElementById("scoreLabel").textContent = scoreLabel(score, MAX_POINTS);
@@ -66,22 +78,31 @@ function showResult() {
   result.scrollIntoView({ behavior: "smooth" });
 }
 
+// Historial de evaluaciones posturales para la evolución del panel principal.
+const HIST_KEY = "sportfy.postural.historial";
+function guardarHistorial(score) {
+  try {
+    const h = JSON.parse(localStorage.getItem(HIST_KEY)) || [];
+    const desviaciones = selectedOptions(answers).map((o) => ({ id: o.id, nombre: `${o.zone.name}: ${o.name}`, nivel: 1 }));
+    h.push({ fecha: new Date().toISOString(), nota: score, max: MAX_POINTS, respuestas: structuredClone(answers), desviaciones });
+    localStorage.setItem(HIST_KEY, JSON.stringify(h));
+  } catch {
+    /* sin almacenamiento */
+  }
+}
+
+// Recupera la última evaluación guardada (las del protocolo anterior se ignoran).
 function restore() {
   const saved = getScores().postural?.detail?.answers;
   if (!saved) return;
   for (const zone of ALL_ZONES) {
-    const ids = Array.isArray(saved[zone.id]) ? saved[zone.id] : [];
-    for (const id of ids) {
-      const input = form.querySelector(`input[name="${zone.id}"][value="${id}"]`);
-      if (input) input.checked = true;
-    }
-    answers[zone.id] = ids.filter((id) => zone.options.some((o) => o.id === id));
+    const ids = (Array.isArray(saved[zone.id]) ? saved[zone.id] : []).filter((id) => zone.options.some((o) => o.id === id));
+    for (const id of ids) form.querySelector(`input[name="${zone.id}"][value="${id}"]`).checked = true;
+    answers[zone.id] = ids;
   }
-  update();
 }
 
 render();
 restore();
 update();
-calcBtn.disabled = false;
 calcBtn.addEventListener("click", showResult);
