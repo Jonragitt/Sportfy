@@ -7,6 +7,26 @@
   <link rel="icon" href="shared/logo/icono.svg" type="image/svg+xml">
   <link rel="stylesheet" href="shared/styles.css?v=202611051520">
   <style>
+    /* Portada a pantalla completa */
+    html { scroll-behavior: smooth; }
+    .portada { min-height: 100svh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; padding: 24px 16px 96px; text-align: center; position: relative; }
+    .portada-logo { width: min(620px, 86vw); height: auto; filter: drop-shadow(0 4px 18px rgba(0,0,0,.7)); }
+    .portada-lema { margin: 0; color: #fff; font-size: clamp(1.05rem, 2.4vw, 1.5rem); font-weight: 600; letter-spacing: .02em; text-shadow: 0 2px 10px rgba(0,0,0,.8); }
+    .portada-cta { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 8px; }
+    .portada-cta .btn { text-decoration: none; padding: 14px 22px; border-radius: 99px; }
+    .btn.ghost { background: rgba(0,0,0,.35); color: #fff; border: 1.5px solid rgba(255,255,255,.7); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+    .desliza { position: absolute; bottom: 88px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; color: #fff; text-decoration: none; font-weight: 600; font-size: .9rem; opacity: .9; }
+    .desliza svg { width: 28px; height: 28px; animation: bota 1.8s ease-in-out infinite; }
+    @keyframes bota { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(6px); } }
+    @media (prefers-reduced-motion: reduce) { .desliza svg { animation: none; } html { scroll-behavior: auto; } }
+    @media (max-height: 560px) { .desliza { display: none; } }
+    .panel { scroll-margin-top: 8px; }
+    .columnas section .sec-head { margin-top: 28px; }
+    @media (min-width: 960px) {
+      .panel.wrap { max-width: 1180px; padding-left: 32px; padding-right: 32px; }
+      .columnas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; align-items: start; }
+      .panel .hero { max-width: 640px; }
+    }
     .marca { margin: 4px 0 12px; }
     .marca .logo-img { display: block; width: min(300px, 78vw); height: auto; margin: 0 auto; filter: drop-shadow(0 2px 10px rgba(0,0,0,.6)); }
     .hero { display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: center; }
@@ -49,10 +69,22 @@
   </style>
 </head>
 <body class="con-fondo">
-  <main class="wrap">
-    <div class="marca"><img class="logo-img" src="shared/logo/forty5-titulo.png?v=202611051520" alt="Forty5" width="900" height="214"></div>
+  <header class="portada">
+    <img class="portada-logo" src="shared/logo/forty5-titulo.png?v=202611051520" alt="Forty5" width="900" height="214">
+    <p class="portada-lema">Evalúa tu punto de partida. Mide tu cambio.</p>
+    <div class="portada-cta">
+      <a class="btn" href="modules/antropometria/index.html">Evaluación antropométrica</a>
+      <a class="btn ghost" href="modules/postural/index.html?v=202611051513">Evaluación postural</a>
+    </div>
+    <a class="desliza" href="#panel" aria-label="Ver tu panel">
+      <span>Tu panel</span>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </a>
+  </header>
+
+  <main class="wrap panel" id="panel">
     <h1>Tu panel</h1>
-    <p class="lead">Tu punto de partida y cómo vas cambiando. Repite las evaluaciones cada 4–6 semanas para ver tu evolución.</p>
+    <p class="lead">Repite las evaluaciones cada 4–6 semanas para ver tu evolución.</p>
 
     <div class="card hero">
       <div class="score" id="total">–</div>
@@ -64,14 +96,20 @@
       </div>
     </div>
 
-    <div class="sec-head"><h2>Tu grasa visceral</h2><a href="modules/antropometria/index.html">Medir ahora →</a></div>
-    <div id="visceral"></div>
-
-    <div class="sec-head"><h2>Evolución antropométrica</h2><a href="modules/antropometria/index.html">Nueva medición →</a></div>
-    <div id="antro"></div>
-
-    <div class="sec-head"><h2>Evolución postural</h2><a href="modules/postural/index.html?v=202611051513">Repetir test →</a></div>
-    <div id="postural"></div>
+    <div class="columnas">
+      <section>
+        <div class="sec-head"><h2>Grasa visceral</h2><a href="modules/antropometria/index.html">Medir →</a></div>
+        <div id="visceral"></div>
+      </section>
+      <section>
+        <div class="sec-head"><h2>Antropometría</h2><a href="modules/antropometria/index.html">Nueva medición →</a></div>
+        <div id="antro"></div>
+      </section>
+      <section>
+        <div class="sec-head"><h2>Postura</h2><a href="modules/postural/index.html?v=202611051513">Repetir test →</a></div>
+        <div id="postural"></div>
+      </section>
+    </div>
 
     <details class="card">
       <summary><b>Baremo de la nota total</b></summary>
