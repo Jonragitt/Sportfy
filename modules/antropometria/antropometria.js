@@ -1,85 +1,50 @@
 // Cálculos de la evaluación antropométrica de Sportfy.
+// Datos de entrada: los que da una báscula de bioimpedancia.
 // Módulo puro (sin DOM) para poder testearlo con `node --test`.
-// Unidades: kg, cm, mm (pliegues), años.
+// Unidades: kg, cm, %, kcal, años.
 
 const round = (n, d = 1) => Math.round(n * 10 ** d) / 10 ** d;
 const es = (n) => String(n).replace('.', ',');
 const isNum = (v) => typeof v === 'number' && Number.isFinite(v) && v > 0;
 
-// ---------- Métricas ----------
+// ---------- Cálculos informativos ----------
 
 export function imc(pesoKg, alturaCm) {
   const m = alturaCm / 100;
   return round(pesoKg / (m * m), 1);
 }
 
-export const cinturaAltura = (cinturaCm, alturaCm) => round(cinturaCm / alturaCm, 2);
-export const cinturaCadera = (cinturaCm, caderaCm) => round(cinturaCm / caderaCm, 2);
+export function clasificarImc(v) {
+  if (v < 18.5) return 'Bajo peso';
+  if (v < 25) return 'Normopeso';
+  if (v < 30) return 'Sobrepeso';
+  return 'Obesidad';
+}
+
+/** Metabolismo basal estimado (Mifflin-St Jeor), en kcal/día. */
+export function metabolismoEstimado(sexo, edad, pesoKg, alturaCm) {
+  return Math.round(10 * pesoKg + 6.25 * alturaCm - 5 * edad + (sexo === 'hombre' ? 5 : -161));
+}
 
 /**
- * % grasa con 3 pliegues (Jackson & Pollock) + ecuación de Siri.
- * Hombre: pecho, abdomen, muslo. Mujer: tríceps, suprailíaco, muslo.
+ * Las básculas dan el "% muscular" de dos formas: músculo esquelético
+ * (≈ 25–45 %, p. ej. Omron) o masa muscular total (≈ 60–85 %, p. ej. Tanita,
+ * Xiaomi, Renpho). Por encima de 50 % se interpreta como masa muscular total.
  */
-export function grasaPliegues(sexo, edad, pliegues) {
-  const s = pliegues.reduce((a, b) => a + b, 0);
-  const dc =
-    sexo === 'hombre'
-      ? 1.10938 - 0.0008267 * s + 0.0000016 * s * s - 0.0002574 * edad
-      : 1.0994921 - 0.0009929 * s + 0.0000023 * s * s - 0.0001392 * edad;
-  return round(495 / dc - 450, 1);
-}
-
-/** % grasa con cinta métrica (fórmula de la Marina de EE.UU., en cm). */
-export function grasaMarina(sexo, alturaCm, cuelloCm, cinturaCm, caderaCm) {
-  const log = Math.log10;
-  const v =
-    sexo === 'hombre'
-      ? 495 / (1.0324 - 0.19077 * log(cinturaCm - cuelloCm) + 0.15456 * log(alturaCm)) - 450
-      : 495 / (1.29579 - 0.35004 * log(cinturaCm + caderaCm - cuelloCm) + 0.221 * log(alturaCm)) - 450;
-  return round(v, 1);
-}
+export const tipoMuscular = (pct) => (pct > 50 ? 'total' : 'esqueletico');
 
 // ---------- Baremos de puntuación (estilo profesional) ----------
 //
-// Cada métrica se clasifica por tramos y suma de 0 a 3 puntos:
-//   3 = Óptimo · 2 = Aceptable · 1 = Riesgo · 0 = Riesgo alto
-// 5 métricas × 3 puntos = nota antropométrica sobre 15.
+// Cada prueba se clasifica por tramos y suma de 0 a 3 puntos:
+//   3 = Óptimo · 2 = Aceptable · 1 = Riesgo/Bajo · 0 = Riesgo alto/Muy bajo
+// 5 pruebas × 3 puntos = nota antropométrica sobre 15.
 // Cada tramo: [hasta (exclusivo), puntos, categoría]. El último tramo usa Infinity.
 
 export const PUNTOS_MAX_METRICA = 3;
+export const NUM_PRUEBAS = 5;
 export const NOTA_MAX = 15;
 
 export const BAREMOS = {
-  // OMS. Por debajo de 18,5 también penaliza (delgadez).
-  imc: {
-    fuente: 'OMS',
-    tramos: [
-      [16, 0, 'Delgadez severa'],
-      [17, 1, 'Delgadez moderada'],
-      [18.5, 2, 'Delgadez leve'],
-      [25, 3, 'Normopeso'],
-      [27.5, 2, 'Sobrepeso grado I'],
-      [30, 1, 'Sobrepeso grado II'],
-      [Infinity, 0, 'Obesidad'],
-    ],
-  },
-  // Ashwell: "mantén tu cintura por debajo de la mitad de tu altura".
-  cinturaAltura: {
-    fuente: 'Ashwell',
-    tramos: [
-      [0.4, 2, 'Muy delgado'],
-      [0.5, 3, 'Saludable'],
-      [0.55, 2, 'Riesgo ligero'],
-      [0.6, 1, 'Riesgo aumentado'],
-      [Infinity, 0, 'Riesgo alto'],
-    ],
-  },
-  // OMS: riesgo cardiometabólico desde 0,90 (H) / 0,85 (M).
-  cinturaCadera: {
-    fuente: 'OMS',
-    hombre: [[0.9, 3, 'Saludable'], [0.95, 2, 'Riesgo ligero'], [1.0, 1, 'Riesgo aumentado'], [Infinity, 0, 'Riesgo alto']],
-    mujer: [[0.8, 3, 'Saludable'], [0.85, 2, 'Riesgo ligero'], [0.9, 1, 'Riesgo aumentado'], [Infinity, 0, 'Riesgo alto']],
-  },
   // American Council on Exercise (ACE), con "Aceptable" partido en dos.
   grasa: {
     fuente: 'ACE',
@@ -100,18 +65,41 @@ export const BAREMOS = {
       [Infinity, 0, 'Obesidad'],
     ],
   },
-  // Escala de básculas de bioimpedancia (1–59).
-  visceralNivel: {
-    fuente: 'Bioimpedancia',
-    tramos: [[10, 3, 'Saludable'], [13, 2, 'Límite'], [16, 1, 'Elevado'], [Infinity, 0, 'Excesivo']],
+  // Rangos de hidratación de básculas de bioimpedancia (Tanita): sano 50–65 % H, 45–60 % M.
+  agua: {
+    fuente: 'Tanita',
+    hombre: [[45, 0, 'Muy baja'], [50, 1, 'Baja'], [55, 2, 'Normal'], [65, 3, 'Óptima'], [Infinity, 2, 'Alta']],
+    mujer: [[40, 0, 'Muy baja'], [45, 1, 'Baja'], [50, 2, 'Normal'], [60, 3, 'Óptima'], [Infinity, 2, 'Alta']],
   },
-  // OMS / IDF por perímetro de cintura (cm).
-  visceralCintura: {
-    fuente: 'OMS / IDF',
-    hombre: [[94, 3, 'Riesgo bajo'], [102, 2, 'Riesgo moderado'], [110, 1, 'Riesgo alto'], [Infinity, 0, 'Riesgo muy alto']],
-    mujer: [[80, 3, 'Riesgo bajo'], [88, 2, 'Riesgo moderado'], [96, 1, 'Riesgo alto'], [Infinity, 0, 'Riesgo muy alto']],
+  // Músculo esquelético (Omron, adultos 18–39 años; el rango normal baja 0,2 puntos a los 40 y a los 60).
+  muscularEsqueletico: {
+    fuente: 'Omron',
+    hombre: [[30.3, 0, 'Muy bajo'], [33.3, 1, 'Bajo'], [39.4, 2, 'Normal'], [Infinity, 3, 'Alto']],
+    mujer: [[21.3, 0, 'Muy bajo'], [24.3, 1, 'Bajo'], [30.4, 2, 'Normal'], [Infinity, 3, 'Alto']],
+  },
+  // Masa muscular total (% del peso), escalas tipo Tanita / Xiaomi / Renpho.
+  muscularTotal: {
+    fuente: 'Bioimpedancia',
+    hombre: [[65, 0, 'Muy baja'], [70, 1, 'Baja'], [75, 2, 'Normal'], [Infinity, 3, 'Alta']],
+    mujer: [[58, 0, 'Muy baja'], [63, 1, 'Baja'], [68, 2, 'Normal'], [Infinity, 3, 'Alta']],
+  },
+  // Diferencia edad metabólica − edad real (años).
+  edadMetabolica: {
+    fuente: 'Tanita',
+    tramos: [[1, 3, 'Igual o más joven'], [6, 2, 'Algo mayor'], [11, 1, 'Mayor'], [Infinity, 0, 'Mucho mayor']],
+  },
+  // Escala de grasa visceral de básculas de bioimpedancia (1–59).
+  visceral: {
+    fuente: 'Tanita',
+    tramos: [[10, 3, 'Saludable'], [13, 2, 'Límite'], [16, 1, 'Elevada'], [Infinity, 0, 'Excesiva']],
   },
 };
+
+/** Ajuste por edad del baremo Omron de músculo esquelético. */
+function tramosEsqueletico(sexo, edad) {
+  const ajuste = edad >= 60 ? -0.4 : edad >= 40 ? -0.2 : 0;
+  return BAREMOS.muscularEsqueletico[sexo].map(([h, p, c]) => [h === Infinity ? h : round(h + ajuste, 1), p, c]);
+}
 
 /** Devuelve { puntos, categoria } del tramo donde cae el valor. */
 export function puntuarTramos(valor, tramos) {
@@ -120,12 +108,13 @@ export function puntuarTramos(valor, tramos) {
 }
 
 /** Texto legible de los tramos para mostrar el baremo. */
-export function describirTramos(tramos, unidad = '') {
+export function describirTramos(tramos, unidad = '', signo = false) {
+  const f = (n) => (signo && n > 0 ? `+${es(n)}` : es(n));
+  const u = unidad ? ` ${unidad}` : '';
   let desde = null;
   return tramos.map(([hasta, puntos, categoria]) => {
-    const u = unidad ? ` ${unidad}` : '';
     const rango =
-      desde === null ? `< ${es(hasta)}${u}` : hasta === Infinity ? `≥ ${es(desde)}${u}` : `${es(desde)}–${es(hasta)}${u}`;
+      desde === null ? `< ${f(hasta)}${u}` : hasta === Infinity ? `≥ ${f(desde)}${u}` : `${f(desde)} a ${f(hasta)}${u}`;
     desde = hasta;
     return { rango, puntos, categoria };
   });
@@ -141,80 +130,83 @@ export function calificacion(puntos, max = NOTA_MAX) {
 }
 
 /**
- * Evalúa los datos disponibles y devuelve cada métrica con sus puntos (0–3)
- * y la nota antropométrica sobre 15. Si falta alguna métrica, la nota se
- * calcula proporcionalmente sobre las medidas y se marca como incompleta.
+ * Evalúa los datos de la báscula. Puntúa 5 pruebas (% graso, % agua, % muscular,
+ * edad metabólica y grasa visceral) sobre 15 y añade datos informativos (IMC,
+ * metabolismo basal, kg de grasa, músculo y agua). Si falta alguna prueba, la
+ * nota se escala sobre las medidas y se marca como incompleta.
  *
- * datos: { sexo: 'hombre'|'mujer', edad, peso, altura, cintura?, cadera?, cuello?,
- *          pliegues?: number[3], nivelVisceral? }
+ * datos: { sexo: 'hombre'|'mujer', edad, altura, peso, grasa?, agua?, muscular?,
+ *          metabolismo?, edadMetabolica?, visceral? }
  */
 export function evaluar(datos) {
-  const { sexo, edad, peso, altura, cintura, cadera, cuello, pliegues, nivelVisceral } = datos;
+  const { sexo, edad, altura, peso, grasa, agua, muscular, metabolismo, edadMetabolica, visceral } = datos;
   if (sexo !== 'hombre' && sexo !== 'mujer') throw new Error('Sexo no válido');
-  if (![edad, peso, altura].every(isNum)) throw new Error('Edad, peso y altura son obligatorios');
+  if (![edad, peso, altura].every(isNum)) throw new Error('Edad, altura y peso son obligatorios');
 
   const metricas = [];
-  const add = (id, nombre, valor, unidad, tramos, fuente, detalle, unidadBaremo = unidad) => {
-    const { puntos, categoria } = puntuarTramos(valor, tramos);
+  const add = (id, nombre, valor, unidad, tramos, fuente, detalle = '', opts = {}) => {
+    const { puntos, categoria } = puntuarTramos(opts.valorBaremo ?? valor, tramos);
     metricas.push({
       id, nombre, valor, unidad, puntos, max: PUNTOS_MAX_METRICA, categoria, fuente, detalle,
-      baremo: describirTramos(tramos, unidadBaremo),
+      baremo: describirTramos(tramos, opts.unidadBaremo ?? unidad, opts.signo),
     });
   };
+  const kg = (pct) => es(round((peso * pct) / 100, 1));
 
-  add('imc', 'IMC', imc(peso, altura), 'kg/m²', BAREMOS.imc.tramos, BAREMOS.imc.fuente, '');
-
-  if (isNum(cintura)) {
-    add('cinturaAltura', 'Índice cintura/altura', cinturaAltura(cintura, altura), '',
-      BAREMOS.cinturaAltura.tramos, BAREMOS.cinturaAltura.fuente, '');
+  if (isNum(grasa)) {
+    add('grasa', '% graso', grasa, '%', BAREMOS.grasa[sexo], BAREMOS.grasa.fuente,
+      `${kg(grasa)} kg de grasa · ${es(round(peso - (peso * grasa) / 100, 1))} kg de masa magra`);
+  }
+  if (isNum(agua)) {
+    add('agua', '% agua', agua, '%', BAREMOS.agua[sexo], BAREMOS.agua.fuente, `${kg(agua)} kg de agua`);
+  }
+  if (isNum(muscular)) {
+    const tipo = tipoMuscular(muscular);
+    const tramos = tipo === 'total' ? BAREMOS.muscularTotal[sexo] : tramosEsqueletico(sexo, edad);
+    const fuente = tipo === 'total' ? BAREMOS.muscularTotal.fuente : BAREMOS.muscularEsqueletico.fuente;
+    add('muscular', '% muscular', muscular, '%', tramos, fuente,
+      `${kg(muscular)} kg · interpretado como ${tipo === 'total' ? 'masa muscular total' : 'músculo esquelético'}`);
+  }
+  if (isNum(edadMetabolica)) {
+    const dif = Math.round(edadMetabolica - edad);
+    add('edadMetabolica', 'Edad metabólica', edadMetabolica, 'años', BAREMOS.edadMetabolica.tramos,
+      BAREMOS.edadMetabolica.fuente,
+      dif === 0 ? 'Igual a tu edad real' : `${Math.abs(dif)} años ${dif < 0 ? 'menos' : 'más'} que tu edad real (${edad})`,
+      { valorBaremo: dif, unidadBaremo: 'años vs edad real', signo: true });
+  }
+  if (isNum(visceral)) {
+    add('visceral', 'Grasa visceral', visceral, 'nivel', BAREMOS.visceral.tramos, BAREMOS.visceral.fuente);
   }
 
-  if (isNum(cintura) && isNum(cadera)) {
-    add('cinturaCadera', 'Índice cintura/cadera', cinturaCadera(cintura, cadera), '',
-      BAREMOS.cinturaCadera[sexo], BAREMOS.cinturaCadera.fuente, '');
-  }
-
-  // % grasa: pliegues si los hay (más preciso); si no, cinta métrica.
-  let grasa = null;
-  let metodo = null;
-  if (Array.isArray(pliegues) && pliegues.length === 3 && pliegues.every(isNum)) {
-    grasa = grasaPliegues(sexo, edad, pliegues);
-    metodo = 'Pliegues (Jackson-Pollock 3)';
-  } else if (isNum(cuello) && isNum(cintura) && (sexo === 'hombre' || isNum(cadera))) {
-    grasa = grasaMarina(sexo, altura, cuello, cintura, cadera);
-    metodo = 'Cinta métrica (Marina EE.UU.)';
-  }
-  if (grasa !== null && Number.isFinite(grasa)) {
-    const masaGrasa = round((peso * grasa) / 100, 1);
-    add('grasa', '% grasa corporal', grasa, '%', BAREMOS.grasa[sexo], BAREMOS.grasa.fuente,
-      `${metodo} · ${es(masaGrasa)} kg grasa · ${es(round(peso - masaGrasa, 1))} kg masa magra`);
-  }
-
-  // Grasa visceral: nivel de bioimpedancia si se aporta; si no, estimación por cintura.
-  if (isNum(nivelVisceral)) {
-    add('visceral', 'Grasa visceral', nivelVisceral, 'nivel', BAREMOS.visceralNivel.tramos,
-      BAREMOS.visceralNivel.fuente, 'Medida con báscula de bioimpedancia');
-  } else if (isNum(cintura)) {
-    add('visceral', 'Grasa visceral (estimada)', cintura, 'cm', BAREMOS.visceralCintura[sexo],
-      BAREMOS.visceralCintura.fuente, 'Estimada por perímetro de cintura');
+  // Datos informativos (no puntúan).
+  const vImc = imc(peso, altura);
+  const informativos = [{ id: 'imc', nombre: 'IMC', valor: vImc, unidad: 'kg/m²', categoria: clasificarImc(vImc) }];
+  if (isNum(metabolismo)) {
+    const est = metabolismoEstimado(sexo, edad, peso, altura);
+    const dif = Math.round(((metabolismo - est) / est) * 100);
+    informativos.push({
+      id: 'metabolismo', nombre: 'Metabolismo basal', valor: Math.round(metabolismo), unidad: 'kcal/día',
+      categoria: `${dif >= 0 ? '+' : ''}${dif} % vs ${est} kcal esperadas (Mifflin-St Jeor)`,
+    });
   }
 
   const conseguidos = metricas.reduce((a, m) => a + m.puntos, 0);
   const posibles = metricas.length * PUNTOS_MAX_METRICA;
-  const nota = round((conseguidos / posibles) * NOTA_MAX, 1);
-  const faltan = 5 - metricas.length;
+  const nota = posibles ? round((conseguidos / posibles) * NOTA_MAX, 1) : null;
+  const faltan = NUM_PRUEBAS - metricas.length;
 
   return {
     fecha: new Date().toISOString(),
     datos,
     metricas,
+    informativos,
     puntos: conseguidos,
     posibles,
     nota,
     max: NOTA_MAX,
     completa: faltan === 0,
     faltan,
-    calificacion: calificacion(nota),
+    calificacion: nota === null ? null : calificacion(nota),
   };
 }
 
@@ -225,12 +217,7 @@ export function evaluar(datos) {
 export function guardarNotaGlobal(resultado, storage = globalThis.localStorage, detail = {}) {
   try {
     const actual = JSON.parse(storage.getItem('sportfy.scores') || '{}');
-    actual.antropometria = {
-      score: resultado.nota,
-      max: NOTA_MAX,
-      date: new Date().toISOString(),
-      detail,
-    };
+    actual.antropometria = { score: resultado.nota, max: NOTA_MAX, date: new Date().toISOString(), detail };
     storage.setItem('sportfy.scores', JSON.stringify(actual));
   } catch {
     /* almacenamiento no disponible: se ignora */

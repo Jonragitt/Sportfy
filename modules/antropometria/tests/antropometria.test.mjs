@@ -1,88 +1,85 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  imc, grasaPliegues, grasaMarina, puntuarTramos, describirTramos, evaluar, guardarNotaGlobal, calificacion, BAREMOS,
+  imc, metabolismoEstimado, tipoMuscular, puntuarTramos, describirTramos, evaluar, guardarNotaGlobal, calificacion, BAREMOS,
 } from '../antropometria.js';
 
-test('IMC', () => {
+const base = { sexo: 'hombre', edad: 30, altura: 178, peso: 75 };
+
+test('IMC y metabolismo estimado', () => {
   assert.equal(imc(70, 175), 22.9);
-  assert.equal(imc(100, 170), 34.6);
+  assert.equal(metabolismoEstimado('hombre', 30, 75, 178), 1718);
+  assert.equal(metabolismoEstimado('mujer', 30, 60, 165), 1320);
 });
 
-test('Tramos de IMC (OMS)', () => {
-  const t = BAREMOS.imc.tramos;
-  assert.deepEqual(puntuarTramos(22, t), { puntos: 3, categoria: 'Normopeso' });
-  assert.equal(puntuarTramos(24.99, t).puntos, 3);
-  assert.equal(puntuarTramos(25, t).puntos, 2);
-  assert.equal(puntuarTramos(28, t).puntos, 1);
-  assert.equal(puntuarTramos(31, t).puntos, 0);
-  assert.equal(puntuarTramos(17.5, t).puntos, 2);
-  assert.equal(puntuarTramos(15, t).puntos, 0);
-});
-
-test('Tramos de % grasa (ACE) según sexo', () => {
+test('Tramos de % graso (ACE) según sexo', () => {
   assert.equal(puntuarTramos(12, BAREMOS.grasa.hombre).categoria, 'Atleta');
   assert.equal(puntuarTramos(20, BAREMOS.grasa.hombre).puntos, 2);
   assert.equal(puntuarTramos(26, BAREMOS.grasa.hombre).puntos, 0);
   assert.equal(puntuarTramos(20, BAREMOS.grasa.mujer).puntos, 3);
-  assert.equal(puntuarTramos(10, BAREMOS.grasa.mujer).puntos, 1);
 });
 
-test('Tramos de grasa visceral', () => {
-  assert.equal(puntuarTramos(90, BAREMOS.visceralCintura.hombre).puntos, 3);
-  assert.equal(puntuarTramos(96, BAREMOS.visceralCintura.hombre).puntos, 2);
-  assert.equal(puntuarTramos(105, BAREMOS.visceralCintura.hombre).puntos, 1);
-  assert.equal(puntuarTramos(85, BAREMOS.visceralCintura.mujer).puntos, 2);
-  assert.equal(puntuarTramos(14, BAREMOS.visceralNivel.tramos).categoria, 'Elevado');
+test('Tramos de % agua', () => {
+  assert.equal(puntuarTramos(58, BAREMOS.agua.hombre).puntos, 3);
+  assert.equal(puntuarTramos(52, BAREMOS.agua.hombre).puntos, 2);
+  assert.equal(puntuarTramos(47, BAREMOS.agua.hombre).puntos, 1);
+  assert.equal(puntuarTramos(52, BAREMOS.agua.mujer).puntos, 3);
 });
 
-test('describirTramos genera rangos legibles', () => {
-  const d = describirTramos(BAREMOS.visceralCintura.hombre, 'cm');
-  assert.deepEqual(d.map((x) => x.rango), ['< 94 cm', '94–102 cm', '102–110 cm', '≥ 110 cm']);
+test('% muscular: detecta esquelético o total', () => {
+  assert.equal(tipoMuscular(38), 'esqueletico');
+  assert.equal(tipoMuscular(76), 'total');
+  const esq = evaluar({ ...base, muscular: 40 }).metricas[0];
+  assert.equal(esq.puntos, 3);
+  assert.equal(esq.fuente, 'Omron');
+  const tot = evaluar({ ...base, muscular: 68 }).metricas[0];
+  assert.equal(tot.puntos, 1);
+  assert.match(tot.detalle, /masa muscular total/);
 });
 
-test('Jackson-Pollock 3 pliegues', () => {
-  const h = grasaPliegues('hombre', 30, [20, 25, 15]);
-  assert.ok(h > 16 && h < 19, `hombre ${h}`);
-  const m = grasaPliegues('mujer', 30, [20, 20, 20]);
-  assert.ok(m > 22 && m < 26, `mujer ${m}`);
+test('Edad metabólica puntúa la diferencia con la edad real', () => {
+  const p = (em) => evaluar({ ...base, edadMetabolica: em }).metricas[0].puntos;
+  assert.equal(p(25), 3);
+  assert.equal(p(30), 3);
+  assert.equal(p(34), 2);
+  assert.equal(p(38), 1);
+  assert.equal(p(45), 0);
 });
 
-test('Fórmula de la Marina', () => {
-  const h = grasaMarina('hombre', 178, 38, 85);
-  assert.ok(h > 14 && h < 19, `hombre ${h}`);
-  const m = grasaMarina('mujer', 165, 33, 75, 98);
-  assert.ok(m > 23 && m < 30, `mujer ${m}`);
+test('Grasa visceral', () => {
+  assert.equal(puntuarTramos(5, BAREMOS.visceral.tramos).puntos, 3);
+  assert.equal(puntuarTramos(14, BAREMOS.visceral.tramos).categoria, 'Elevada');
+});
+
+test('describirTramos', () => {
+  assert.deepEqual(describirTramos(BAREMOS.visceral.tramos).map((x) => x.rango), ['< 10', '10 a 13', '13 a 16', '≥ 16']);
+  assert.equal(describirTramos(BAREMOS.edadMetabolica.tramos, 'años', true)[1].rango, '+1 a +6 años');
 });
 
 test('evaluar: perfil en forma saca 15/15', () => {
-  const r = evaluar({ sexo: 'hombre', edad: 30, peso: 75, altura: 178, cintura: 82, cadera: 98, cuello: 39 });
-  assert.deepEqual(r.metricas.map((m) => m.id), ['imc', 'cinturaAltura', 'cinturaCadera', 'grasa', 'visceral']);
-  assert.ok(r.metricas.every((m) => m.max === 3));
+  const r = evaluar({ ...base, grasa: 14, agua: 60, muscular: 41, metabolismo: 1800, edadMetabolica: 26, visceral: 4 });
+  assert.deepEqual(r.metricas.map((m) => m.id), ['grasa', 'agua', 'muscular', 'edadMetabolica', 'visceral']);
   assert.equal(r.nota, 15);
   assert.equal(r.completa, true);
   assert.equal(r.calificacion, 'Excelente');
+  assert.deepEqual(r.informativos.map((i) => i.id), ['imc', 'metabolismo']);
+  assert.match(r.informativos[1].categoria, /^\+5 % vs 1718/);
 });
 
-test('evaluar: perfil con sobrepeso abdominal baja la nota', () => {
-  const r = evaluar({ sexo: 'hombre', edad: 30, peso: 82, altura: 178, cintura: 92, cadera: 100, cuello: 39 });
-  assert.ok(r.nota < 13.5 && r.nota >= 7.5, `nota ${r.nota}`);
-});
-
-test('evaluar: prioriza pliegues y nivel de bioimpedancia', () => {
-  const r = evaluar({ sexo: 'mujer', edad: 40, peso: 80, altura: 160, cintura: 95, cadera: 110, cuello: 34,
-    pliegues: [30, 35, 40], nivelVisceral: 14 });
-  assert.match(r.metricas.find((m) => m.id === 'grasa').detalle, /Pliegues/);
-  assert.equal(r.metricas.find((m) => m.id === 'visceral').categoria, 'Elevado');
-  assert.ok(r.nota < 7.5, `nota ${r.nota}`);
+test('evaluar: perfil con sobrepeso', () => {
+  const r = evaluar({ sexo: 'hombre', edad: 40, altura: 175, peso: 92, grasa: 27, agua: 49, muscular: 31,
+    metabolismo: 1750, edadMetabolica: 49, visceral: 13 });
+  assert.equal(r.puntos, 0 + 1 + 1 + 1 + 1);
+  assert.equal(r.nota, 4);
+  assert.equal(r.calificacion, 'Deficiente');
 });
 
 test('evaluar: incompleta escala sobre 15 y lo indica', () => {
-  const r = evaluar({ sexo: 'hombre', edad: 25, peso: 70, altura: 175 });
-  assert.equal(r.metricas.length, 1);
-  assert.equal(r.nota, 15);
+  const r = evaluar({ ...base, grasa: 20, visceral: 5 });
+  assert.equal(r.nota, 12.5);
   assert.equal(r.completa, false);
-  assert.equal(r.faltan, 4);
+  assert.equal(r.faltan, 3);
+  assert.equal(evaluar(base).nota, null);
 });
 
 test('evaluar: valida obligatorios', () => {

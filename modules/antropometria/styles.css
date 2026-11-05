@@ -110,3 +110,7 @@ th { color: var(--muted); font-weight: 500; }
 .baremo table { table-layout: fixed; }
 .baremo th:first-child, .baremo td:first-child { width: 38%; }
 .baremo .pts { width: 3.5em; text-align: center; }
+.sub { font-size: 1rem; margin: 20px 0 8px; }
+.informativos { list-style: none; padding: 0; margin: 0 0 16px; display: grid; gap: 8px; }
+.informativos li { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; }
+.informativos em { grid-column: 1 / -1; font-style: normal; color: var(--muted); font-size: .85rem; }

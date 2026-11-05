@@ -5,19 +5,6 @@ const $ = (s) => document.querySelector(s);
 const form = $('#form');
 let ultimo = null;
 
-const PLIEGUES = {
-  hombre: [
-    ['Pecho', 'Diagonal, a medio camino entre la axila y el pezón.'],
-    ['Abdomen', 'Vertical, 2 cm a la derecha del ombligo.'],
-    ['Muslo', 'Vertical, en la parte delantera, a mitad entre ingle y rodilla.'],
-  ],
-  mujer: [
-    ['Tríceps', 'Vertical, parte trasera del brazo, a mitad entre hombro y codo.'],
-    ['Suprailíaco', 'Diagonal, justo por encima de la cresta de la cadera.'],
-    ['Muslo', 'Vertical, en la parte delantera, a mitad entre ingle y rodilla.'],
-  ],
-};
-
 const leer = (k, def) => {
   try { return JSON.parse(localStorage.getItem(k)) ?? def; } catch { return def; }
 };
@@ -33,29 +20,17 @@ const color = (pts, max) => {
 };
 const COLOR_PUNTOS = ['mal', 'medio', 'bien', 'ok'];
 
-function actualizarPliegues() {
-  const lista = PLIEGUES[form.sexo.value];
-  lista.forEach(([nombre], i) => { document.querySelector(`[data-pliegue="${i}"]`).textContent = nombre; });
-  $('#guia-pliegues').innerHTML = lista.map(([n, d]) => `<li><b>${n}:</b> ${d}</li>`).join('');
-}
+const CAMPOS = ['edad', 'altura', 'peso', 'grasa', 'agua', 'muscular', 'metabolismo', 'edadMetabolica', 'visceral'];
 
 function datosFormulario() {
   const f = new FormData(form);
-  const pl = [num(f.get('p0')), num(f.get('p1')), num(f.get('p2'))];
-  return {
-    sexo: f.get('sexo'),
-    edad: num(f.get('edad')),
-    peso: num(f.get('peso')),
-    altura: num(f.get('altura')),
-    cintura: num(f.get('cintura')),
-    cadera: num(f.get('cadera')),
-    cuello: num(f.get('cuello')),
-    pliegues: pl.every((v) => v !== undefined) ? pl : undefined,
-    nivelVisceral: num(f.get('nivelVisceral')),
-  };
+  const d = { sexo: f.get('sexo') };
+  CAMPOS.forEach((c) => { d[c] = num(f.get(c)); });
+  return d;
 }
 
 function pintarResultado(r) {
+  if (r.nota === null) throw new Error('Introduce al menos uno de los valores de la báscula (% graso, % agua, % muscular, edad metabólica o grasa visceral).');
   $('#resultado').hidden = false;
   const media = $('#media-num');
   media.innerHTML = `${fmt(r.nota)}<small>/${r.max}</small>`;
@@ -64,6 +39,8 @@ function pintarResultado(r) {
   $('#media-aviso').hidden = r.completa;
   $('#media-aviso').textContent = r.completa ? '' :
     `Evaluación incompleta: faltan ${r.faltan} de 5 pruebas. La nota se ha escalado sobre las ${r.metricas.length} medidas (${r.puntos}/${r.posibles} puntos).`;
+  $('#informativos').innerHTML = r.informativos.map((i) => `
+    <li><span>${i.nombre}</span><b>${fmt(i.valor)} <small>${i.unidad}</small></b><em>${i.categoria}</em></li>`).join('');
   $('#metricas').innerHTML = r.metricas.map((m) => `
     <li class="metrica">
       <div class="m-head">
@@ -90,27 +67,29 @@ function pintarHistorial() {
   $('#historial-vacio').hidden = h.length > 0;
   $('#historial').hidden = h.length === 0;
   $('#historial tbody').innerHTML = h.map((r, i) => {
-    const grasa = r.metricas.find((m) => m.id === 'grasa');
+    const v = (id) => r.metricas.find((m) => m.id === id);
+    const grasa = v('grasa');
+    const musc = v('muscular');
     return `<tr>
       <td>${new Date(r.fecha).toLocaleDateString('es-ES')}</td>
       <td>${fmt(r.datos.peso)} kg</td>
-      <td>${r.datos.cintura ? `${fmt(r.datos.cintura)} cm` : '–'}</td>
       <td>${grasa ? `${fmt(grasa.valor)} %` : '–'}</td>
+      <td>${musc ? `${fmt(musc.valor)} %` : '–'}</td>
       <td>${r.nota != null ? `<b class="${color(r.nota, r.max)}">${fmt(r.nota)}</b>/${r.max}` : '–'}</td>
       <td><button type="button" class="borrar" data-i="${i}" aria-label="Borrar">✕</button></td>
     </tr>`;
   }).reverse().join('');
 }
 
-form.sexo.addEventListener('change', actualizarPliegues);
 
 form.addEventListener('submit', (e) => {
   e.preventDefault();
   const err = $('#error');
   try {
-    ultimo = evaluar(datosFormulario());
+    const r = evaluar(datosFormulario());
     err.hidden = true;
-    pintarResultado(ultimo);
+    pintarResultado(r);
+    ultimo = r;
   } catch (ex) {
     err.textContent = ex.message;
     err.hidden = false;
@@ -141,5 +120,4 @@ $('#historial tbody').addEventListener('click', (e) => {
   pintarHistorial();
 });
 
-actualizarPliegues();
 pintarHistorial();

@@ -9,13 +9,13 @@
 <body>
   <header class="top">
     <h1>Evaluación antropométrica</h1>
-    <p>Mide, calcula y puntúa tu composición corporal sobre 15 puntos. Rellena lo que tengas: cuantos más datos, más completa será la nota.</p>
+    <p>Introduce los datos de tu báscula de bioimpedancia y obtén tu nota de composición corporal sobre 15 puntos.</p>
   </header>
 
   <main>
     <form id="form" novalidate>
       <fieldset>
-        <legend>Datos básicos <span class="req">obligatorio</span></legend>
+        <legend>Datos personales <span class="req">obligatorio</span></legend>
         <div class="grid">
           <label>Sexo
             <select name="sexo" required>
@@ -24,49 +24,31 @@
             </select>
           </label>
           <label>Edad (años)<input name="edad" type="number" inputmode="numeric" min="14" max="99" required /></label>
-          <label>Peso (kg)<input name="peso" type="number" inputmode="decimal" step="0.1" min="30" max="300" required /></label>
           <label>Altura (cm)<input name="altura" type="number" inputmode="decimal" step="0.1" min="120" max="230" required /></label>
+          <label>Peso (kg)<input name="peso" type="number" inputmode="decimal" step="0.1" min="30" max="300" required /></label>
         </div>
       </fieldset>
 
       <fieldset>
-        <legend>Perímetros con cinta métrica</legend>
+        <legend>Báscula de bioimpedancia</legend>
         <div class="grid">
-          <label>Cintura (cm)<input name="cintura" type="number" inputmode="decimal" step="0.1" /></label>
-          <label>Cadera (cm)<input name="cadera" type="number" inputmode="decimal" step="0.1" /></label>
-          <label>Cuello (cm)<input name="cuello" type="number" inputmode="decimal" step="0.1" /></label>
+          <label>% graso<input name="grasa" type="number" inputmode="decimal" step="0.1" min="2" max="70" /></label>
+          <label>% agua<input name="agua" type="number" inputmode="decimal" step="0.1" min="20" max="80" /></label>
+          <label>% muscular<input name="muscular" type="number" inputmode="decimal" step="0.1" min="10" max="95" /></label>
+          <label>Metabolismo basal (kcal)<input name="metabolismo" type="number" inputmode="numeric" min="600" max="5000" /></label>
+          <label>Edad metabólica (años)<input name="edadMetabolica" type="number" inputmode="numeric" min="10" max="99" /></label>
+          <label>Grasa visceral (nivel)<input name="visceral" type="number" inputmode="decimal" step="0.5" min="1" max="59" /></label>
         </div>
         <details>
-          <summary>Cómo medir</summary>
+          <summary>Cómo pesarte para que los datos sean fiables</summary>
           <ul>
-            <li><b>Cintura:</b> de pie, a la altura del ombligo (punto medio entre la última costilla y la cresta ilíaca), al final de una espiración normal.</li>
-            <li><b>Cadera:</b> en la zona más ancha de los glúteos, pies juntos.</li>
-            <li><b>Cuello:</b> justo debajo de la nuez, cinta ligeramente inclinada hacia abajo.</li>
-            <li>Cinta horizontal, ajustada sin apretar la piel. Mide 2 veces y usa la media.</li>
+            <li>Por la mañana, en ayunas, después de ir al baño y antes de entrenar.</li>
+            <li>Descalzo y con los pies secos, bien apoyados en los electrodos.</li>
+            <li>No bebas mucha agua ni alcohol las horas previas: la hidratación cambia el % graso y el % agua.</li>
+            <li>Usa siempre la misma báscula y a la misma hora para comparar evaluaciones.</li>
+            <li><b>% muscular:</b> si tu báscula da valores de 25–45 % es músculo esquelético; si da 60–85 % es masa muscular total. La app lo detecta sola.</li>
           </ul>
         </details>
-      </fieldset>
-
-      <fieldset>
-        <legend>Pliegues cutáneos (opcional, con plicómetro)</legend>
-        <div class="grid">
-          <label><span data-pliegue="0">Pecho</span> (mm)<input name="p0" type="number" inputmode="decimal" step="0.5" /></label>
-          <label><span data-pliegue="1">Abdomen</span> (mm)<input name="p1" type="number" inputmode="decimal" step="0.5" /></label>
-          <label><span data-pliegue="2">Muslo</span> (mm)<input name="p2" type="number" inputmode="decimal" step="0.5" /></label>
-        </div>
-        <details>
-          <summary>Cómo medir</summary>
-          <ul id="guia-pliegues"></ul>
-          <p class="nota">Lado derecho del cuerpo, pellizca piel y grasa (no músculo), coloca el plicómetro a 1 cm de los dedos y lee a los 2 segundos. Toma 2–3 medidas y usa la media.</p>
-        </details>
-      </fieldset>
-
-      <fieldset>
-        <legend>Báscula de bioimpedancia (opcional)</legend>
-        <div class="grid">
-          <label>Nivel de grasa visceral<input name="nivelVisceral" type="number" inputmode="numeric" min="1" max="59" /></label>
-        </div>
-        <p class="nota">Si no tienes báscula, el riesgo visceral se estima con el perímetro de cintura.</p>
       </fieldset>
 
       <p id="error" class="error" role="alert" hidden></p>
@@ -83,8 +65,10 @@
         </div>
       </div>
       <p id="media-aviso" class="aviso" hidden></p>
-      <p class="nota">5 pruebas × 3 puntos (3 Óptimo · 2 Aceptable · 1 Riesgo · 0 Riesgo alto) = 15 puntos. Cuenta para la nota global sobre 25 junto a la evaluación postural (/10).</p>
+      <p class="nota">5 pruebas (% graso, % agua, % muscular, edad metabólica y grasa visceral) × 3 puntos = 15 puntos. Cuenta para la nota global sobre 25 junto a la evaluación postural (/10).</p>
       <ul id="metricas" class="metricas"></ul>
+      <h3 class="sub">Datos informativos (no puntúan)</h3>
+      <ul id="informativos" class="informativos"></ul>
       <button type="button" id="guardar">Guardar en mi historial</button>
     </section>
 
@@ -92,7 +76,7 @@
       <h2>Historial</h2>
       <p id="historial-vacio" class="nota">Todavía no has guardado evaluaciones.</p>
       <table id="historial" hidden>
-        <thead><tr><th>Fecha</th><th>Peso</th><th>Cintura</th><th>% grasa</th><th>Nota</th><th></th></tr></thead>
+        <thead><tr><th>Fecha</th><th>Peso</th><th>% graso</th><th>% musc.</th><th>Nota</th><th></th></tr></thead>
         <tbody></tbody>
       </table>
     </section>
