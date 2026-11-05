@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Evaluación postural · Sportfy</title>
+  <link rel="stylesheet" href="../../shared/styles.css">
+</head>
+<body>
+  <main class="wrap">
+    <p><a href="../../index.html">← Volver al panel</a></p>
+    <h1>Evaluación postural</h1>
+    <p class="lead">16 pruebas sencillas para detectar desequilibrios. Hazlas descalzo, con ropa ajustada y, si puedes, con alguien que te haga fotos de frente, de perfil y de espaldas.</p>
+
+    <form id="form"></form>
+
+    <section id="result" class="hidden">
+      <h2>Tu resultado</h2>
+      <div class="card">
+        <div class="score" id="scoreValue">–</div>
+        <div id="scoreLabel" class="lead"></div>
+        <div class="bar"><span id="scoreBar"></span></div>
+        <p class="note">Esta nota se suma a la nota media de tu evaluación completa.</p>
+      </div>
+      <h2>Qué trabajar</h2>
+      <p class="lead">Ejercicios correctivos para tus desviaciones, de mayor a menor prioridad. Hazlos 3-4 días por semana como calentamiento.</p>
+      <div id="fixes"></div>
+      <p class="note">Esta evaluación es orientativa y no sustituye un diagnóstico médico. Si tienes dolor o una asimetría marcada, consulta con un fisioterapeuta.</p>
+    </section>
+  </main>
+
+  <div class="sticky">
+    <div class="wrap">
+      <span class="progress" id="progress">0 / 16 respondidas</span>
+      <button class="btn" id="calc" type="button" disabled>Calcular nota</button>
+    </div>
+  </div>
+
+  <script type="module" src="./postural.js"></script>
+</body>
+</html>

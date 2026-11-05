@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sportfy · Tu evaluación</title>
+  <link rel="stylesheet" href="shared/styles.css">
+</head>
+<body>
+  <main class="wrap">
+    <h1>Sportfy</h1>
+    <p class="lead">Completa las evaluaciones para conocer tu punto de partida. Tu nota media resume tu forma física actual.</p>
+
+    <div class="card">
+      <div class="note">Nota media</div>
+      <div class="score" id="avg">–</div>
+      <div class="lead" id="avgLabel"></div>
+      <div class="bar"><span id="avgBar" style="width:0"></span></div>
+    </div>
+
+    <h2>Evaluaciones</h2>
+    <div class="grid" id="evals"></div>
+  </main>
+
+  <script type="module">
+    import { EVALUATIONS, getScores, averageScore, scoreLabel } from "./shared/scores.js";
+
+    const LINKS = {
+      antropometria: "modules/antropometria/index.html",
+      postural: "modules/postural/index.html",
+    };
+    const scores = getScores();
+    const avg = averageScore();
+    document.getElementById("avg").textContent = avg == null ? "–" : `${avg} / 100`;
+    document.getElementById("avgLabel").textContent = scoreLabel(avg);
+    document.getElementById("avgBar").style.width = `${avg ?? 0}%`;
+
+    const grid = document.getElementById("evals");
+    for (const [key, name] of Object.entries(EVALUATIONS)) {
+      const entry = scores[key];
+      const score = typeof entry === "number" ? entry : entry?.score;
+      const card = document.createElement(LINKS[key] ? "a" : "div");
+      card.className = "card";
+      card.style.textDecoration = "none";
+      card.style.color = "inherit";
+      if (LINKS[key]) card.href = LINKS[key];
+      card.innerHTML = `<h3></h3><div class="score" style="font-size:2rem"></div><div class="note"></div>`;
+      card.querySelector("h3").textContent = name;
+      card.querySelector(".score").textContent = score == null ? "–" : score;
+      card.querySelector(".note").textContent = LINKS[key]
+        ? (score == null ? "Pendiente · Empezar" : `${scoreLabel(score)} · Repetir`)
+        : "Próximamente";
+      grid.append(card);
+    }
+  </script>
+</body>
+</html>
