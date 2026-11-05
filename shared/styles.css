@@ -176,6 +176,21 @@ body.con-fondo .sec-head a { color: #ff8a5c; text-shadow: 0 1px 6px rgba(0,0,0,.
 @media (max-width: 600px) { .ejercicio-media { grid-template-columns: 1fr; } .ejercicio-media figure:not(.ancho) { max-width: 260px; margin: 0 auto; } }
 /* Tarjetas algo transparentes sobre el fondo de imagen */
 body.con-fondo .card {
-  background: color-mix(in srgb, var(--surface) 80%, transparent);
+  background: color-mix(in srgb, var(--surface) 86%, transparent);
   -webkit-backdrop-filter: blur(10px) saturate(140%); backdrop-filter: blur(10px) saturate(140%);
 }
+/* Texto pequeño legible sobre la foto: franja oscura translúcida detrás */
+body.con-fondo main > .lead,
+body.con-fondo #form > .lead,
+body.con-fondo #form > .note,
+body.con-fondo #result > .lead,
+body.con-fondo #result > .note {
+  color: #fff; font-weight: 500;
+  background: rgba(8,9,12,.62);
+  padding: 10px 14px; border-radius: 12px;
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  text-shadow: none;
+}
+/* Dentro de las tarjetas semitransparentes, el texto gris un poco más oscuro */
+body.con-fondo .card { --muted: #474e5a; }
+@media (prefers-color-scheme: dark) { body.con-fondo .card { --muted: #b3bac6; } }
