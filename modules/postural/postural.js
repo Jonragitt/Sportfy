@@ -1,5 +1,5 @@
-import { SECTIONS, SIDES, ALL_ZONES, MAX_POINTS, computeScore, selectedOptions, optionLabel, alteredZoneCount } from "./tests.js?v=202611051620";
-import { saveScore, getScores, scoreLabel } from "../../shared/scores.js?v=202611051620";
+import { SECTIONS, SIDES, ALL_ZONES, MAX_POINTS, computeScore, selectedOptions, optionLabel, alteredZoneCount } from "./tests.js?v=202611051715";
+import { saveScore, getScores, scoreLabel } from "../../shared/scores.js?v=202611051715";
 import { marcarPendiente, quitarPendiente, montarTick } from "../../shared/perfil.js";
 
 const form = document.getElementById("form");
@@ -40,7 +40,7 @@ function circle(zone, value, label) {
 }
 
 // Botón "Ver ejemplo": despliega el GIF de la alteración (en bilaterales, izquierda y derecha).
-const GIF_V = "202611051620";
+const GIF_V = "202611051715";
 function demo(opt, sides) {
   const panel = el("div", { class: "demo hidden" });
   const btn = el("button", { type: "button", class: "ver-demo", "aria-expanded": "false" }, "▶ Ver ejemplo");
@@ -61,6 +61,15 @@ function demo(opt, sides) {
   return { btn, panel };
 }
 
+// Cómo se hace el ejercicio: GIF y fotos del test, siempre visibles al inicio del bloque.
+function exerciseCard(section) {
+  const fig = el("div", { class: "ejercicio-media" });
+  for (const m of section.media) {
+    fig.append(el("figure", { class: m.wide ? "ancho" : "" }, el("img", { src: `${m.src}?v=${GIF_V}`, alt: m.alt, width: String(m.w), height: String(m.h), loading: "lazy" }), el("figcaption", {}, m.caption)));
+  }
+  return el("div", { class: "card ejercicio" }, el("h3", {}, "Cómo se hace"), fig);
+}
+
 // Zona normal: un círculo por opción.
 function zoneCard(zone) {
   const options = el("div", { class: "options" });
@@ -75,16 +84,16 @@ function zoneCard(zone) {
 }
 
 // Zona bilateral: columnas I y D con un círculo por lado en cada opción.
-function bilateralCard(zone) {
+function bilateralCard(zone, section) {
   const head = el("div", { class: "lado-head" }, el("span", {}, zone.colLabel || "Compensación"));
   for (const k of Object.keys(SIDES)) head.append(el("span", { class: "lado-tag", title: SIDES[k] }, k));
   const rows = el("div", { class: "lados" }, head);
   for (const opt of zone.options) {
-    const { btn, panel } = demo(opt, Object.keys(SIDES));
+    const { btn, panel } = section.media ? { btn: "", panel: "" } : demo(opt, Object.keys(SIDES));
     const row = el(
       "div",
       { class: "lado-row" },
-      el("span", {}, el("strong", {}, opt.name), " ", el("span", { class: "vista" }, opt.view), el("br"), el("span", { class: "note" }, opt.hint), el("br"), btn)
+      el("span", {}, el("strong", {}, opt.name), " ", el("span", { class: "vista" }, opt.view), el("br"), el("span", { class: "note" }, opt.hint), ...(btn ? [el("br"), btn] : []))
     );
     for (const k of Object.keys(SIDES)) row.append(el("label", { class: "lado-cel" }, circle(zone, `${opt.id}:${k}`, `${opt.name}, lado ${SIDES[k].toLowerCase()}`)));
     rows.append(row, panel);
@@ -95,7 +104,8 @@ function bilateralCard(zone) {
 function render() {
   for (const section of SECTIONS) {
     form.append(el("h2", {}, section.title), el("p", { class: "lead" }, section.intro));
-    for (const zone of section.zones) form.append(section.bilateral ? bilateralCard(zone) : zoneCard(zone));
+    if (section.media) form.append(exerciseCard(section));
+    for (const zone of section.zones) form.append(section.bilateral ? bilateralCard(zone, section) : zoneCard(zone));
   }
   form.append(el("p", { class: "note" }, "Si no marcas ninguna opción en una zona, se considera sin alteración."));
 }

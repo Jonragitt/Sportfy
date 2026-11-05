@@ -191,6 +191,11 @@ export const SECTIONS = [
     id: "soh",
     title: "Sentadilla profunda (SOH)",
     bilateral: true,
+    // Cómo se hace el test: imágenes propias que sustituyen a los ejemplos por opción.
+    media: [
+      { src: "ejercicios/soh-lateral.gif", alt: "Sentadilla profunda con brazos arriba vista de perfil, en bucle", caption: "Vista lateral", w: 380, h: 508 },
+      { src: "ejercicios/soh-anterior.png", alt: "Secuencia de la sentadilla profunda vista de frente en cinco fases: bipedestación, inicio del descenso, descenso progresivo, sentadilla profunda y retorno", caption: "Vista anterior: fases del movimiento", w: 900, h: 937, wide: true },
+    ],
     intro:
       "Pies a la anchura de los hombros y apuntando al frente, brazos estirados por encima de la cabeza. Haz 5 sentadillas lo más profundas posible, a ritmo lento. Obsérvalas de frente (Ant), de espaldas (Post) y de perfil (Lat), y marca en qué lado aparece cada compensación: I (izquierda) o D (derecha).",
     zones: [
