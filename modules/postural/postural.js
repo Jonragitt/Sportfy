@@ -1,4 +1,4 @@
-import { SECTIONS, SIDES, ALL_ZONES, MAX_POINTS, computeScore, selectedOptions, optionLabel } from "./tests.js";
+import { SECTIONS, SIDES, ALL_ZONES, MAX_POINTS, computeScore, selectedOptions, optionLabel, alteredZoneCount } from "./tests.js";
 import { saveScore, getScores, scoreLabel } from "../../shared/scores.js";
 import { marcarPendiente, quitarPendiente, montarTick } from "../../shared/perfil.js";
 
@@ -26,7 +26,16 @@ function onChange(zone) {
 function circle(zone, value, label) {
   const input = el("input", { type: "checkbox", class: "circle", name: zone.id, value });
   if (label) input.setAttribute("aria-label", label);
-  input.addEventListener("change", () => onChange(zone));
+  input.addEventListener("change", () => {
+    // Zonas exclusivas (positivo/negativo): un solo resultado por lado.
+    if (zone.exclusive && input.checked) {
+      const side = value.includes(":") ? value.split(":")[1] : null;
+      form.querySelectorAll(`input[name="${zone.id}"]:checked`).forEach((other) => {
+        if (other !== input && (side == null || other.value.endsWith(`:${side}`))) other.checked = false;
+      });
+    }
+    onChange(zone);
+  });
   return input;
 }
 
@@ -43,7 +52,7 @@ function zoneCard(zone) {
 
 // Zona bilateral: columnas I y D con un círculo por lado en cada opción.
 function bilateralCard(zone) {
-  const head = el("div", { class: "lado-head" }, el("span", {}, "Compensación"));
+  const head = el("div", { class: "lado-head" }, el("span", {}, zone.colLabel || "Compensación"));
   for (const k of Object.keys(SIDES)) head.append(el("span", { class: "lado-tag", title: SIDES[k] }, k));
   const rows = el("div", { class: "lados" }, head);
   for (const opt of zone.options) {
@@ -68,7 +77,7 @@ function render() {
 
 // Las zonas sin marcar cuentan como correctas, así que el resultado siempre está disponible.
 function update() {
-  const n = ALL_ZONES.filter((z) => (answers[z.id] || []).length).length;
+  const n = alteredZoneCount(answers);
   progress.textContent = n
     ? `${n} de ${ALL_ZONES.length} zonas con alteración · Toca para ver tu evaluación`
     : "Toca para ver tu evaluación";

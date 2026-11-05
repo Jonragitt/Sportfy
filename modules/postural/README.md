@@ -1,6 +1,6 @@
 # Evaluación postural
 
-Dos planos y tres tests funcionales (sentadilla profunda, puente a una pierna y wall angel), 15 zonas. En cada zona se marcan con círculos una o varias alteraciones.
+Dos planos y cuatro tests funcionales (sentadilla profunda, puente a una pierna, wall angel y lunge test), 16 zonas. En cada zona se marcan con círculos una o varias alteraciones.
 
 Plano sagital (vista lateral):
 
@@ -39,3 +39,5 @@ Tests: `node --test modules/postural/tests/*.test.js`
 Puente de cadera a una pierna (SLB), bilateral: caída de la pelvis, rotación de la pelvis (Ant), compensación lumbar y dominancia de isquiotibiales (Lat).
 
 Wall angel test, bilateral: no apoya codos / manos en la pared y movimiento compensado lumbar / dorsal (Lat).
+
+Lunge test / dorsiflexión (10 cm), bilateral y exclusivo por lado: positivo (no llega a la pared, cuenta como alteración) o negativo (correcto, no resta).

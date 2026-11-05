@@ -354,16 +354,57 @@ export const SECTIONS = [
       },
     ],
   },
+  {
+    id: "lunge",
+    title: "Lunge test / dorsiflexión (10 cm)",
+    bilateral: true,
+    intro:
+      "Descalzo, frente a una pared, con el dedo gordo a 10 cm de ella. Lleva la rodilla hacia delante hasta tocar la pared sin despegar el talón del suelo. Repite con cada pie y marca el resultado de cada lado.",
+    zones: [
+      {
+        id: "lungeDorsi",
+        name: "Dorsiflexión de tobillo",
+        how: "Se marca un resultado por lado. Negativo = la rodilla toca la pared a 10 cm con el talón apoyado.",
+        exclusive: true,
+        colLabel: "Resultado",
+        options: [
+          {
+            id: "lungePositivo",
+            name: "Positivo",
+            view: "Lat",
+            hint: "La rodilla no llega a la pared o el talón se despega: dorsiflexión limitada.",
+            fix: ["Movilidad de tobillo contra la pared (knee to wall) 2×10 por lado", "Estiramiento de gemelo y sóleo 3×30 s", "Masaje de gemelo con foam roller 1 min por lado"],
+          },
+          {
+            id: "lungeNegativo",
+            name: "Negativo",
+            view: "Lat",
+            normal: true,
+            hint: "La rodilla toca la pared sin levantar el talón: dorsiflexión correcta.",
+            fix: [],
+          },
+        ],
+      },
+    ],
+  },
 ];
 
 export const ALL_ZONES = SECTIONS.flatMap((s) => s.zones);
 export const ALL_OPTIONS = ALL_ZONES.flatMap((z) => z.options.map((o) => ({ ...o, zone: z })));
 
+// Opciones con "normal: true" (p. ej. test negativo) se registran pero no cuentan como alteración.
+function isAltered(zone, answers) {
+  return (answers[zone.id] || []).some((v) => {
+    const opt = zone.options.find((o) => o.id === v.split(":")[0]);
+    return opt && !opt.normal;
+  });
+}
+
 // answers: { zonaId: [opcionId, ...] }. Nota /10 (un decimal):
 // cada zona sin alteraciones suma lo mismo.
 export function computeScore(answers = {}) {
   if (!ALL_ZONES.length) return null;
-  const ok = ALL_ZONES.filter((z) => !(answers[z.id] || []).length).length;
+  const ok = ALL_ZONES.filter((z) => !isAltered(z, answers)).length;
   return Math.round((ok / ALL_ZONES.length) * MAX_POINTS * 10) / 10;
 }
 
@@ -374,10 +415,15 @@ export function isBilateral(zone) {
   return SECTIONS.some((s) => s.bilateral && s.zones.includes(zone));
 }
 
-// Opciones marcadas, con los lados (["I","D"]) en las secciones bilaterales.
+export function alteredZoneCount(answers = {}) {
+  return ALL_ZONES.filter((z) => isAltered(z, answers)).length;
+}
+
+// Alteraciones marcadas, con los lados (["I","D"]) en las secciones bilaterales.
 export function selectedOptions(answers = {}) {
   const out = [];
   for (const o of ALL_OPTIONS) {
+    if (o.normal) continue;
     const marked = answers[o.zone.id] || [];
     if (isBilateral(o.zone)) {
       const sides = Object.keys(SIDES).filter((k) => marked.includes(`${o.id}:${k}`));
