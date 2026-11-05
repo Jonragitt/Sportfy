@@ -122,3 +122,4 @@ body { padding-bottom: 110px; }
 .check input { width: auto; accent-color: var(--accent); }
 #bio.off { opacity: .4; pointer-events: none; }
 input.vacio { border-color: var(--mal); }
+.perfil-link { float: right; font-weight: 600; color: var(--accent); }

@@ -1,5 +1,6 @@
 import { SECTIONS, ALL_ITEMS, MAX_POINTS, computeScore } from "./tests.js";
 import { saveScore, getScores, scoreLabel } from "../../shared/scores.js";
+import { marcarPendiente, quitarPendiente, montarTick } from "../../shared/perfil.js";
 
 const LEVEL_TAG = ["Marcada", "Leve", "Correcto"];
 const form = document.getElementById("form");
@@ -27,6 +28,7 @@ function render() {
         const input = el("input", { type: "radio", name: item.id, value: String(value) });
         input.addEventListener("change", () => {
           answers[item.id] = value;
+          calcBtn.classList.remove("oculto");
           update();
         });
         options.append(
@@ -58,8 +60,12 @@ function intentarResultado() {
 
 function showResult() {
   const score = computeScore(answers);
-  saveScore("postural", score, { answers });
-  guardarHistorial(score);
+  marcarPendiente("postural");
+  montarTick(document.getElementById("tick"), calcBtn, () => {
+    saveScore("postural", score, { answers: { ...answers } });
+    guardarHistorial(score);
+    quitarPendiente("postural");
+  }, "../../perfil.html");
   const shown = score.toLocaleString("es-ES", { maximumFractionDigits: 1 });
   document.getElementById("scoreValue").textContent = `${shown} / ${MAX_POINTS}`;
   document.getElementById("scoreLabel").textContent = scoreLabel(score, MAX_POINTS);

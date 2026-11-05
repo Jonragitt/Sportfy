@@ -1,4 +1,5 @@
 import { evaluar, guardarNotaGlobal } from './antropometria.js';
+import { marcarPendiente, quitarPendiente, montarTick } from '../../shared/perfil.js';
 
 const HIST_KEY = 'sportfy.antropometria.historial';
 const $ = (s) => document.querySelector(s);
@@ -120,7 +121,7 @@ function pintarHistorial() {
 }
 
 
-form.addEventListener('input', (e) => { e.target.classList?.remove('vacio'); actualizarBoton(); $('#error').hidden = true; });
+form.addEventListener('input', (e) => { e.target.classList?.remove('vacio'); $('#ver').classList.remove('oculto'); actualizarBoton(); $('#error').hidden = true; });
 form.addEventListener('change', actualizarBoton);
 
 form.addEventListener('submit', (e) => {
@@ -140,13 +141,16 @@ form.addEventListener('submit', (e) => {
     err.hidden = true;
     pintarResultado(r);
     ultimo = r;
+    marcarPendiente('antropometria');
+    montarTick($('#tick'), $('#ver'), confirmar, '../../perfil.html');
   } catch (ex) {
     err.textContent = ex.message;
     err.hidden = false;
   }
 });
 
-$('#guardar').addEventListener('click', () => {
+// Solo el tick verde guarda los resultados en el perfil (historial + nota global).
+function confirmar() {
   if (!ultimo) return;
   const h = leer(HIST_KEY, []);
   h.push(ultimo);
@@ -156,11 +160,9 @@ $('#guardar').addEventListener('click', () => {
     completa: ultimo.completa,
     puntos: Object.fromEntries(ultimo.metricas.map((m) => [m.id, m.puntos])),
   });
+  quitarPendiente('antropometria');
   pintarHistorial();
-actualizarBoton();
-  $('#guardar').textContent = 'Guardado ✓';
-  setTimeout(() => { $('#guardar').textContent = 'Guardar en mi historial'; }, 1500);
-});
+}
 
 $('#historial tbody').addEventListener('click', (e) => {
   const b = e.target.closest('.borrar');
