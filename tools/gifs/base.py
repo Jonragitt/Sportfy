@@ -76,6 +76,35 @@ class Canvas:
     def blob(self, pts, fill=FIG):
         self.d.polygon([self.T(*p) for p in catmull(pts)], fill=fill)
 
+    def shape(self, pts, fill=FIG, edge=False):
+        """Contorno suave (Catmull-Rom)."""
+        q = [self.T(*p) for p in catmull(pts, steps=8)]
+        if getattr(self, "_grp", None) is not None:
+            self._grp.polygon(q, fill=255)
+        else:
+            self.d.polygon(q, fill=fill)
+
+    def begin_group(self):
+        """Las formas siguientes se unen en una sola pieza (un brazo, una pierna)."""
+        self._mask = Image.new("L", self.im.size, 0)
+        self._grp = ImageDraw.Draw(self._mask)
+
+    def end_group(self, edge=True):
+        """Pinta la pieza y, con edge, un filo claro en su contorno para separarla del cuerpo."""
+        from PIL import ImageFilter
+        from anat import EDGE
+        m = self._mask
+        self._grp = None
+        self.im.paste(FIG, mask=m)
+        if edge:
+            inner = m.filter(ImageFilter.MinFilter(2 * S - 1 if S > 1 else 3))
+            import numpy as np
+            e = (np.asarray(m) > 127) & (np.asarray(inner) < 128)
+            a = np.asarray(self.im).copy()
+            a[e] = EDGE
+            self.im = Image.fromarray(a)
+            self.d = ImageDraw.Draw(self.im)
+
     def poly(self, pts, fill=FIG):
         self.d.polygon([self.T(*p) for p in pts], fill=fill)
 
