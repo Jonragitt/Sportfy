@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Evaluación postural · Forty5</title>
   <link rel="stylesheet" href="../../shared/styles.css">
+  <link rel="stylesheet" href="../../shared/resultados.css">
 </head>
 <body>
   <main class="wrap">
@@ -38,12 +39,10 @@
     </section>
   </main>
 
-  <div class="sticky">
-    <div class="wrap">
-      <span class="progress" id="progress">0 / 16 respondidas</span>
-      <button class="btn" id="calc" type="button" disabled>Calcular nota</button>
-    </div>
-  </div>
+  <button class="resultados" id="calc" type="button" aria-disabled="true">
+    <span class="r-tit">Resultados</span>
+    <span class="r-sub" id="progress">0 / 16 respondidas</span>
+  </button>
 
   <script type="module" src="./postural.js"></script>
 </body>

@@ -40,8 +40,20 @@ function render() {
 
 function update() {
   const n = Object.keys(answers).length;
-  progress.textContent = `${n} / ${ALL_ITEMS.length} respondidas`;
-  calcBtn.disabled = n < ALL_ITEMS.length;
+  const listo = n === ALL_ITEMS.length;
+  progress.textContent = listo ? "Toca para ver tu evaluación" : `${ALL_ITEMS.length - n === 1 ? "Falta" : "Faltan"} ${ALL_ITEMS.length - n} de ${ALL_ITEMS.length} pruebas`;
+  calcBtn.classList.toggle("listo", listo);
+  calcBtn.setAttribute("aria-disabled", String(!listo));
+}
+
+// Todas las pruebas son obligatorias: si falta alguna, se lleva al usuario a la primera.
+function intentarResultado() {
+  const falta = ALL_ITEMS.find((i) => answers[i.id] == null);
+  if (!falta) return showResult();
+  const card = form.querySelector(`input[name="${falta.id}"]`).closest(".card");
+  card.classList.add("falta");
+  card.scrollIntoView({ behavior: "smooth", block: "center" });
+  setTimeout(() => card.classList.remove("falta"), 1600);
 }
 
 function showResult() {
@@ -101,5 +113,6 @@ function restore() {
 }
 
 render();
+update();
 restore();
-calcBtn.addEventListener("click", showResult);
+calcBtn.addEventListener("click", intentarResultado);

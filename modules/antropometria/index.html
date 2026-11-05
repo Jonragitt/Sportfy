@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Evaluación antropométrica · Forty5</title>
   <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="../../shared/resultados.css" />
 </head>
 <body>
   <header class="top">
@@ -31,8 +32,10 @@
       </fieldset>
 
       <fieldset>
-        <legend>Báscula de bioimpedancia</legend>
-        <div class="grid">
+        <legend>Báscula de bioimpedancia <span class="req">obligatorio</span></legend>
+        <label class="check"><input type="checkbox" name="soloKg" id="soloKg" /> Mi báscula solo mide el peso (kg)</label>
+        <p class="nota" id="soloKg-nota" hidden>Sin báscula de bioimpedancia no se puede calcular la nota sobre 15: verás tu IMC y tu peso quedará en el historial.</p>
+        <div class="grid" id="bio">
           <label>% graso<input name="grasa" type="number" inputmode="decimal" step="0.1" min="2" max="70" /></label>
           <label>% agua<input name="agua" type="number" inputmode="decimal" step="0.1" min="20" max="80" /></label>
           <label>% muscular<input name="muscular" type="number" inputmode="decimal" step="0.1" min="10" max="95" /></label>
@@ -53,7 +56,10 @@
       </fieldset>
 
       <p id="error" class="error" role="alert" hidden></p>
-      <button type="submit">Calcular nota</button>
+      <button type="submit" class="resultados" id="ver" aria-disabled="true">
+        <span class="r-tit">Resultados</span>
+        <span class="r-sub" id="faltan">Rellena todos los datos</span>
+      </button>
     </form>
 
     <section id="resultado" hidden aria-live="polite">

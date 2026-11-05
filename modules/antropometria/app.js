@@ -22,21 +22,59 @@ const COLOR_PUNTOS = ['mal', 'medio', 'bien', 'ok'];
 
 const CAMPOS = ['edad', 'altura', 'peso', 'grasa', 'agua', 'muscular', 'metabolismo', 'edadMetabolica', 'visceral'];
 
+const BASICOS = ['edad', 'altura', 'peso'];
+const BIO = ['grasa', 'agua', 'muscular', 'metabolismo', 'edadMetabolica', 'visceral'];
+const soloKg = () => $('#soloKg').checked;
+// Campos obligatorios: todos, salvo los de bioimpedancia si la báscula solo mide kg.
+const obligatorios = () => (soloKg() ? BASICOS : [...BASICOS, ...BIO]);
+
 function datosFormulario() {
   const f = new FormData(form);
   const d = { sexo: f.get('sexo') };
-  CAMPOS.forEach((c) => { d[c] = num(f.get(c)); });
+  CAMPOS.forEach((c) => { d[c] = soloKg() && BIO.includes(c) ? undefined : num(f.get(c)); });
   return d;
 }
 
+function pendientes() {
+  return obligatorios().filter((c) => {
+    const v = num(form.elements[c].value);
+    return !(typeof v === 'number' && Number.isFinite(v) && v > 0);
+  });
+}
+
+// Botón "Resultados": cristal gris mientras falten datos, verde y grande cuando está todo.
+function actualizarBoton() {
+  const faltan = pendientes();
+  const listo = faltan.length === 0;
+  const ver = $('#ver');
+  ver.classList.toggle('listo', listo);
+  ver.setAttribute('aria-disabled', String(!listo));
+  $('#faltan').textContent = listo
+    ? 'Toca para ver tu evaluación'
+    : `${faltan.length === 1 ? 'Falta' : 'Faltan'} ${faltan.length} de ${obligatorios().length} datos`;
+  $('#bio').classList.toggle('off', soloKg());
+  BIO.forEach((c) => { form.elements[c].disabled = soloKg(); });
+  $('#soloKg-nota').hidden = !soloKg();
+  return listo;
+}
+
 function pintarResultado(r) {
-  if (r.nota === null) throw new Error('Introduce al menos uno de los valores de la báscula (% graso, % agua, % muscular, edad metabólica o grasa visceral).');
   $('#resultado').hidden = false;
+  const conNota = r.nota !== null;
+  $('.media').style.display = conNota ? '' : 'none';
+  $('#metricas').style.display = conNota ? '' : 'none';
+  $('#resultado > .nota').textContent = conNota
+    ? '5 pruebas (% graso, % agua, % muscular, edad metabólica y grasa visceral) × 3 puntos = 15 puntos. Cuenta para la nota global sobre 25 junto a la evaluación postural (/10).'
+    : 'Tu báscula solo mide el peso, así que no hay nota sobre 15. Con una báscula de bioimpedancia podrás completar la evaluación.';
+  if (!conNota) {
+    $('#media-aviso').hidden = true;
+    $('#metricas').innerHTML = '';
+  }
   const media = $('#media-num');
-  media.innerHTML = `${fmt(r.nota)}<small>/${r.max}</small>`;
-  media.className = `media-num ${color(r.nota, r.max)}`;
+  if (conNota) media.innerHTML = `${fmt(r.nota)}<small>/${r.max}</small>`;
+  if (conNota) media.className = `media-num ${color(r.nota, r.max)}`;
   $('#media-cal').textContent = r.calificacion;
-  $('#media-aviso').hidden = r.completa;
+  if (conNota) $('#media-aviso').hidden = r.completa;
   $('#media-aviso').textContent = r.completa ? '' :
     `Evaluación incompleta: faltan ${r.faltan} de 5 pruebas. La nota se ha escalado sobre las ${r.metricas.length} medidas (${r.puntos}/${r.posibles} puntos).`;
   $('#informativos').innerHTML = r.informativos.map((i) => `
@@ -82,9 +120,21 @@ function pintarHistorial() {
 }
 
 
+form.addEventListener('input', (e) => { e.target.classList?.remove('vacio'); actualizarBoton(); $('#error').hidden = true; });
+form.addEventListener('change', actualizarBoton);
+
 form.addEventListener('submit', (e) => {
   e.preventDefault();
   const err = $('#error');
+  form.querySelectorAll('input.vacio').forEach((i) => i.classList.remove('vacio'));
+  if (!actualizarBoton()) {
+    const faltan = pendientes();
+    faltan.forEach((c) => form.elements[c].classList.add('vacio'));
+    err.textContent = 'Rellena todos los datos para ver tus resultados. Si tu báscula solo mide el peso, marca la casilla.';
+    err.hidden = false;
+    form.elements[faltan[0]].focus();
+    return;
+  }
   try {
     const r = evaluar(datosFormulario());
     err.hidden = true;
@@ -101,12 +151,13 @@ $('#guardar').addEventListener('click', () => {
   const h = leer(HIST_KEY, []);
   h.push(ultimo);
   escribir(HIST_KEY, h);
-  guardarNotaGlobal(ultimo, localStorage, {
+  if (ultimo.nota !== null) guardarNotaGlobal(ultimo, localStorage, {
     calificacion: ultimo.calificacion,
     completa: ultimo.completa,
     puntos: Object.fromEntries(ultimo.metricas.map((m) => [m.id, m.puntos])),
   });
   pintarHistorial();
+actualizarBoton();
   $('#guardar').textContent = 'Guardado ✓';
   setTimeout(() => { $('#guardar').textContent = 'Guardar en mi historial'; }, 1500);
 });
@@ -118,6 +169,8 @@ $('#historial tbody').addEventListener('click', (e) => {
   h.splice(Number(b.dataset.i), 1);
   escribir(HIST_KEY, h);
   pintarHistorial();
+actualizarBoton();
 });
 
 pintarHistorial();
+actualizarBoton();
