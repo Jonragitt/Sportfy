@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Evaluación antropométrica · Sportfy</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="top">
+    <h1>Evaluación antropométrica</h1>
+    <p>Mide, calcula y puntúa tu composición corporal. Rellena lo que tengas: cuantos más datos, más completa será la nota.</p>
+  </header>
+
+  <main>
+    <form id="form" novalidate>
+      <fieldset>
+        <legend>Datos básicos <span class="req">obligatorio</span></legend>
+        <div class="grid">
+          <label>Sexo
+            <select name="sexo" required>
+              <option value="hombre">Hombre</option>
+              <option value="mujer">Mujer</option>
+            </select>
+          </label>
+          <label>Edad (años)<input name="edad" type="number" inputmode="numeric" min="14" max="99" required /></label>
+          <label>Peso (kg)<input name="peso" type="number" inputmode="decimal" step="0.1" min="30" max="300" required /></label>
+          <label>Altura (cm)<input name="altura" type="number" inputmode="decimal" step="0.1" min="120" max="230" required /></label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Perímetros con cinta métrica</legend>
+        <div class="grid">
+          <label>Cintura (cm)<input name="cintura" type="number" inputmode="decimal" step="0.1" /></label>
+          <label>Cadera (cm)<input name="cadera" type="number" inputmode="decimal" step="0.1" /></label>
+          <label>Cuello (cm)<input name="cuello" type="number" inputmode="decimal" step="0.1" /></label>
+        </div>
+        <details>
+          <summary>Cómo medir</summary>
+          <ul>
+            <li><b>Cintura:</b> de pie, a la altura del ombligo (punto medio entre la última costilla y la cresta ilíaca), al final de una espiración normal.</li>
+            <li><b>Cadera:</b> en la zona más ancha de los glúteos, pies juntos.</li>
+            <li><b>Cuello:</b> justo debajo de la nuez, cinta ligeramente inclinada hacia abajo.</li>
+            <li>Cinta horizontal, ajustada sin apretar la piel. Mide 2 veces y usa la media.</li>
+          </ul>
+        </details>
+      </fieldset>
+
+      <fieldset>
+        <legend>Pliegues cutáneos (opcional, con plicómetro)</legend>
+        <div class="grid">
+          <label><span data-pliegue="0">Pecho</span> (mm)<input name="p0" type="number" inputmode="decimal" step="0.5" /></label>
+          <label><span data-pliegue="1">Abdomen</span> (mm)<input name="p1" type="number" inputmode="decimal" step="0.5" /></label>
+          <label><span data-pliegue="2">Muslo</span> (mm)<input name="p2" type="number" inputmode="decimal" step="0.5" /></label>
+        </div>
+        <details>
+          <summary>Cómo medir</summary>
+          <ul id="guia-pliegues"></ul>
+          <p class="nota">Lado derecho del cuerpo, pellizca piel y grasa (no músculo), coloca el plicómetro a 1 cm de los dedos y lee a los 2 segundos. Toma 2–3 medidas y usa la media.</p>
+        </details>
+      </fieldset>
+
+      <fieldset>
+        <legend>Báscula de bioimpedancia (opcional)</legend>
+        <div class="grid">
+          <label>Nivel de grasa visceral<input name="nivelVisceral" type="number" inputmode="numeric" min="1" max="59" /></label>
+        </div>
+        <p class="nota">Si no tienes báscula, el riesgo visceral se estima con el perímetro de cintura.</p>
+      </fieldset>
+
+      <p id="error" class="error" role="alert" hidden></p>
+      <button type="submit">Calcular nota</button>
+    </form>
+
+    <section id="resultado" hidden aria-live="polite">
+      <div class="media">
+        <div class="media-num" id="media-num">–</div>
+        <div>
+          <div class="media-label">Nota media antropométrica</div>
+          <div class="media-cal" id="media-cal"></div>
+        </div>
+      </div>
+      <ul id="metricas" class="metricas"></ul>
+      <button type="button" id="guardar">Guardar en mi historial</button>
+    </section>
+
+    <section id="historial-sec">
+      <h2>Historial</h2>
+      <p id="historial-vacio" class="nota">Todavía no has guardado evaluaciones.</p>
+      <table id="historial" hidden>
+        <thead><tr><th>Fecha</th><th>Peso</th><th>Cintura</th><th>% grasa</th><th>Nota</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </section>
+  </main>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
