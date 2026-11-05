@@ -1,5 +1,5 @@
-import { SECTIONS, SIDES, ALL_ZONES, MAX_POINTS, computeScore, selectedOptions, optionLabel, alteredZoneCount } from "./tests.js?v=202611051800";
-import { saveScore, getScores, scoreLabel } from "../../shared/scores.js?v=202611051800";
+import { SECTIONS, SIDES, ALL_ZONES, MAX_POINTS, computeScore, selectedOptions, optionLabel, alteredZoneCount } from "./tests.js?v=202611051830";
+import { saveScore, getScores, scoreLabel } from "../../shared/scores.js?v=202611051830";
 import { marcarPendiente, quitarPendiente, montarTick } from "../../shared/perfil.js";
 
 const form = document.getElementById("form");
@@ -40,7 +40,7 @@ function circle(zone, value, label) {
 }
 
 // Botón "Ver ejemplo": despliega el GIF de la alteración (en bilaterales, izquierda y derecha).
-const GIF_V = "202611051800";
+const GIF_V = "202611051830";
 function demo(opt, sides) {
   const panel = el("div", { class: "demo hidden" });
   const btn = el("button", { type: "button", class: "ver-demo", "aria-expanded": "false" }, "▶ Ver ejemplo");
