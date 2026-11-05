@@ -13,11 +13,14 @@ test("una zona con dos opciones cuenta una sola vez", () => {
   const one = computeScore({ hombros: ["hombrosAntepulsion"] });
   const two = computeScore({ hombros: ["hombrosAntepulsion", "hombrosRetropulsion"] });
   assert.equal(one, two);
-  assert.equal(one, 8);
+  assert.equal(one, 9);
 });
 
-test("plano sagital tiene las 5 zonas pedidas", () => {
-  assert.deepEqual(ALL_ZONES.map((z) => z.id), ["cabeza", "hombros", "cadera", "rodilla", "pie"]);
+test("planos sagital y frontal tienen las zonas pedidas", () => {
+  assert.deepEqual(ALL_ZONES.map((z) => z.id), [
+    "cabeza", "hombros", "cadera", "rodilla", "pie",
+    "acromion", "escapulas", "crestas", "rodillaFrontal", "tobillo",
+  ]);
 });
 
 test("cada opción tiene ejercicios y los ids son únicos", () => {

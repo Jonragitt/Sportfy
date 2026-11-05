@@ -96,6 +96,97 @@ export const SECTIONS = [
       },
     ],
   },
+  {
+    id: "frontal",
+    title: "Plano frontal",
+    intro:
+      "Vista anterior y posterior, de pie, descalzo, pies a la anchura de la cadera y brazos relajados. Compara la altura y la alineación de ambos lados del cuerpo.",
+    zones: [
+      {
+        id: "acromion",
+        name: "Hombros (acromion)",
+        how: "Coloca los dedos en la punta de ambos hombros y compara su altura.",
+        options: [
+          {
+            id: "acromionAsimetrico",
+            name: "Acromios asimétricos",
+            hint: "Un hombro queda más alto que el otro.",
+            fix: ["Estiramiento de trapecio superior del lado alto 3×30 s", "Paseo del granjero con una mano 3×30 m por lado", "Remo unilateral con mancuerna 3×12 por lado"],
+          },
+        ],
+      },
+      {
+        id: "escapulas",
+        name: "Escápulas",
+        how: "De espaldas, el borde interno de cada escápula debe quedar a unos 5-7 cm de la columna.",
+        options: [
+          {
+            id: "escapulasAbduccion",
+            name: "Abducción",
+            hint: "Escápulas separadas de la columna, desplazadas hacia fuera.",
+            fix: ["Remo con banda juntando escápulas 3×15", "Y-T-W en banco inclinado 2×10", "Estiramiento de pectoral 3×30 s"],
+          },
+          {
+            id: "escapulasAduccion",
+            name: "Aducción",
+            hint: "Escápulas muy juntas, pegadas a la columna.",
+            fix: ["Flexiones escapulares (push-up plus) 3×12", "Estiramiento de romboides abrazándote 3×30 s", "Press de pecho con mancuerna 3×12"],
+          },
+        ],
+      },
+      {
+        id: "crestas",
+        name: "Pelvis (crestas ilíacas)",
+        how: "Coloca las manos sobre la parte alta de la cadera y compara la altura de ambas crestas ilíacas.",
+        options: [
+          {
+            id: "crestasAsimetricas",
+            name: "Crestas ilíacas asimétricas",
+            hint: "Un lado de la cadera queda más alto que el otro.",
+            fix: ["Plancha lateral 3×20 s por lado", "Puente de glúteo a una pierna 3×10 por lado", "Estiramiento de cuadrado lumbar del lado alto 3×30 s"],
+          },
+        ],
+      },
+      {
+        id: "rodillaFrontal",
+        name: "Rodillas",
+        how: "De frente, con los pies juntos: deben tocarse a la vez rodillas y tobillos.",
+        options: [
+          {
+            id: "genuValgo",
+            name: "Valgo",
+            hint: "Las rodillas se juntan hacia dentro y los tobillos quedan separados.",
+            fix: ["Monster walk con banda 3×15 pasos", "Sentadilla con banda en rodillas 3×12", "Abducción de cadera tumbado 3×15"],
+          },
+          {
+            id: "genuVaro",
+            name: "Varo",
+            hint: "Los tobillos se tocan pero las rodillas quedan separadas.",
+            fix: ["Estiramiento de aductores (mariposa) 3×30 s", "Sentadilla sumo controlada 3×12", "Aducción de cadera con banda 3×15"],
+          },
+        ],
+      },
+      {
+        id: "tobillo",
+        name: "Tobillos",
+        how: "De espaldas, el tendón de Aquiles debe quedar vertical respecto al talón.",
+        options: [
+          {
+            id: "tobilloEversion",
+            name: "Eversión",
+            hint: "El talón se inclina hacia fuera y el tobillo cae hacia dentro.",
+            fix: ["Short foot (pie corto) 3×10 s", "Inversión con banda 3×15", "Elevaciones de talón 3×15"],
+          },
+          {
+            id: "tobilloInversion",
+            name: "Inversión",
+            hint: "El talón se inclina hacia dentro y el apoyo va al borde externo del pie.",
+            fix: ["Eversión con banda 3×15", "Equilibrio a una pierna 3×30 s por lado", "Movilidad de tobillo contra la pared 2×10"],
+          },
+        ],
+      },
+    ],
+  },
 ];
 
 export const ALL_ZONES = SECTIONS.flatMap((s) => s.zones);
