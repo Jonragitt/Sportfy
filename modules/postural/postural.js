@@ -1,4 +1,4 @@
-import { SECTIONS, ALL_ITEMS, computeScore } from "./tests.js";
+import { SECTIONS, ALL_ITEMS, MAX_POINTS, computeScore } from "./tests.js";
 import { saveScore, getScores, scoreLabel } from "../../shared/scores.js";
 
 const LEVEL_TAG = ["Marcada", "Leve", "Correcto"];
@@ -47,10 +47,10 @@ function update() {
 function showResult() {
   const score = computeScore(answers);
   saveScore("postural", score, { answers });
-  const rounded = Math.round(score);
-  document.getElementById("scoreValue").textContent = `${rounded} / 100`;
-  document.getElementById("scoreLabel").textContent = scoreLabel(rounded);
-  document.getElementById("scoreBar").style.width = `${rounded}%`;
+  const shown = score.toLocaleString("es-ES", { maximumFractionDigits: 1 });
+  document.getElementById("scoreValue").textContent = `${shown} / ${MAX_POINTS}`;
+  document.getElementById("scoreLabel").textContent = scoreLabel(score, MAX_POINTS);
+  document.getElementById("scoreBar").style.width = `${(score / MAX_POINTS) * 100}%`;
 
   const fixes = document.getElementById("fixes");
   fixes.replaceChildren();

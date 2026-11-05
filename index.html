@@ -9,47 +9,63 @@
 <body>
   <main class="wrap">
     <h1>Sportfy</h1>
-    <p class="lead">Completa las evaluaciones para conocer tu punto de partida. Tu nota media resume tu forma física actual.</p>
+    <p class="lead">Completa las evaluaciones para conocer tu punto de partida. Tu nota total sobre 25 resume tu forma física actual.</p>
 
     <div class="card">
-      <div class="note">Nota media</div>
-      <div class="score" id="avg">–</div>
-      <div class="lead" id="avgLabel"></div>
-      <div class="bar"><span id="avgBar" style="width:0"></span></div>
+      <div class="note">Nota total</div>
+      <div class="score" id="total">–</div>
+      <div class="lead" id="totalLabel"></div>
+      <div class="bar"><span id="totalBar" style="width:0"></span></div>
+      <div class="note" id="totalNote"></div>
     </div>
 
     <h2>Evaluaciones</h2>
     <div class="grid" id="evals"></div>
+
+    <h2>Baremo de la nota total</h2>
+    <div class="card">
+      <table class="baremo">
+        <tr><td><span class="tag l2">Excelente</span></td><td>22,5 – 25</td><td>Forma física y postura de alto nivel.</td></tr>
+        <tr><td><span class="tag l2">Bueno</span></td><td>17,5 – 22,4</td><td>Buena base: toca afinar los puntos débiles.</td></tr>
+        <tr><td><span class="tag l1">Aceptable</span></td><td>12,5 – 17,4</td><td>Margen de mejora claro en composición o postura.</td></tr>
+        <tr><td><span class="tag l0">Deficiente</span></td><td>0 – 12,4</td><td>Punto de partida: el plan se centra en lo básico.</td></tr>
+      </table>
+      <p class="note">Antropometría puntúa sobre 15 (composición corporal y grasa visceral) y postural sobre 10.</p>
+    </div>
   </main>
 
   <script type="module">
-    import { EVALUATIONS, getScores, averageScore, scoreLabel } from "./shared/scores.js";
+    import { EVALUATIONS, getScores, pointsFor, totalScore, scoreLabel } from "./shared/scores.js";
 
     const LINKS = {
       antropometria: "modules/antropometria/index.html",
       postural: "modules/postural/index.html",
     };
+    const fmt = (n) => n.toLocaleString("es-ES", { maximumFractionDigits: 1 });
     const scores = getScores();
-    const avg = averageScore();
-    document.getElementById("avg").textContent = avg == null ? "–" : `${avg} / 100`;
-    document.getElementById("avgLabel").textContent = scoreLabel(avg);
-    document.getElementById("avgBar").style.width = `${avg ?? 0}%`;
+    const total = totalScore(scores);
+    const n = Object.keys(EVALUATIONS).length;
+
+    document.getElementById("total").textContent = total.done ? `${fmt(total.points)} / ${total.max}` : "–";
+    document.getElementById("totalLabel").textContent = total.complete ? scoreLabel(total.points, total.max) : "";
+    document.getElementById("totalBar").style.width = `${(total.points / total.max) * 100}%`;
+    document.getElementById("totalNote").textContent = total.complete
+      ? ""
+      : `Completadas ${total.done} de ${n} evaluaciones. Completa todas para obtener tu nota final.`;
 
     const grid = document.getElementById("evals");
-    for (const [key, name] of Object.entries(EVALUATIONS)) {
-      const entry = scores[key];
-      const score = typeof entry === "number" ? entry : entry?.score;
-      const card = document.createElement(LINKS[key] ? "a" : "div");
+    for (const [key, { name, max }] of Object.entries(EVALUATIONS)) {
+      const points = pointsFor(key, scores[key]);
+      const card = document.createElement("a");
       card.className = "card";
       card.style.textDecoration = "none";
       card.style.color = "inherit";
-      if (LINKS[key]) card.href = LINKS[key];
+      card.href = LINKS[key];
       card.innerHTML = `<h3></h3><div class="score" style="font-size:2rem"></div><div class="note"></div>`;
       card.querySelector("h3").textContent = name;
-      card.querySelector(".score").textContent = score == null ? "–" : score;
-      card.querySelector(".note").textContent = LINKS[key]
-        ? (score == null ? "Pendiente · Empezar" : `${scoreLabel(score)} · Repetir`)
-        : "Próximamente";
+      card.querySelector(".score").textContent = points == null ? `– / ${max}` : `${fmt(points)} / ${max}`;
+      card.querySelector(".note").textContent =
+        points == null ? "Pendiente · Empezar" : `${scoreLabel(points, max)} · Repetir`;
       grid.append(card);
     }
   </script>

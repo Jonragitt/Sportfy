@@ -157,7 +157,9 @@ export const SECTIONS = [
 
 export const ALL_ITEMS = SECTIONS.flatMap((s) => s.items);
 
-// Nota 0-100 a partir de las respuestas {itemId: 0|1|2}.
+export const MAX_POINTS = 10;
+
+// Nota /10 (un decimal) a partir de las respuestas {itemId: 0|1|2}.
 export function computeScore(answers) {
   let total = 0;
   let max = 0;
@@ -167,5 +169,5 @@ export function computeScore(answers) {
     total += v * item.weight;
     max += 2 * item.weight;
   }
-  return max ? (total / max) * 100 : null;
+  return max ? Math.round((total / max) * MAX_POINTS * 10) / 10 : null;
 }
