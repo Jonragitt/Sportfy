@@ -6,36 +6,11 @@ const round = (n, d = 1) => Math.round(n * 10 ** d) / 10 ** d;
 const es = (n) => String(n).replace('.', ',');
 const isNum = (v) => typeof v === 'number' && Number.isFinite(v) && v > 0;
 
-/**
- * Nota de 0 a 10: 10 dentro del rango ideal [idealMin, idealMax]. Al salir del
- * rango la nota cae a 8 como máximo (penalización por estar fuera de lo saludable)
- * y baja en línea recta hasta 0 en worstLow (por debajo) o worstHigh (por encima).
- */
-const FUERA_IDEAL = 8;
-export function scoreRange(value, { idealMin, idealMax, worstLow, worstHigh }) {
-  if (!Number.isFinite(value)) return null;
-  if (value >= idealMin && value <= idealMax) return 10;
-  if (value < idealMin) {
-    if (worstLow === undefined) return 10;
-    return round(Math.max(0, (FUERA_IDEAL * (value - worstLow)) / (idealMin - worstLow)));
-  }
-  return round(Math.max(0, (FUERA_IDEAL * (worstHigh - value)) / (worstHigh - idealMax)));
-}
-
 // ---------- Métricas ----------
 
 export function imc(pesoKg, alturaCm) {
   const m = alturaCm / 100;
   return round(pesoKg / (m * m), 1);
-}
-
-export function clasificarImc(v) {
-  if (v < 18.5) return 'Bajo peso';
-  if (v < 25) return 'Normal';
-  if (v < 30) return 'Sobrepeso';
-  if (v < 35) return 'Obesidad grado I';
-  if (v < 40) return 'Obesidad grado II';
-  return 'Obesidad grado III';
 }
 
 export const cinturaAltura = (cinturaCm, alturaCm) => round(cinturaCm / alturaCm, 2);
@@ -64,51 +39,111 @@ export function grasaMarina(sexo, alturaCm, cuelloCm, cinturaCm, caderaCm) {
   return round(v, 1);
 }
 
-/** Riesgo de grasa visceral según perímetro de cintura (criterios OMS / IDF). */
-export function riesgoVisceral(sexo, cinturaCm) {
-  const [moderado, alto] = sexo === 'hombre' ? [94, 102] : [80, 88];
-  if (cinturaCm >= alto) return 'Alto';
-  if (cinturaCm >= moderado) return 'Moderado';
-  return 'Bajo';
-}
+// ---------- Baremos de puntuación (estilo profesional) ----------
+//
+// Cada métrica se clasifica por tramos y suma de 0 a 3 puntos:
+//   3 = Óptimo · 2 = Aceptable · 1 = Riesgo · 0 = Riesgo alto
+// 5 métricas × 3 puntos = nota antropométrica sobre 15.
+// Cada tramo: [hasta (exclusivo), puntos, categoría]. El último tramo usa Infinity.
 
-export function clasificarNivelVisceral(nivel) {
-  // Escala habitual de básculas de bioimpedancia (1–59): 1–12 saludable.
-  if (nivel <= 12) return 'Saludable';
-  if (nivel <= 15) return 'Elevado';
-  return 'Excesivo';
-}
-
-// ---------- Baremos de puntuación ----------
+export const PUNTOS_MAX_METRICA = 3;
+export const NOTA_MAX = 15;
 
 export const BAREMOS = {
-  imc: { idealMin: 18.5, idealMax: 24.9, worstLow: 15, worstHigh: 40 },
-  cinturaAltura: { idealMin: 0.4, idealMax: 0.5, worstLow: 0.35, worstHigh: 0.65 },
+  // OMS. Por debajo de 18,5 también penaliza (delgadez).
+  imc: {
+    fuente: 'OMS',
+    tramos: [
+      [16, 0, 'Delgadez severa'],
+      [17, 1, 'Delgadez moderada'],
+      [18.5, 2, 'Delgadez leve'],
+      [25, 3, 'Normopeso'],
+      [27.5, 2, 'Sobrepeso grado I'],
+      [30, 1, 'Sobrepeso grado II'],
+      [Infinity, 0, 'Obesidad'],
+    ],
+  },
+  // Ashwell: "mantén tu cintura por debajo de la mitad de tu altura".
+  cinturaAltura: {
+    fuente: 'Ashwell',
+    tramos: [
+      [0.4, 2, 'Muy delgado'],
+      [0.5, 3, 'Saludable'],
+      [0.55, 2, 'Riesgo ligero'],
+      [0.6, 1, 'Riesgo aumentado'],
+      [Infinity, 0, 'Riesgo alto'],
+    ],
+  },
+  // OMS: riesgo cardiometabólico desde 0,90 (H) / 0,85 (M).
   cinturaCadera: {
-    hombre: { idealMin: 0, idealMax: 0.9, worstHigh: 1.1 },
-    mujer: { idealMin: 0, idealMax: 0.8, worstHigh: 1.0 },
+    fuente: 'OMS',
+    hombre: [[0.9, 3, 'Saludable'], [0.95, 2, 'Riesgo ligero'], [1.0, 1, 'Riesgo aumentado'], [Infinity, 0, 'Riesgo alto']],
+    mujer: [[0.8, 3, 'Saludable'], [0.85, 2, 'Riesgo ligero'], [0.9, 1, 'Riesgo aumentado'], [Infinity, 0, 'Riesgo alto']],
   },
+  // American Council on Exercise (ACE), con "Aceptable" partido en dos.
   grasa: {
-    hombre: { idealMin: 10, idealMax: 20, worstLow: 4, worstHigh: 35 },
-    mujer: { idealMin: 18, idealMax: 28, worstLow: 12, worstHigh: 45 },
+    fuente: 'ACE',
+    hombre: [
+      [6, 1, 'Grasa esencial (demasiado baja)'],
+      [14, 3, 'Atleta'],
+      [18, 3, 'Fitness'],
+      [22, 2, 'Aceptable'],
+      [25, 1, 'Aceptable alto'],
+      [Infinity, 0, 'Obesidad'],
+    ],
+    mujer: [
+      [14, 1, 'Grasa esencial (demasiado baja)'],
+      [21, 3, 'Atleta'],
+      [25, 3, 'Fitness'],
+      [29, 2, 'Aceptable'],
+      [32, 1, 'Aceptable alto'],
+      [Infinity, 0, 'Obesidad'],
+    ],
   },
+  // Escala de básculas de bioimpedancia (1–59).
+  visceralNivel: {
+    fuente: 'Bioimpedancia',
+    tramos: [[10, 3, 'Saludable'], [13, 2, 'Límite'], [16, 1, 'Elevado'], [Infinity, 0, 'Excesivo']],
+  },
+  // OMS / IDF por perímetro de cintura (cm).
   visceralCintura: {
-    hombre: { idealMin: 0, idealMax: 94, worstHigh: 120 },
-    mujer: { idealMin: 0, idealMax: 80, worstHigh: 108 },
+    fuente: 'OMS / IDF',
+    hombre: [[94, 3, 'Riesgo bajo'], [102, 2, 'Riesgo moderado'], [110, 1, 'Riesgo alto'], [Infinity, 0, 'Riesgo muy alto']],
+    mujer: [[80, 3, 'Riesgo bajo'], [88, 2, 'Riesgo moderado'], [96, 1, 'Riesgo alto'], [Infinity, 0, 'Riesgo muy alto']],
   },
-  visceralNivel: { idealMin: 1, idealMax: 12, worstHigh: 25 },
 };
 
-export function calificacion(nota) {
-  if (nota >= 9) return 'Excelente';
-  if (nota >= 7) return 'Bueno';
-  if (nota >= 5) return 'Mejorable';
-  return 'Prioridad de mejora';
+/** Devuelve { puntos, categoria } del tramo donde cae el valor. */
+export function puntuarTramos(valor, tramos) {
+  const [, puntos, categoria] = tramos.find(([hasta]) => valor < hasta);
+  return { puntos, categoria };
+}
+
+/** Texto legible de los tramos para mostrar el baremo. */
+export function describirTramos(tramos, unidad = '') {
+  let desde = null;
+  return tramos.map(([hasta, puntos, categoria]) => {
+    const u = unidad ? ` ${unidad}` : '';
+    const rango =
+      desde === null ? `< ${es(hasta)}${u}` : hasta === Infinity ? `≥ ${es(desde)}${u}` : `${es(desde)}–${es(hasta)}${u}`;
+    desde = hasta;
+    return { rango, puntos, categoria };
+  });
+}
+
+/** Calificación según el % de la nota máxima (mismo baremo que el panel global). */
+export function calificacion(puntos, max = NOTA_MAX) {
+  const pct = puntos / max;
+  if (pct >= 0.9) return 'Excelente';
+  if (pct >= 0.7) return 'Bueno';
+  if (pct >= 0.5) return 'Aceptable';
+  return 'Deficiente';
 }
 
 /**
- * Evalúa todos los datos disponibles y devuelve cada métrica con su nota
- * y la nota media antropométrica. Los campos opcionales que falten se omiten.
+ * Evalúa los datos disponibles y devuelve cada métrica con sus puntos (0–3)
+ * y la nota antropométrica sobre 15. Si falta alguna métrica, la nota se
+ * calcula proporcionalmente sobre las medidas y se marca como incompleta.
  *
  * datos: { sexo: 'hombre'|'mujer', edad, peso, altura, cintura?, cadera?, cuello?,
  *          pliegues?: number[3], nivelVisceral? }
@@ -119,23 +154,24 @@ export function evaluar(datos) {
   if (![edad, peso, altura].every(isNum)) throw new Error('Edad, peso y altura son obligatorios');
 
   const metricas = [];
-  const add = (id, nombre, valor, unidad, clasificacion, nota, detalle) =>
-    metricas.push({ id, nombre, valor, unidad, clasificacion, nota, detalle });
+  const add = (id, nombre, valor, unidad, tramos, fuente, detalle, unidadBaremo = unidad) => {
+    const { puntos, categoria } = puntuarTramos(valor, tramos);
+    metricas.push({
+      id, nombre, valor, unidad, puntos, max: PUNTOS_MAX_METRICA, categoria, fuente, detalle,
+      baremo: describirTramos(tramos, unidadBaremo),
+    });
+  };
 
-  const vImc = imc(peso, altura);
-  add('imc', 'IMC', vImc, 'kg/m²', clasificarImc(vImc), scoreRange(vImc, BAREMOS.imc), 'Ideal 18,5–24,9');
+  add('imc', 'IMC', imc(peso, altura), 'kg/m²', BAREMOS.imc.tramos, BAREMOS.imc.fuente, '');
 
   if (isNum(cintura)) {
-    const ica = cinturaAltura(cintura, altura);
-    add('cinturaAltura', 'Índice cintura/altura', ica, '', ica <= 0.5 ? 'Saludable' : 'Riesgo aumentado',
-      scoreRange(ica, BAREMOS.cinturaAltura), 'Ideal ≤ 0,50');
+    add('cinturaAltura', 'Índice cintura/altura', cinturaAltura(cintura, altura), '',
+      BAREMOS.cinturaAltura.tramos, BAREMOS.cinturaAltura.fuente, '');
   }
 
   if (isNum(cintura) && isNum(cadera)) {
-    const icc = cinturaCadera(cintura, cadera);
-    const b = BAREMOS.cinturaCadera[sexo];
-    add('cinturaCadera', 'Índice cintura/cadera', icc, '', icc <= b.idealMax ? 'Saludable' : 'Riesgo aumentado',
-      scoreRange(icc, b), `Ideal ≤ ${es(b.idealMax)}`);
+    add('cinturaCadera', 'Índice cintura/cadera', cinturaCadera(cintura, cadera), '',
+      BAREMOS.cinturaCadera[sexo], BAREMOS.cinturaCadera.fuente, '');
   }
 
   // % grasa: pliegues si los hay (más preciso); si no, cinta métrica.
@@ -149,40 +185,52 @@ export function evaluar(datos) {
     metodo = 'Cinta métrica (Marina EE.UU.)';
   }
   if (grasa !== null && Number.isFinite(grasa)) {
-    const b = BAREMOS.grasa[sexo];
-    const clas = grasa < b.idealMin ? 'Bajo' : grasa <= b.idealMax ? 'Saludable' : 'Alto';
     const masaGrasa = round((peso * grasa) / 100, 1);
-    add('grasa', '% grasa corporal', grasa, '%', clas, scoreRange(grasa, b),
-      `${metodo} · ${es(masaGrasa)} kg grasa · ${es(round(peso - masaGrasa, 1))} kg masa magra · Ideal ${b.idealMin}–${b.idealMax} %`);
+    add('grasa', '% grasa corporal', grasa, '%', BAREMOS.grasa[sexo], BAREMOS.grasa.fuente,
+      `${metodo} · ${es(masaGrasa)} kg grasa · ${es(round(peso - masaGrasa, 1))} kg masa magra`);
   }
 
   // Grasa visceral: nivel de bioimpedancia si se aporta; si no, estimación por cintura.
   if (isNum(nivelVisceral)) {
-    add('visceral', 'Grasa visceral (bioimpedancia)', nivelVisceral, 'nivel', clasificarNivelVisceral(nivelVisceral),
-      scoreRange(nivelVisceral, BAREMOS.visceralNivel), 'Saludable 1–12');
+    add('visceral', 'Grasa visceral', nivelVisceral, 'nivel', BAREMOS.visceralNivel.tramos,
+      BAREMOS.visceralNivel.fuente, 'Medida con báscula de bioimpedancia');
   } else if (isNum(cintura)) {
-    const b = BAREMOS.visceralCintura[sexo];
-    add('visceral', 'Riesgo de grasa visceral', cintura, 'cm cintura', riesgoVisceral(sexo, cintura),
-      scoreRange(cintura, b), `Estimado por cintura · Riesgo bajo < ${b.idealMax} cm`);
+    add('visceral', 'Grasa visceral (estimada)', cintura, 'cm', BAREMOS.visceralCintura[sexo],
+      BAREMOS.visceralCintura.fuente, 'Estimada por perímetro de cintura');
   }
 
-  const notas = metricas.map((m) => m.nota).filter((n) => n !== null);
-  const media = notas.length ? round(notas.reduce((a, b) => a + b, 0) / notas.length, 1) : null;
+  const conseguidos = metricas.reduce((a, m) => a + m.puntos, 0);
+  const posibles = metricas.length * PUNTOS_MAX_METRICA;
+  const nota = round((conseguidos / posibles) * NOTA_MAX, 1);
+  const faltan = 5 - metricas.length;
 
-  return { fecha: new Date().toISOString(), datos, metricas, media, calificacion: media === null ? null : calificacion(media) };
+  return {
+    fecha: new Date().toISOString(),
+    datos,
+    metricas,
+    puntos: conseguidos,
+    posibles,
+    nota,
+    max: NOTA_MAX,
+    completa: faltan === 0,
+    faltan,
+    calificacion: calificacion(nota),
+  };
 }
-
-/** Nota 0–100 para combinar con el resto de evaluaciones de Sportfy. */
-export const nota100 = (media) => (media === null ? null : Math.round(media * 10));
 
 /**
  * Guarda la nota en localStorage "sportfy.scores" sin pisar las de otros módulos.
- * Mismo formato que shared/scores.js: { score, date, detail }.
+ * Formato común: { score: puntos, max, date, detail } (el panel suma score/max para la nota /25).
  */
-export function guardarNotaGlobal(media, storage = globalThis.localStorage, detail = {}) {
+export function guardarNotaGlobal(resultado, storage = globalThis.localStorage, detail = {}) {
   try {
     const actual = JSON.parse(storage.getItem('sportfy.scores') || '{}');
-    actual.antropometria = { score: nota100(media), date: new Date().toISOString(), detail };
+    actual.antropometria = {
+      score: resultado.nota,
+      max: NOTA_MAX,
+      date: new Date().toISOString(),
+      detail,
+    };
     storage.setItem('sportfy.scores', JSON.stringify(actual));
   } catch {
     /* almacenamiento no disponible: se ignora */

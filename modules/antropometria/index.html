@@ -9,7 +9,7 @@
 <body>
   <header class="top">
     <h1>Evaluación antropométrica</h1>
-    <p>Mide, calcula y puntúa tu composición corporal. Rellena lo que tengas: cuantos más datos, más completa será la nota.</p>
+    <p>Mide, calcula y puntúa tu composición corporal sobre 15 puntos. Rellena lo que tengas: cuantos más datos, más completa será la nota.</p>
   </header>
 
   <main>
@@ -77,10 +77,13 @@
       <div class="media">
         <div class="media-num" id="media-num">–</div>
         <div>
-          <div class="media-label">Nota media antropométrica</div>
+          <div class="media-label">Nota antropométrica</div>
           <div class="media-cal" id="media-cal"></div>
+          <div class="media-escala">Excelente ≥ 13,5 · Bueno ≥ 10,5 · Aceptable ≥ 7,5 · Deficiente &lt; 7,5</div>
         </div>
       </div>
+      <p id="media-aviso" class="aviso" hidden></p>
+      <p class="nota">5 pruebas × 3 puntos (3 Óptimo · 2 Aceptable · 1 Riesgo · 0 Riesgo alto) = 15 puntos. Cuenta para la nota global sobre 25 junto a la evaluación postural (/10).</p>
       <ul id="metricas" class="metricas"></ul>
       <button type="button" id="guardar">Guardar en mi historial</button>
     </section>

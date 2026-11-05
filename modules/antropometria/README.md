@@ -2,21 +2,21 @@
 
 Página estática (HTML + CSS + JS con ES modules, sin build). Abre `index.html` con cualquier servidor estático, por ejemplo `python3 -m http.server` desde la raíz del repo y entra en `/modules/antropometria/`.
 
-## Qué mide
+## Puntuación (sobre 15)
 
-| Métrica | Datos necesarios | Ideal (nota 10) |
-|---|---|---|
-| IMC | peso, altura | 18,5–24,9 |
-| Índice cintura/altura | cintura | ≤ 0,50 |
-| Índice cintura/cadera | cintura, cadera | ≤ 0,90 hombre · ≤ 0,80 mujer |
-| % grasa corporal | 3 pliegues (Jackson-Pollock + Siri) o, si no hay, cuello + cintura (+ cadera en mujer) con la fórmula de la Marina de EE.UU. | 10–20 % hombre · 18–28 % mujer |
-| Grasa visceral | nivel de báscula de bioimpedancia (1–12 saludable) o, si no hay, estimación por cintura (OMS/IDF: riesgo desde 94 cm hombre, 80 cm mujer) | riesgo bajo |
+5 pruebas, cada una de 0 a 3 puntos según el tramo en que caiga (3 Óptimo · 2 Aceptable · 1 Riesgo · 0 Riesgo alto). Los tramos están en `BAREMOS` (`antropometria.js`) y la página muestra el de cada prueba.
 
-## Puntuación
+| Prueba | Datos | 3 puntos | Fuente |
+|---|---|---|---|
+| IMC | peso, altura | 18,5–24,9 | OMS |
+| Índice cintura/altura | cintura | 0,40–0,49 | Ashwell |
+| Índice cintura/cadera | cintura, cadera | < 0,90 H · < 0,80 M | OMS |
+| % grasa corporal | 3 pliegues (Jackson-Pollock + Siri) o cuello + cintura (+ cadera M) con fórmula de la Marina | Atleta / Fitness: 6–17 % H · 14–24 % M | ACE |
+| Grasa visceral | nivel de bioimpedancia, o estimada por cintura | nivel 1–9 · cintura < 94 cm H / < 80 cm M | OMS / IDF |
 
-- Cada métrica saca 10 dentro del rango ideal. Fuera de él empieza como máximo en 8 y baja en línea recta hasta 0 en el valor extremo (ver `BAREMOS` en `antropometria.js`).
-- La nota media es la media de las métricas que se hayan podido calcular: ≥ 9 Excelente, ≥ 7 Bueno, ≥ 5 Mejorable, < 5 Prioridad de mejora.
-- Al guardar, la nota (0–100) se escribe en `localStorage["sportfy.scores"].antropometria` como `{ score, date, detail }`, el mismo formato que usan los demás módulos para la nota media global. El historial se guarda en `sportfy.antropometria.historial`.
+Calificación: Excelente ≥ 13,5 · Bueno ≥ 10,5 · Aceptable ≥ 7,5 · Deficiente < 7,5 (90 / 70 / 50 % de la nota máxima). Si falta alguna prueba, la nota se escala sobre las medidas hechas y se avisa de que es incompleta.
+
+Al guardar se escribe `localStorage["sportfy.scores"].antropometria = { score, max: 15, date, detail }`. El panel raíz suma esta nota con la postural (/10) para la nota global sobre 25. El historial va en `sportfy.antropometria.historial`.
 
 ## Tests
 

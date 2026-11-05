@@ -76,7 +76,10 @@ button:hover { filter: brightness(1.05); }
   display: flex; align-items: center; gap: 16px;
   background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 12px;
 }
-.media-num { font-size: 3rem; font-weight: 800; line-height: 1; min-width: 3ch; text-align: center; }
+.media-num { font-size: 3rem; font-weight: 800; line-height: 1; min-width: 3ch; text-align: center; white-space: nowrap; }
+.media-num small { font-size: 1.1rem; font-weight: 600; color: var(--muted); }
+.media-escala { color: var(--muted); font-size: .78rem; margin-top: 4px; }
+.aviso { background: color-mix(in srgb, var(--medio) 15%, transparent); border-radius: 8px; padding: 10px 12px; font-size: .88rem; }
 .media-label { color: var(--muted); font-size: .9rem; }
 .media-cal { font-size: 1.25rem; font-weight: 700; }
 
@@ -85,8 +88,13 @@ button:hover { filter: brightness(1.05); }
 .m-head { display: flex; justify-content: space-between; gap: 8px; font-weight: 600; }
 .m-valor { margin: 4px 0 8px; }
 .m-detalle { color: var(--muted); font-size: .82rem; margin-top: 6px; }
-.barra { height: 8px; background: var(--border); border-radius: 99px; overflow: hidden; }
-.barra span { display: block; height: 100%; border-radius: 99px; background: currentColor; }
+.pips { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
+.pips span { height: 8px; border-radius: 99px; background: var(--border); }
+.pips span.ok, .pips span.bien, .pips span.medio, .pips span.mal { background: currentColor; }
+.baremo { margin-top: 8px; }
+.baremo table { font-size: .82rem; margin-top: 6px; background: var(--bg); }
+.baremo td, .baremo th { padding: 6px 8px; }
+.baremo tr.actual td { font-weight: 700; background: color-mix(in srgb, var(--accent) 12%, transparent); }
 
 .ok { color: var(--ok); }
 .bien { color: var(--bien); }
@@ -98,4 +106,7 @@ table { width: 100%; border-collapse: collapse; background: var(--card); border-
 th, td { padding: 10px 8px; text-align: left; border-bottom: 1px solid var(--border); }
 th { color: var(--muted); font-weight: 500; }
 .borrar { background: none; color: var(--muted); padding: 4px 8px; width: auto; }
-@media (max-width: 480px) { th:nth-child(3), td:nth-child(3) { display: none; } }
+@media (max-width: 480px) { #historial th:nth-child(3), #historial td:nth-child(3) { display: none; } }
+.baremo table { table-layout: fixed; }
+.baremo th:first-child, .baremo td:first-child { width: 38%; }
+.baremo .pts { width: 3.5em; text-align: center; }
