@@ -5,9 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Forty5</title>
   <link rel="icon" href="shared/logo/icono.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="shared/styles.css">
+  <link rel="stylesheet" href="shared/styles.css?v=202611051520">
   <style>
-    .marca { font-weight: 800; letter-spacing: .04em; color: var(--accent); }
+    .marca { margin: 4px 0 12px; }
+    .marca .logo-img { display: block; width: min(300px, 78vw); height: auto; margin: 0 auto; filter: drop-shadow(0 2px 10px rgba(0,0,0,.6)); }
     .hero { display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: center; }
     .hero .score small, .big small { font-size: 1.1rem; color: var(--muted); font-weight: 600; }
     .sec-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin: 32px 0 4px; }
@@ -47,22 +48,9 @@
     @media (max-width: 420px) { .stat { padding: 8px; } .stat b { font-size: 1rem; } .big { font-size: 2rem; } .sec-head h2 { font-size: 1.1rem; } }
   </style>
 </head>
-<body>
+<body class="con-fondo">
   <main class="wrap">
-    <div class="marca"><svg class="logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 336 96" role="img" aria-label="Forty5">
-  <g fill="currentColor">
-    <text x="0" y="72" font-family="'Arial Black','Helvetica Neue',Inter,system-ui,sans-serif" font-weight="900" font-style="italic" font-size="70" letter-spacing="-3">FORTY</text>
-  </g>
-  <g transform="translate(290 50)">
-    <rect x="-7" y="-46" width="14" height="8" rx="2" fill="currentColor"/>
-    <rect x="-2.5" y="-40" width="5" height="6" fill="currentColor"/>
-    <circle r="34" fill="none" stroke="currentColor" stroke-opacity=".18" stroke-width="9"/>
-    <circle r="34" fill="none" stroke="#e4572e" stroke-width="9" stroke-linecap="round"
-            stroke-dasharray="160.2 213.6" transform="rotate(-90)"/>
-    <text x="1" y="21" text-anchor="middle" font-family="'Arial Black','Helvetica Neue',Inter,system-ui,sans-serif" font-weight="900" font-style="italic" font-size="58" fill="#e4572e">5</text>
-  </g>
-</svg>
-</div>
+    <div class="marca"><img class="logo-img" src="shared/logo/forty5-titulo.png?v=202611051520" alt="Forty5" width="900" height="214"></div>
     <h1>Tu panel</h1>
     <p class="lead">Tu punto de partida y cómo vas cambiando. Repite las evaluaciones cada 4–6 semanas para ver tu evolución.</p>
 

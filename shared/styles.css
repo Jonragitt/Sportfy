@@ -151,3 +151,7 @@ body.con-fondo #result > .note { color: #fff; text-shadow: 0 1px 6px rgba(0,0,0,
 body.con-fondo #form > .lead, body.con-fondo #result > .lead, body.con-fondo main > .lead { color: rgba(255,255,255,.85); }
 body.con-fondo .topbar-logo, body.con-fondo .topbar-logo .logo { color: #fff; }
 .topbar-logo .logo-img { display: block; width: min(220px, 56vw); height: auto; }
+/* Menú principal con fondo */
+body.con-fondo main > h1,
+body.con-fondo .sec-head h2 { color: #fff; text-shadow: 0 1px 6px rgba(0,0,0,.6); }
+body.con-fondo .sec-head a { color: #ff8a5c; text-shadow: 0 1px 6px rgba(0,0,0,.6); }
