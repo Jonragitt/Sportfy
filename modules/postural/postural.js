@@ -47,6 +47,7 @@ function update() {
 function showResult() {
   const score = computeScore(answers);
   saveScore("postural", score, { answers });
+  guardarHistorial(score);
   const shown = score.toLocaleString("es-ES", { maximumFractionDigits: 1 });
   document.getElementById("scoreValue").textContent = `${shown} / ${MAX_POINTS}`;
   document.getElementById("scoreLabel").textContent = scoreLabel(score, MAX_POINTS);
@@ -71,6 +72,19 @@ function showResult() {
   const result = document.getElementById("result");
   result.classList.remove("hidden");
   result.scrollIntoView({ behavior: "smooth" });
+}
+
+// Historial de evaluaciones posturales para la evolución del panel principal.
+const HIST_KEY = "sportfy.postural.historial";
+function guardarHistorial(score) {
+  try {
+    const h = JSON.parse(localStorage.getItem(HIST_KEY)) || [];
+    const desviaciones = ALL_ITEMS.filter((i) => answers[i.id] < 2).map((i) => ({ id: i.id, nombre: i.name, nivel: answers[i.id] }));
+    h.push({ fecha: new Date().toISOString(), nota: score, max: MAX_POINTS, respuestas: { ...answers }, desviaciones });
+    localStorage.setItem(HIST_KEY, JSON.stringify(h));
+  } catch {
+    /* sin almacenamiento */
+  }
 }
 
 function restore() {

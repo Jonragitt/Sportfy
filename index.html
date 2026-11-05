@@ -3,70 +3,230 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Forty5 · Tu evaluación</title>
+  <title>Forty5</title>
   <link rel="stylesheet" href="shared/styles.css">
+  <style>
+    .marca { font-weight: 800; letter-spacing: .04em; color: var(--accent); }
+    .hero { display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: center; }
+    .hero .score small, .big small { font-size: 1.1rem; color: var(--muted); font-weight: 600; }
+    .sec-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin: 32px 0 4px; }
+    .sec-head h2 { margin: 0; }
+    .sec-head a { font-weight: 600; white-space: nowrap; font-size: .95rem; }
+    .big { font-size: 2.4rem; font-weight: 800; line-height: 1; }
+    .row { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px; }
+    .delta { font-weight: 700; font-size: .9rem; }
+    .delta.up { color: var(--good); } .delta.down { color: var(--bad); } .delta.flat { color: var(--muted); }
+    .stat .delta { display: block; font-size: .8rem; }
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; }
+    .stat { border: 1px solid var(--border); border-radius: 10px; padding: 10px; }
+    .stat b { display: block; font-size: 1.15rem; }
+    .stat > span:first-child { font-size: .8rem; color: var(--muted); }
+    .chart { width: 100%; height: auto; display: block; margin-top: 12px; }
+    .chart .grid-l { stroke: var(--border); stroke-width: 1; }
+    .chart .axis { fill: var(--muted); font-size: 11px; }
+    .chart .line { fill: none; stroke: var(--accent); stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
+    .chart .dot { fill: var(--surface); stroke: var(--accent); stroke-width: 2.5; }
+    .chart .val { fill: var(--text); font-size: 11px; font-weight: 700; }
+    .empty { text-align: center; padding: 24px 16px; }
+    .empty p { margin: 0 0 12px; color: var(--muted); }
+    .empty .btn { text-decoration: none; display: inline-block; }
+    .visceral { border-left: 6px solid var(--muted); }
+    .visceral.l2 { border-left-color: var(--good); }
+    .visceral.l1 { border-left-color: var(--mid); }
+    .visceral.l0 { border-left-color: var(--bad); }
+    .escala { display: grid; grid-template-columns: 9fr 3fr 3fr 4fr; gap: 3px; margin: 14px 0 4px; position: relative; }
+    .escala span { height: 10px; }
+    .escala span:nth-child(1) { background: var(--good); border-radius: 99px 0 0 99px; }
+    .escala span:nth-child(2) { background: var(--mid); }
+    .escala span:nth-child(3) { background: color-mix(in srgb, var(--bad) 70%, var(--mid)); }
+    .escala span:nth-child(4) { background: var(--bad); border-radius: 0 99px 99px 0; }
+    .escala i { position: absolute; top: -5px; width: 4px; height: 20px; background: var(--text); border-radius: 2px; transform: translateX(-2px); }
+    .escala-txt { display: grid; grid-template-columns: 9fr 3fr 3fr 4fr; font-size: .72rem; color: var(--muted); gap: 3px; }
+    ul.chips { list-style: none; padding: 0; margin: 10px 0 0; display: flex; flex-wrap: wrap; gap: 6px; }
+    @media (max-width: 420px) { .stat { padding: 8px; } .stat b { font-size: 1rem; } .big { font-size: 2rem; } .sec-head h2 { font-size: 1.1rem; } }
+  </style>
 </head>
 <body>
   <main class="wrap">
-    <h1>Forty5</h1>
-    <p class="lead">Completa las evaluaciones para conocer tu punto de partida. Tu nota total sobre 25 resume tu forma física actual.</p>
+    <div class="marca">Forty5</div>
+    <h1>Tu panel</h1>
+    <p class="lead">Tu punto de partida y cómo vas cambiando. Repite las evaluaciones cada 4–6 semanas para ver tu evolución.</p>
 
-    <div class="card">
-      <div class="note">Nota total</div>
+    <div class="card hero">
       <div class="score" id="total">–</div>
-      <div class="lead" id="totalLabel"></div>
-      <div class="bar"><span id="totalBar" style="width:0"></span></div>
-      <div class="note" id="totalNote"></div>
+      <div>
+        <div class="note">Nota total (antropometría /15 + postural /10)</div>
+        <div class="lead" style="margin:0" id="totalLabel"></div>
+        <div class="bar"><span id="totalBar" style="width:0"></span></div>
+        <div class="note" id="totalNote"></div>
+      </div>
     </div>
 
-    <h2>Evaluaciones</h2>
-    <div class="grid" id="evals"></div>
+    <div class="sec-head"><h2>Tu grasa visceral</h2><a href="modules/antropometria/index.html">Medir ahora →</a></div>
+    <div id="visceral"></div>
 
-    <h2>Baremo de la nota total</h2>
-    <div class="card">
-      <table class="baremo">
+    <div class="sec-head"><h2>Evolución antropométrica</h2><a href="modules/antropometria/index.html">Nueva medición →</a></div>
+    <div id="antro"></div>
+
+    <div class="sec-head"><h2>Evolución postural</h2><a href="modules/postural/index.html">Repetir test →</a></div>
+    <div id="postural"></div>
+
+    <details class="card">
+      <summary><b>Baremo de la nota total</b></summary>
+      <table class="baremo" style="margin-top:8px">
         <tr><td><span class="tag l2">Excelente</span></td><td>22,5 – 25</td><td>Forma física y postura de alto nivel.</td></tr>
         <tr><td><span class="tag l2">Bueno</span></td><td>17,5 – 22,4</td><td>Buena base: toca afinar los puntos débiles.</td></tr>
         <tr><td><span class="tag l1">Aceptable</span></td><td>12,5 – 17,4</td><td>Margen de mejora claro en composición o postura.</td></tr>
         <tr><td><span class="tag l0">Deficiente</span></td><td>0 – 12,4</td><td>Punto de partida: el plan se centra en lo básico.</td></tr>
       </table>
-      <p class="note">Antropometría puntúa sobre 15 (composición corporal y grasa visceral) y postural sobre 10.</p>
-    </div>
+    </details>
   </main>
 
   <script type="module">
-    import { EVALUATIONS, getScores, pointsFor, totalScore, scoreLabel } from "./shared/scores.js";
+    import { EVALUATIONS, getScores, totalScore, scoreLabel } from "./shared/scores.js";
 
-    const LINKS = {
-      antropometria: "modules/antropometria/index.html",
-      postural: "modules/postural/index.html",
-    };
-    const fmt = (n) => n.toLocaleString("es-ES", { maximumFractionDigits: 1 });
+    const $ = (s) => document.querySelector(s);
+    const fmt = (n, d = 1) => Number(n).toLocaleString("es-ES", { maximumFractionDigits: d });
+    const fecha = (iso) => new Date(iso).toLocaleDateString("es-ES", { day: "numeric", month: "short" });
+    const leer = (k) => { try { return JSON.parse(localStorage.getItem(k)) || []; } catch { return []; } };
+    const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+    // Delta con signo y color. menosEsMejor: para grasa, peso o visceral bajar es bueno.
+    function delta(a, b, unidad = "", menosEsMejor = false) {
+      if (a == null || b == null) return "";
+      const d = Math.round((b - a) * 10) / 10;
+      if (d === 0) return `<span class="delta flat">= sin cambio</span>`;
+      const bueno = menosEsMejor ? d < 0 : d > 0;
+      return `<span class="delta ${bueno ? "up" : "down"}">${d > 0 ? "▲ +" : "▼ "}${fmt(d)}${unidad}</span>`;
+    }
+
+    // Gráfico de línea en SVG: puntos [{fecha, valor}] sobre una escala 0..max.
+    function grafico(puntos, max) {
+      const W = 360, H = 170, L = 24, R = 14, T = 20, B = 24;
+      const n = puntos.length;
+      const x = (i) => (n === 1 ? (L + W - R) / 2 : L + (i * (W - L - R)) / (n - 1));
+      const y = (v) => T + (1 - v / max) * (H - T - B);
+      const ticks = [0, max / 2, max];
+      let s = `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Evolución de la nota">`;
+      for (const t of ticks) s += `<line class="grid-l" x1="${L}" x2="${W - R}" y1="${y(t)}" y2="${y(t)}"/><text class="axis" x="${L - 6}" y="${y(t) + 4}" text-anchor="end">${fmt(t)}</text>`;
+      if (n > 1) s += `<polyline class="line" points="${puntos.map((p, i) => `${x(i)},${y(p.valor)}`).join(" ")}"/>`;
+      const paso = Math.ceil(n / 4); // como mucho ~4 etiquetas de fecha
+      puntos.forEach((p, i) => {
+        s += `<circle class="dot" cx="${x(i)}" cy="${y(p.valor)}" r="4.5"><title>${fecha(p.fecha)}: ${fmt(p.valor)}/${max}</title></circle>`;
+        if (i % paso === 0 || i === n - 1) {
+          s += `<text class="val" x="${x(i)}" y="${y(p.valor) - 9}" text-anchor="middle">${fmt(p.valor)}</text>`;
+          s += `<text class="axis" x="${x(i)}" y="${H - 6}" text-anchor="middle">${fecha(p.fecha)}</text>`;
+        }
+      });
+      return s + `</svg>`;
+    }
+
+    const vacio = (texto, href, boton) =>
+      `<div class="card empty"><p>${texto}</p><a class="btn" href="${href}">${boton}</a></div>`;
+
+    // ---------- Nota total ----------
     const scores = getScores();
     const total = totalScore(scores);
-    const n = Object.keys(EVALUATIONS).length;
+    const nEval = Object.keys(EVALUATIONS).length;
+    $("#total").innerHTML = total.done ? `${fmt(total.points)}<small>/${total.max}</small>` : "–";
+    $("#totalLabel").textContent = total.complete ? scoreLabel(total.points, total.max) : "";
+    $("#totalBar").style.width = `${(total.points / total.max) * 100}%`;
+    $("#totalNote").textContent = total.complete ? "" : `Completadas ${total.done} de ${nEval} evaluaciones. Hazlas todas para tu nota final.`;
 
-    document.getElementById("total").textContent = total.done ? `${fmt(total.points)} / ${total.max}` : "–";
-    document.getElementById("totalLabel").textContent = total.complete ? scoreLabel(total.points, total.max) : "";
-    document.getElementById("totalBar").style.width = `${(total.points / total.max) * 100}%`;
-    document.getElementById("totalNote").textContent = total.complete
-      ? ""
-      : `Completadas ${total.done} de ${n} evaluaciones. Completa todas para obtener tu nota final.`;
+    // ---------- Antropometría ----------
+    const antro = leer("sportfy.antropometria.historial")
+      .filter((r) => r && r.fecha)
+      .sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
+    const metrica = (r, id) => r?.metricas?.find((m) => m.id === id);
 
-    const grid = document.getElementById("evals");
-    for (const [key, { name, max }] of Object.entries(EVALUATIONS)) {
-      const points = pointsFor(key, scores[key]);
-      const card = document.createElement("a");
-      card.className = "card";
-      card.style.textDecoration = "none";
-      card.style.color = "inherit";
-      card.href = LINKS[key];
-      card.innerHTML = `<h3></h3><div class="score" style="font-size:2rem"></div><div class="note"></div>`;
-      card.querySelector("h3").textContent = name;
-      card.querySelector(".score").textContent = points == null ? `– / ${max}` : `${fmt(points)} / ${max}`;
-      card.querySelector(".note").textContent =
-        points == null ? "Pendiente · Empezar" : `${scoreLabel(points, max)} · Repetir`;
-      grid.append(card);
+    // Grasa visceral actual: la medición más reciente que la incluya.
+    const conVisceral = antro.filter((r) => metrica(r, "visceral"));
+    if (!conVisceral.length) {
+      $("#visceral").innerHTML = vacio("Aún no tenemos tu nivel de grasa visceral. Apúntalo de tu báscula en la evaluación antropométrica.", "modules/antropometria/index.html", "Registrar grasa visceral");
+    } else {
+      const ult = conVisceral.at(-1);
+      const prev = conVisceral.at(-2);
+      const v = metrica(ult, "visceral");
+      const nivel = v.puntos >= 3 ? 2 : v.puntos === 2 ? 1 : 0;
+      const consejo = v.puntos >= 3
+        ? "Estás en rango saludable. Mantén el entrenamiento de fuerza y la actividad diaria."
+        : v.puntos === 2
+          ? "Estás en el límite. Prioriza cardio moderado 3–4 días por semana, más pasos diarios y reduce azúcares y alcohol."
+          : "Nivel de riesgo. La grasa visceral es la que más afecta a tu salud: combina fuerza y cardio, cuida el déficit calórico y el descanso, y consulta con tu médico.";
+      const pos = (Math.min(Math.max(v.valor, 1), 20) - 1) / 19 * 100;
+      $("#visceral").innerHTML = `
+        <div class="card visceral l${nivel}">
+          <div class="row">
+            <span class="big">${fmt(v.valor)}</span>
+            <span class="tag l${nivel}">${esc(v.categoria)}</span>
+            ${prev ? delta(metrica(prev, "visceral").valor, v.valor, "", true) + `<span class="note">vs ${fecha(prev.fecha)}</span>` : ""}
+          </div>
+          <div class="note">Nivel de grasa visceral · medido el ${new Date(ult.fecha).toLocaleDateString("es-ES")}</div>
+          <div class="escala" aria-hidden="true"><span></span><span></span><span></span><span></span><i style="left:${pos}%"></i></div>
+          <div class="escala-txt"><span>1–9 Saludable</span><span>10–12 Límite</span><span>13–15 Elevada</span><span>16+ Excesiva</span></div>
+          <p style="margin:12px 0 0">${consejo}</p>
+        </div>`;
+    }
+
+    if (!antro.length) {
+      $("#antro").innerHTML = vacio("Guarda tu primera evaluación antropométrica para empezar a ver tu evolución.", "modules/antropometria/index.html", "Hacer evaluación");
+    } else {
+      const primero = antro[0], ultimo = antro.at(-1);
+      const conNota = antro.filter((r) => r.nota != null);
+      const stat = (nombre, valor, unidad, ini, menosEsMejor) => `
+        <div class="stat"><span>${nombre}</span><b>${valor == null ? "–" : fmt(valor) + unidad}</b>${antro.length > 1 ? delta(ini, valor, unidad, menosEsMejor) : ""}</div>`;
+      $("#antro").innerHTML = `
+        <div class="card">
+          <div class="row">
+            <span class="big">${ultimo.nota != null ? fmt(ultimo.nota) : "–"}<small>/15</small></span>
+            ${ultimo.calificacion ? `<span class="tag l${ultimo.nota >= 10.5 ? 2 : ultimo.nota >= 7.5 ? 1 : 0}">${esc(ultimo.calificacion)}</span>` : ""}
+            ${antro.length > 1 ? delta(primero.nota, ultimo.nota) + `<span class="note">desde ${fecha(primero.fecha)}</span>` : ""}
+          </div>
+          <div class="note">${antro.length} ${antro.length === 1 ? "medición" : "mediciones"} · última el ${new Date(ultimo.fecha).toLocaleDateString("es-ES")}</div>
+          ${conNota.length ? grafico(conNota.map((r) => ({ fecha: r.fecha, valor: r.nota })), 15) : ""}
+          <div class="stats">
+            ${stat("Peso", ultimo.datos?.peso, " kg", primero.datos?.peso, true)}
+            ${stat("% graso", metrica(ultimo, "grasa")?.valor, " %", metrica(primero, "grasa")?.valor, true)}
+            ${stat("% muscular", metrica(ultimo, "muscular")?.valor, " %", metrica(primero, "muscular")?.valor, false)}
+          </div>
+          ${antro.length === 1 ? `<p class="note">Repite la medición en unas semanas, en las mismas condiciones, para ver cómo cambias.</p>` : `<p class="note">Cambios desde tu primera medición.</p>`}
+        </div>`;
+    }
+
+    // ---------- Postural ----------
+    let post = leer("sportfy.postural.historial").filter((r) => r && r.fecha && r.nota != null);
+    if (!post.length && scores.postural?.score != null) {
+      // Evaluaciones hechas antes de existir el historial: se muestra la última nota guardada.
+      post = [{ fecha: scores.postural.date, nota: scores.postural.score, max: 10, desviaciones: null }];
+    }
+    post.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
+    if (!post.length) {
+      $("#postural").innerHTML = vacio("Haz la evaluación postural para conocer tus desequilibrios y seguir cómo los corriges.", "modules/postural/index.html", "Hacer evaluación");
+    } else {
+      const primero = post[0], ultimo = post.at(-1);
+      const nivel = ultimo.nota >= 7 ? 2 : ultimo.nota >= 5 ? 1 : 0;
+      const desv = ultimo.desviaciones;
+      let mejoras = "";
+      if (post.length > 1 && primero.desviaciones && desv) {
+        const ahora = new Set(desv.map((d) => d.id));
+        const corregidas = primero.desviaciones.filter((d) => !ahora.has(d.id));
+        if (corregidas.length) mejoras = `<p style="margin:12px 0 0"><b>Corregido desde el inicio:</b> ${corregidas.map((d) => esc(d.nombre)).join(", ")}.</p>`;
+      }
+      $("#postural").innerHTML = `
+        <div class="card">
+          <div class="row">
+            <span class="big">${fmt(ultimo.nota)}<small>/10</small></span>
+            <span class="tag l${nivel}">${scoreLabel(ultimo.nota, 10)}</span>
+            ${post.length > 1 ? delta(primero.nota, ultimo.nota) + `<span class="note">desde ${fecha(primero.fecha)}</span>` : ""}
+          </div>
+          <div class="note">${post.length} ${post.length === 1 ? "evaluación" : "evaluaciones"} · última el ${new Date(ultimo.fecha).toLocaleDateString("es-ES")}</div>
+          ${grafico(post.map((r) => ({ fecha: r.fecha, valor: r.nota })), 10)}
+          ${desv ? (desv.length
+            ? `<p style="margin:12px 0 0"><b>${desv.length} ${desv.length === 1 ? "punto a trabajar" : "puntos a trabajar"}:</b></p>
+               <ul class="chips">${desv.sort((a, b) => a.nivel - b.nivel).map((d) => `<li class="tag l${d.nivel}">${esc(d.nombre)}</li>`).join("")}</ul>`
+            : `<p style="margin:12px 0 0">Sin desviaciones: ¡postura excelente!</p>`) : ""}
+          ${mejoras}
+        </div>`;
     }
   </script>
 </body>
