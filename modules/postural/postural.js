@@ -1,5 +1,5 @@
-import { SECTIONS, SIDES, ALL_ZONES, MAX_POINTS, computeScore, selectedOptions, optionLabel, alteredZoneCount } from "./tests.js";
-import { saveScore, getScores, scoreLabel } from "../../shared/scores.js";
+import { SECTIONS, SIDES, ALL_ZONES, MAX_POINTS, computeScore, selectedOptions, optionLabel, alteredZoneCount } from "./tests.js?v=202611051513";
+import { saveScore, getScores, scoreLabel } from "../../shared/scores.js?v=202611051513";
 import { marcarPendiente, quitarPendiente, montarTick } from "../../shared/perfil.js";
 
 const form = document.getElementById("form");

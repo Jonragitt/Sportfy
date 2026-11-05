@@ -82,7 +82,7 @@
     <div class="sec-head"><h2>Evolución antropométrica</h2><a href="modules/antropometria/index.html">Nueva medición →</a></div>
     <div id="antro"></div>
 
-    <div class="sec-head"><h2>Evolución postural</h2><a href="modules/postural/index.html">Repetir test →</a></div>
+    <div class="sec-head"><h2>Evolución postural</h2><a href="modules/postural/index.html?v=202611051513">Repetir test →</a></div>
     <div id="postural"></div>
 
     <details class="card">
@@ -220,7 +220,7 @@
     }
     post.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
     if (!post.length) {
-      $("#postural").innerHTML = vacio("Haz la evaluación postural para conocer tus desequilibrios y seguir cómo los corriges.", "modules/postural/index.html", "Hacer evaluación");
+      $("#postural").innerHTML = vacio("Haz la evaluación postural para conocer tus desequilibrios y seguir cómo los corriges.", "modules/postural/index.html?v=202611051513", "Hacer evaluación");
     } else {
       const primero = post[0], ultimo = post.at(-1);
       const nivel = ultimo.nota >= 7 ? 2 : ultimo.nota >= 5 ? 1 : 0;
