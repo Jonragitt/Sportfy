@@ -123,3 +123,4 @@ body { padding-bottom: 110px; }
 #bio.off { opacity: .4; pointer-events: none; }
 input.vacio { border-color: var(--mal); }
 .perfil-link { float: right; font-weight: 600; color: var(--accent); }
+.logo { display: inline-block; width: 140px; height: auto; color: var(--text); vertical-align: middle; }
