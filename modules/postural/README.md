@@ -1,6 +1,6 @@
 # Evaluación postural
 
-Dos planos, 10 zonas. En cada zona se marcan con círculos una o varias alteraciones.
+Dos planos y la sentadilla profunda, 13 zonas. En cada zona se marcan con círculos una o varias alteraciones.
 
 Plano sagital (vista lateral):
 
@@ -17,6 +17,13 @@ Plano frontal (vista anterior y posterior):
 - Pelvis: crestas ilíacas asimétricas
 - Rodillas: valgo / varo
 - Tobillos: eversión / inversión
+
+Sentadilla profunda (SOH), bilateral: cada compensación tiene un círculo para el lado izquierdo (I) y otro para el derecho (D).
+Se guarda como `"opcionId:I"` / `"opcionId:D"`.
+
+- Pies: rotan hacia fuera o eleva talón, caída del arco plantar, pie cavo, reparto asimétrico de carga (Ant / Post)
+- Rodillas: valgo, varo (Ant)
+- C.L.P.: inclinación anterior excesiva, hiperlordosis lumbar, retroversión pélvica precoz (Lat)
 
 Nota /10 = zonas sin alteración / total de zonas × 10 (un decimal). Una zona con varias alteraciones cuenta una vez.
 

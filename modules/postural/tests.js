@@ -187,6 +187,99 @@ export const SECTIONS = [
       },
     ],
   },
+  {
+    id: "soh",
+    title: "Sentadilla profunda (SOH)",
+    bilateral: true,
+    intro:
+      "Pies a la anchura de los hombros y apuntando al frente, brazos estirados por encima de la cabeza. Haz 5 sentadillas lo más profundas posible, a ritmo lento. Obsérvalas de frente (Ant), de espaldas (Post) y de perfil (Lat), y marca en qué lado aparece cada compensación: I (izquierda) o D (derecha).",
+    zones: [
+      {
+        id: "sohPies",
+        name: "Pies",
+        how: "Los pies deben quedar fijos, apuntando al frente y con el peso repartido por igual.",
+        options: [
+          {
+            id: "sohPiesRotan",
+            name: "Pies rotan hacia fuera o eleva talón",
+            view: "Ant / Post",
+            hint: "La punta del pie se abre o el talón se despega del suelo al bajar.",
+            fix: ["Movilidad de tobillo contra la pared 2×10 por lado", "Estiramiento de gemelo y sóleo 3×30 s", "Sentadilla goblet con talones apoyados 3×10"],
+          },
+          {
+            id: "sohArcoCae",
+            name: "Caída del arco plantar",
+            view: "Ant / Post",
+            hint: "El arco se hunde y el tobillo cae hacia dentro al bajar.",
+            fix: ["Short foot (pie corto) 3×10 s", "Elevaciones de talón 3×15", "Sentadilla con el arco activo (trípode del pie) 3×10"],
+          },
+          {
+            id: "sohPieCavo",
+            name: "Pie cavo",
+            view: "Ant / Post",
+            hint: "El arco se mantiene muy alto y el apoyo va al borde externo del pie.",
+            fix: ["Masaje plantar con pelota 2 min por pie", "Estiramiento de la fascia plantar 3×30 s", "Eversión con banda 3×15"],
+          },
+          {
+            id: "sohCargaAsimetrica",
+            name: "Reparto asimétrico de carga",
+            view: "Ant / Post",
+            hint: "El peso se desplaza más hacia un pie. Marca el lado que carga más.",
+            fix: ["Sentadilla en split (búlgara) 3×10 por lado", "Sentadilla frente a espejo repartiendo el peso 3×10", "Peso muerto a una pierna 3×10 por lado"],
+          },
+        ],
+      },
+      {
+        id: "sohRodillas",
+        name: "Rodillas",
+        how: "Las rodillas deben seguir la línea de los pies, sin ir hacia dentro ni hacia fuera.",
+        options: [
+          {
+            id: "sohValgo",
+            name: "Valgo",
+            view: "Ant",
+            hint: "La rodilla se va hacia dentro al bajar.",
+            fix: ["Sentadilla con banda en rodillas 3×12", "Monster walk con banda 3×15 pasos", "Clamshell 3×15 por lado"],
+          },
+          {
+            id: "sohVaro",
+            name: "Varo",
+            view: "Ant",
+            hint: "La rodilla se abre hacia fuera al bajar.",
+            fix: ["Estiramiento de aductores (mariposa) 3×30 s", "Sentadilla sumo controlada 3×12", "Aducción de cadera con banda 3×15"],
+          },
+        ],
+      },
+      {
+        id: "sohCLP",
+        name: "Complejo lumbo-pélvico (C.L.P.)",
+        how: "El tronco debe quedar paralelo a las tibias y la zona lumbar neutra durante toda la bajada.",
+        options: [
+          {
+            id: "sohInclinacion",
+            name: "Inclinación anterior excesiva",
+            view: "Lat",
+            hint: "El tronco cae hacia delante más que las tibias.",
+            fix: ["Sentadilla goblet 3×10", "Movilidad de tobillo contra la pared 2×10", "Plancha frontal 3×30 s"],
+          },
+          {
+            id: "sohHiperlordosis",
+            name: "Hiperlordosis lumbar",
+            view: "Lat",
+            hint: "La zona lumbar se arquea en exceso al bajar.",
+            fix: ["Estiramiento de psoas en zancada 3×30 s", "Dead bug 3×10", "Estiramiento de dorsal 3×30 s"],
+          },
+          {
+            id: "sohRetroversion",
+            name: "Retroversión pélvica precoz",
+            view: "Lat",
+            hint: "La pelvis se mete hacia dentro (butt wink) antes de llegar abajo.",
+            fix: ["Estiramiento de isquiotibiales 3×30 s", "Movilidad de cadera en cuadrupedia (rock back) 2×10", "Sentadilla a cajón a la altura sin retroversión 3×10"],
+          },
+        ],
+      },
+    ],
+  },
 ];
 
 export const ALL_ZONES = SECTIONS.flatMap((s) => s.zones);
@@ -200,6 +293,29 @@ export function computeScore(answers = {}) {
   return Math.round((ok / ALL_ZONES.length) * MAX_POINTS * 10) / 10;
 }
 
+export const SIDES = { I: "Izquierda", D: "Derecha" };
+
+// Las secciones bilaterales guardan "opcionId:I" / "opcionId:D".
+export function isBilateral(zone) {
+  return SECTIONS.some((s) => s.bilateral && s.zones.includes(zone));
+}
+
+// Opciones marcadas, con los lados (["I","D"]) en las secciones bilaterales.
 export function selectedOptions(answers = {}) {
-  return ALL_OPTIONS.filter((o) => (answers[o.zone.id] || []).includes(o.id));
+  const out = [];
+  for (const o of ALL_OPTIONS) {
+    const marked = answers[o.zone.id] || [];
+    if (isBilateral(o.zone)) {
+      const sides = Object.keys(SIDES).filter((k) => marked.includes(`${o.id}:${k}`));
+      if (sides.length) out.push({ ...o, sides });
+    } else if (marked.includes(o.id)) {
+      out.push({ ...o, sides: null });
+    }
+  }
+  return out;
+}
+
+export function optionLabel(o) {
+  const sides = o.sides?.length ? ` (${o.sides.join(", ")})` : "";
+  return `${o.zone.name}: ${o.name}${sides}`;
 }

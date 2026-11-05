@@ -1,4 +1,4 @@
-import { SECTIONS, ALL_ZONES, MAX_POINTS, computeScore, selectedOptions } from "./tests.js";
+import { SECTIONS, SIDES, ALL_ZONES, MAX_POINTS, computeScore, selectedOptions, optionLabel } from "./tests.js";
 import { saveScore, getScores, scoreLabel } from "../../shared/scores.js";
 import { marcarPendiente, quitarPendiente, montarTick } from "../../shared/perfil.js";
 
@@ -17,24 +17,51 @@ function el(tag, attrs = {}, ...children) {
   return node;
 }
 
+function onChange(zone) {
+  answers[zone.id] = [...form.querySelectorAll(`input[name="${zone.id}"]:checked`)].map((i) => i.value);
+  calcBtn.classList.remove("oculto");
+  update();
+}
+
+function circle(zone, value, label) {
+  const input = el("input", { type: "checkbox", class: "circle", name: zone.id, value });
+  if (label) input.setAttribute("aria-label", label);
+  input.addEventListener("change", () => onChange(zone));
+  return input;
+}
+
+// Zona normal: un círculo por opción.
+function zoneCard(zone) {
+  const options = el("div", { class: "options" });
+  for (const opt of zone.options) {
+    options.append(
+      el("label", {}, circle(zone, opt.id), el("span", {}, el("strong", {}, opt.name), el("br"), el("span", { class: "note" }, opt.hint)))
+    );
+  }
+  return el("div", { class: "card" }, el("h3", {}, zone.name), el("p", { class: "how" }, zone.how), options);
+}
+
+// Zona bilateral: columnas I y D con un círculo por lado en cada opción.
+function bilateralCard(zone) {
+  const head = el("div", { class: "lado-head" }, el("span", {}, "Compensación"));
+  for (const k of Object.keys(SIDES)) head.append(el("span", { class: "lado-tag", title: SIDES[k] }, k));
+  const rows = el("div", { class: "lados" }, head);
+  for (const opt of zone.options) {
+    const row = el(
+      "div",
+      { class: "lado-row" },
+      el("span", {}, el("strong", {}, opt.name), " ", el("span", { class: "vista" }, opt.view), el("br"), el("span", { class: "note" }, opt.hint))
+    );
+    for (const k of Object.keys(SIDES)) row.append(el("label", { class: "lado-cel" }, circle(zone, `${opt.id}:${k}`, `${opt.name}, lado ${SIDES[k].toLowerCase()}`)));
+    rows.append(row);
+  }
+  return el("div", { class: "card" }, el("h3", {}, zone.name), el("p", { class: "how" }, zone.how), rows);
+}
+
 function render() {
   for (const section of SECTIONS) {
     form.append(el("h2", {}, section.title), el("p", { class: "lead" }, section.intro));
-    for (const zone of section.zones) {
-      const options = el("div", { class: "options" });
-      for (const opt of zone.options) {
-        const input = el("input", { type: "checkbox", class: "circle", name: zone.id, value: opt.id });
-        input.addEventListener("change", () => {
-          answers[zone.id] = [...form.querySelectorAll(`input[name="${zone.id}"]:checked`)].map((i) => i.value);
-          calcBtn.classList.remove("oculto");
-          update();
-        });
-        options.append(
-          el("label", {}, input, el("span", {}, el("strong", {}, opt.name), el("br"), el("span", { class: "note" }, opt.hint)))
-        );
-      }
-      form.append(el("div", { class: "card" }, el("h3", {}, zone.name), el("p", { class: "how" }, zone.how), options));
-    }
+    for (const zone of section.zones) form.append(section.bilateral ? bilateralCard(zone) : zoneCard(zone));
   }
   form.append(el("p", { class: "note" }, "Si no marcas ninguna opción en una zona, se considera sin alteración."));
 }
@@ -71,7 +98,7 @@ function showResult() {
   for (const opt of issues) {
     const list = el("ul", { class: "fix" });
     opt.fix.forEach((f) => list.append(el("li", {}, f)));
-    fixes.append(el("div", { class: "card" }, el("h3", {}, `${opt.zone.name}: ${opt.name}`), list));
+    fixes.append(el("div", { class: "card" }, el("h3", {}, optionLabel(opt)), list));
   }
   const result = document.getElementById("result");
   result.classList.remove("hidden");
@@ -83,7 +110,7 @@ const HIST_KEY = "sportfy.postural.historial";
 function guardarHistorial(score) {
   try {
     const h = JSON.parse(localStorage.getItem(HIST_KEY)) || [];
-    const desviaciones = selectedOptions(answers).map((o) => ({ id: o.id, nombre: `${o.zone.name}: ${o.name}`, nivel: 1 }));
+    const desviaciones = selectedOptions(answers).map((o) => ({ id: o.sides ? `${o.id}:${o.sides.join("")}` : o.id, nombre: optionLabel(o), nivel: 1 }));
     h.push({ fecha: new Date().toISOString(), nota: score, max: MAX_POINTS, respuestas: structuredClone(answers), desviaciones });
     localStorage.setItem(HIST_KEY, JSON.stringify(h));
   } catch {
@@ -96,8 +123,11 @@ function restore() {
   const saved = getScores().postural?.detail?.answers;
   if (!saved) return;
   for (const zone of ALL_ZONES) {
-    const ids = (Array.isArray(saved[zone.id]) ? saved[zone.id] : []).filter((id) => zone.options.some((o) => o.id === id));
-    for (const id of ids) form.querySelector(`input[name="${zone.id}"][value="${id}"]`).checked = true;
+    const ids = (Array.isArray(saved[zone.id]) ? saved[zone.id] : []).filter((id) => zone.options.some((o) => o.id === id.split(":")[0]));
+    for (const id of ids) {
+      const input = form.querySelector(`input[name="${zone.id}"][value="${id}"]`);
+      if (input) input.checked = true;
+    }
     answers[zone.id] = ids;
   }
 }
