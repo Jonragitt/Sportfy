@@ -1,11 +1,10 @@
-/* Botón flotante "Resultados": cristal gris mientras faltan datos,
-   verde y más grande cuando el formulario está completo. */
+/* Botón "Resultados" al final del formulario (no flota al hacer scroll):
+   cristal gris mientras faltan datos, verde y más grande cuando está completo. */
 .resultados {
-  position: fixed; left: 50%; bottom: 16px; z-index: 20;
-  transform: translateX(-50%);
-  width: min(320px, calc(100% - 32px));
+  position: static;
+  width: min(320px, 100%);
   display: flex; flex-direction: column; align-items: center; gap: 2px;
-  padding: 12px 18px; margin: 0;
+  padding: 12px 18px; margin: 28px auto 8px;
   border-radius: 22px;
   font: inherit; text-align: center; cursor: not-allowed;
   color: #3f4550;
@@ -20,7 +19,7 @@
 .resultados .r-sub { font-size: .8rem; opacity: .8; }
 .resultados.listo {
   cursor: pointer;
-  width: min(440px, calc(100% - 24px));
+  width: min(440px, 100%);
   padding: 18px 22px;
   color: #fff;
   background: linear-gradient(135deg, rgba(52,199,110,.92), rgba(24,150,80,.88));
