@@ -41,6 +41,8 @@ function circle(zone, value, label) {
 
 // Botón "Ver ejemplo": despliega el GIF de la alteración (en bilaterales, izquierda y derecha).
 const GIF_V = "202611052135";
+// Solo un ejemplo abierto a la vez: al abrir uno se cierra el anterior.
+let demoAbierto = null;
 function demo(opt, sides) {
   const panel = el("div", { class: "demo hidden" });
   const btn = el("button", { type: "button", class: "ver-demo", "aria-expanded": "false" }, "▶ Ver ejemplo");
@@ -58,10 +60,25 @@ function demo(opt, sides) {
       }
       panel.append(...pngs);
     }
-    const open = panel.classList.toggle("hidden") === false;
-    btn.setAttribute("aria-expanded", String(open));
-    btn.textContent = open ? "✕ Ocultar ejemplo" : "▶ Ver ejemplo";
+    const open = panel.classList.contains("hidden");
+    if (open && demoAbierto && demoAbierto.panel !== panel) demoAbierto.cerrar();
+    if (open) {
+      panel.classList.remove("hidden");
+      btn.setAttribute("aria-expanded", "true");
+      btn.textContent = "✕ Ocultar ejemplo";
+      demoAbierto = { panel, cerrar };
+      // Si al cerrar el anterior se ha movido la página, deja este botón a la vista.
+      btn.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    } else {
+      cerrar();
+    }
   });
+  function cerrar() {
+    panel.classList.add("hidden");
+    btn.setAttribute("aria-expanded", "false");
+    btn.textContent = "▶ Ver ejemplo";
+    if (demoAbierto?.panel === panel) demoAbierto = null;
+  }
   return { btn, panel };
 }
 

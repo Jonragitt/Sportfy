@@ -1,0 +1,18 @@
+/* Botones fijos en las esquinas: menú (arriba izquierda) y perfil (arriba derecha).
+   Siguen al usuario al hacer scroll; se ocultan en su propia página. */
+.esquina {
+  position: fixed; top: max(12px, env(safe-area-inset-top)); z-index: 30;
+  width: 46px; height: 46px; border-radius: 50%;
+  display: grid; place-content: center; text-decoration: none;
+  color: #fff; background: rgba(15,16,20,.55);
+  border: 1px solid rgba(255,255,255,.35);
+  box-shadow: 0 6px 18px rgba(0,0,0,.3);
+  -webkit-backdrop-filter: blur(14px) saturate(160%); backdrop-filter: blur(14px) saturate(160%);
+}
+.esquina svg { width: 22px; height: 22px; }
+.esquina:hover { border-color: #e4572e; color: #ff8a5c; }
+.esquina.menu { left: max(12px, env(safe-area-inset-left)); }
+.esquina.perfil { right: max(12px, env(safe-area-inset-right)); }
+/* Deja hueco arriba para que los botones no tapen la barra de la página */
+body.con-esquinas .topbar { margin-top: 58px; }
+.topbar .hueco { width: 44px; height: 44px; }
