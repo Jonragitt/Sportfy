@@ -4,6 +4,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Forty5</title>
+  <script>
+    // Ya evaluado (y sin repetición en curso): el menú pasa a ser el plan.
+    try {
+      const ev = JSON.parse(localStorage.getItem("sportfy.evaluaciones") || "[]");
+      if (ev.length && !localStorage.getItem("sportfy.rondaInicio")) location.replace("analisis.html");
+    } catch {}
+  </script>
   <link rel="stylesheet" href="shared/esquinas.css?v=202611051850">
   <link rel="icon" href="shared/logo/icono.svg" type="image/svg+xml">
   <link rel="stylesheet" href="shared/styles.css?v=202611052135">
@@ -85,6 +92,7 @@
   </header>
 
   <main class="wrap panel" id="panel">
+    <div id="repeticion"></div>
     <h1>Tu panel</h1>
     <p class="lead">Repite las evaluaciones cada 4–6 semanas para ver tu evolución.</p>
 
@@ -95,7 +103,6 @@
         <div class="lead" style="margin:0" id="totalLabel"></div>
         <div class="bar"><span id="totalBar" style="width:0"></span></div>
         <div class="note" id="totalNote"></div>
-        <a href="analisis.html" style="display:inline-block;margin-top:8px;font-weight:600">Ver análisis y plan →</a>
       </div>
     </div>
 
@@ -127,12 +134,24 @@
 
   <nav class="tabs" aria-label="Menú principal">
     <a href="index.html" aria-current="page">Inicio</a>
-    <a href="analisis.html">Análisis</a>
     <a href="perfil.html">Perfil</a>
   </nav>
 
   <script type="module">
     import { EVALUATIONS, getScores, totalScore, scoreLabel } from "./shared/scores.js";
+    import { sincronizar, modo, evaluaciones, rondaEnCurso, cancelarRepeticion } from "./shared/evaluaciones.js?v=202611130100";
+
+    // Si ya están confirmadas las dos evaluaciones, se guarda el apartado y se pasa al plan.
+    sincronizar();
+    if (modo() === "plan") location.replace("analisis.html");
+    const previas = evaluaciones();
+    if (previas.length && rondaEnCurso()) {
+      document.querySelector("#repeticion").innerHTML = `<div class="card" style="border-color:var(--accent)">
+        <b>Estás repitiendo tu evaluación (n.º ${previas.length + 1})</b>
+        <p class="note" style="margin:4px 0 8px">Haz la antropometría y la postural y confírmalas con el tick. Tus ${previas.length} ${previas.length === 1 ? "evaluación anterior sigue guardada" : "evaluaciones anteriores siguen guardadas"} en tu perfil.</p>
+        <button class="btn secondary" id="cancelar" type="button">Volver a mi plan sin repetir</button></div>`;
+      document.querySelector("#cancelar").addEventListener("click", () => { cancelarRepeticion(); location.replace("analisis.html"); });
+    }
 
     const $ = (s) => document.querySelector(s);
     const fmt = (n, d = 1) => Number(n).toLocaleString("es-ES", { maximumFractionDigits: d });

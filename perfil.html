@@ -8,26 +8,47 @@
   <link rel="icon" href="shared/logo/icono.svg" type="image/svg+xml">
   <link rel="stylesheet" href="shared/styles.css?v=202611051940">
   <style>
-    .marca { font-weight: 800; letter-spacing: .04em; color: var(--accent); }
     .estado { display: flex; align-items: center; gap: 12px; }
     .estado .big { font-size: 2.2rem; font-weight: 800; line-height: 1; }
     .estado .big small { font-size: 1rem; color: var(--muted); font-weight: 600; }
     .badge { display: inline-flex; align-items: center; gap: 4px; font-size: .78rem; font-weight: 700; padding: 3px 10px; border-radius: 99px; white-space: nowrap; }
     .badge.ok { background: color-mix(in srgb, var(--good) 16%, transparent); color: var(--good); }
     .badge.inc { background: color-mix(in srgb, var(--muted) 16%, transparent); color: var(--muted); }
-    .ev-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .ev-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
     .ev-head h2 { margin: 0; font-size: 1.15rem; }
-    body.con-fondo .card.incompleta { background: color-mix(in srgb, color-mix(in srgb, var(--surface) 88%, var(--border)) 78%, transparent); border-style: dashed; }
     .datos { display: grid; grid-template-columns: 1fr auto; margin: 12px 0 0; }
     .datos dt, .datos dd { padding: 8px 0; border-top: 1px solid var(--border); margin: 0; }
     .datos dd { text-align: right; font-weight: 600; }
     .datos dd small { display: block; font-weight: 400; color: var(--muted); font-size: .8rem; }
-    .incompleta .datos dd { color: var(--muted); font-weight: 400; font-style: italic; }
-    .aviso { margin: 12px 0 0; padding: 10px 12px; border-radius: 10px; font-size: .9rem;
-      background: color-mix(in srgb, var(--mid) 15%, transparent); }
-    .acciones { margin-top: 12px; }
-    .acciones a { font-weight: 600; }
-    .pts { font-size: .8rem; color: var(--muted); }
+    .aviso { margin: 12px 0 0; padding: 10px 12px; border-radius: 10px; font-size: .9rem; background: color-mix(in srgb, var(--mid) 15%, transparent); }
+    .enlace { appearance: none; border: 0; background: none; padding: 0; font: inherit; font-weight: 600; color: var(--accent); cursor: pointer; text-decoration: underline; }
+    .form-datos { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-top: 12px; }
+    .form-datos label { display: grid; gap: 4px; font-size: .85rem; color: var(--muted); font-weight: 600; }
+    .form-datos input, .form-datos select { font: inherit; font-size: 1rem; padding: 9px 10px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); color: var(--text); width: 100%; }
+    .acciones { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .acciones .btn { padding: 10px 16px; font-size: .95rem; }
+    ul.chips { list-style: none; padding: 0; margin: 10px 0 0; display: flex; flex-wrap: wrap; gap: 6px; }
+    body.con-fondo .seccion { color: #fff; text-shadow: 0 1px 6px rgba(0,0,0,.6); margin: 30px 0 4px; }
+    .apartado { display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: start; }
+    .apartado input[type=checkbox] { width: 22px; height: 22px; margin: 2px 0 0; accent-color: var(--accent); cursor: pointer; }
+    .apartado.sel { border-color: var(--accent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 35%, transparent); }
+    .apartado summary { cursor: pointer; font-weight: 600; color: var(--accent); margin-top: 6px; }
+    .notas { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: .9rem; margin-top: 4px; }
+    .comparar-barra { position: sticky; bottom: 78px; z-index: 5; display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .tabla-wrap { overflow-x: auto; margin-top: 10px; }
+    table.comp { border-collapse: collapse; width: 100%; font-size: .88rem; }
+    .tabs a { white-space: nowrap; }
+    table.comp th, table.comp td { padding: 8px 6px; border-top: 1px solid var(--border); text-align: right; vertical-align: top; }
+    table.comp th:first-child, table.comp td:first-child { text-align: left; }
+    table.comp thead th { border-top: 0; font-size: .8rem; color: var(--muted); }
+    .delta { display: block; font-size: .78rem; font-weight: 700; }
+    .delta.up { color: var(--good); } .delta.down { color: var(--bad); } .delta.flat { color: var(--muted); }
+    .volver { border-style: dashed; }
+    .opciones { display: grid; gap: 10px; margin-top: 12px; }
+    @media (min-width: 640px) { .opciones { grid-template-columns: 1fr 1fr; } }
+    .opcion { border: 1px solid var(--border); border-radius: 12px; padding: 12px; }
+    .opcion p { margin: 4px 0 10px; font-size: .9rem; color: var(--muted); }
+    .btn.peligro { background: var(--bad); }
   </style>
 </head>
 <body class="con-esquinas con-fondo">
@@ -46,109 +67,211 @@
       });
     </script>
     <h1>Mi perfil</h1>
-    <p class="lead">Aquí se guardan tus resultados cuando los confirmas con el tick verde. Hasta entonces aparecen como incompletos.</p>
-
-    <div class="card" id="resumen"></div>
-    <div id="antro"></div>
-    <div id="postural"></div>
+    <p class="lead" id="intro"></p>
+    <div id="contenido"></div>
   </main>
 
   <nav class="tabs" aria-label="Menú principal">
-    <a href="index.html">Inicio</a>
-    <a href="analisis.html">Análisis</a>
+    <a href="index.html" id="tab-inicio">Inicio</a>
     <a href="perfil.html" aria-current="page">Perfil</a>
   </nav>
 
   <script type="module">
-    import { getScores, totalScore, scoreLabel } from "./shared/scores.js";
+    import { scoreLabel } from "./shared/scores.js";
     import { pendientes } from "./shared/perfil.js";
+    import { sincronizar, evaluaciones, rondaEnCurso, repetirEvaluacion, reiniciarTodo, editarDatos, compararEvaluaciones, notaTotal } from "./shared/evaluaciones.js?v=202611130100";
 
     const $ = (s) => document.querySelector(s);
-    const fmt = (n, d = 1) => (n == null ? "–" : Number(n).toLocaleString("es-ES", { maximumFractionDigits: d }));
+    const fmt = (n, d = 1) => (n == null || !Number.isFinite(Number(n)) ? "–" : Number(n).toLocaleString("es-ES", { maximumFractionDigits: d }));
     const dia = (iso) => new Date(iso).toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" });
+    const corto = (iso) => new Date(iso).toLocaleDateString("es-ES", { day: "numeric", month: "short", year: "2-digit" });
     const leer = (k) => { try { return JSON.parse(localStorage.getItem(k)) || []; } catch { return []; } };
-    const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-    const ultimo = (arr) => arr.filter((r) => r && r.fecha).sort((a, b) => new Date(a.fecha) - new Date(b.fecha)).at(-1);
+    const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+    const tag = (nota, max) => `<span class="tag l${nota / max >= 0.7 ? 2 : nota / max >= 0.5 ? 1 : 0}">${scoreLabel(nota, max)}</span>`;
 
-    const pend = pendientes();
-    const antro = ultimo(leer("sportfy.antropometria.historial"));
-    const post = ultimo(leer("sportfy.postural.historial"));
-    const confirmadas = [antro, post].filter(Boolean).length;
+    sincronizar();
+    let seleccion = new Set();
+    let editando = false;
+    let volverAbierto = false, confirmarReinicio = false, comparando = false;
 
-    // Un aviso si hay resultados vistos sin confirmar (más recientes que lo confirmado).
-    function avisoPendiente(clave, confirmado, href) {
-      const p = pend[clave];
-      if (!p || (confirmado && new Date(confirmado.fecha) >= new Date(p))) return "";
-      return `<p class="aviso">Tienes resultados${confirmado ? " nuevos" : ""} sin confirmar. <a href="${href}">Vuelve y pulsa el tick verde</a> para guardarlos.</p>`;
+    function pintar() {
+      const lista = evaluaciones();
+      const ronda = rondaEnCurso();
+      if (lista.length && !ronda) { $("#tab-inicio").textContent = "Mi plan"; $("#tab-inicio").href = "analisis.html"; document.querySelector(".esquina.menu").href = "analisis.html"; }
+      if (!lista.length) return pintarSinEvaluacion();
+      const ult = lista.at(-1);
+      $("#intro").textContent = `Tienes ${lista.length} ${lista.length === 1 ? "evaluación guardada" : "evaluaciones guardadas"}. Tu plan se calcula con la última.`;
+      const html = [];
+      if (ronda) html.push(`<div class="card" style="border-color:var(--accent)"><b>Tienes una nueva evaluación en curso (n.º ${lista.length + 1}).</b>
+        <p class="note" style="margin:4px 0 8px">Cuando confirmes la antropometría y la postural aparecerá aquí como un nuevo apartado.</p>
+        <a class="btn" style="text-decoration:none;display:inline-block" href="index.html">Continuar evaluación</a></div>`);
+
+      // ---------- Resumen ----------
+      const total = notaTotal(ult);
+      html.push(`<div class="card"><div class="estado">
+        <div class="big">${fmt(total)}<small>/25</small></div>
+        <div>${tag(total, 25)}<div class="note">Evaluación n.º ${lista.length} · ${dia(ult.fecha)}</div></div>
+      </div></div>`);
+
+      html.push(datosFisicos(ult), resultadosPosturales(ult), apartados(lista), volverMenu());
+      $("#contenido").innerHTML = html.join("");
+      enlazar(ult);
+      if (comparando) pintarComparacion();
     }
 
-    function tarjeta({ titulo, confirmado, filas, extra = "", clave, href, max }) {
-      const ok = Boolean(confirmado);
-      const nota = ok && confirmado.nota != null ? `${fmt(confirmado.nota)} / ${max} · ${scoreLabel(confirmado.nota, max)}` : ok ? "Sin nota" : "Incompleto";
-      return `
-        <div class="card ${ok ? "" : "incompleta"}">
-          <div class="ev-head">
-            <h2>${titulo}</h2>
-            ${ok ? `<span class="badge ok">✓ Completado</span>` : `<span class="badge inc">Incompleto</span>`}
+    // ---------- Datos físicos (editables) ----------
+    const CAMPOS = [
+      ["edad", "Edad", "años", 1], ["altura", "Altura", "cm", 0.5], ["peso", "Peso", "kg", 0.1],
+      ["grasa", "% graso", "%", 0.1], ["agua", "% agua", "%", 0.1], ["muscular", "% muscular", "%", 0.1],
+      ["metabolismo", "Metabolismo basal", "kcal", 1], ["edadMetabolica", "Edad metabólica", "años", 1], ["visceral", "Grasa visceral", "nivel", 0.5],
+    ];
+    function datosFisicos(ev) {
+      const d = ev.antro.datos || {};
+      const met = (id) => ev.antro.metricas?.find((m) => m.id === id);
+      const imc = ev.antro.informativos?.find((i) => i.id === "imc");
+      const cuerpo = editando
+        ? `<form id="form-datos"><div class="form-datos">
+            <label>Sexo<select name="sexo"><option value="hombre" ${d.sexo !== "mujer" ? "selected" : ""}>Hombre</option><option value="mujer" ${d.sexo === "mujer" ? "selected" : ""}>Mujer</option></select></label>
+            ${CAMPOS.map(([k, n, u, step]) => `<label>${n} (${u})<input type="number" inputmode="decimal" name="${k}" step="${step}" min="0" value="${d[k] ?? ""}" ${["edad", "altura", "peso"].includes(k) ? "required" : ""}></label>`).join("")}
           </div>
-          <div class="note">${ok ? `Confirmado el ${dia(confirmado.fecha)}` : "Pendiente de confirmar con el tick verde"}</div>
-          <dl class="datos">
-            <dt>Nota</dt><dd>${nota}</dd>
-            ${filas.map(([k, v, sub]) => `<dt>${k}</dt><dd>${ok ? v : "Incompleto"}${ok && sub ? `<small>${esc(sub)}</small>` : ""}</dd>`).join("")}
+          <div class="acciones"><button class="btn" type="submit">Guardar cambios</button><button class="btn secondary" type="button" id="cancelar-edicion">Cancelar</button></div>
+          <p class="note">Al guardar se recalculan tu nota antropométrica y tu plan.</p></form>`
+        : `<dl class="datos">
+            <dt>Sexo y edad</dt><dd>${d.sexo === "mujer" ? "Mujer" : "Hombre"}, ${fmt(d.edad, 0)} años</dd>
+            <dt>Altura</dt><dd>${fmt(d.altura)} cm</dd>
+            <dt>Peso</dt><dd>${fmt(d.peso)} kg${imc ? `<small>IMC ${fmt(imc.valor)} · ${esc(imc.categoria)}</small>` : ""}</dd>
+            ${CAMPOS.slice(3).map(([k, n, u]) => {
+              const m = met(k);
+              if (k === "metabolismo") return d.metabolismo ? `<dt>${n}</dt><dd>${fmt(d.metabolismo, 0)} kcal</dd>` : "";
+              return m ? `<dt>${n}</dt><dd>${fmt(m.valor)} ${u}<small>${esc(m.categoria)} · ${m.puntos}/3 pts</small></dd>` : `<dt>${n}</dt><dd>–<small>Sin dato</small></dd>`;
+            }).join("")}
           </dl>
-          ${extra}
-          ${avisoPendiente(clave, confirmado, href)}
-          <div class="acciones"><a href="${href}">${ok ? "Repetir evaluación →" : "Hacer evaluación →"}</a></div>
-        </div>`;
+          <div class="acciones"><button class="btn secondary" type="button" id="editar">✎ Editar mis datos</button></div>`;
+      return `<h2 class="seccion">Evaluación física</h2>
+        <div class="card"><div class="ev-head"><h2>Datos físicos</h2>${ev.antro.nota != null ? `<span>${fmt(ev.antro.nota)}/15 ${tag(ev.antro.nota, 15)}</span>` : ""}</div>
+        <div class="note">Medidos el ${dia(ev.antro.fecha)}${ev.antro.editado ? ` · editados el ${dia(ev.antro.editado)}` : ""}</div>${cuerpo}</div>`;
     }
 
-    // ---------- Resumen ----------
-    const total = totalScore(getScores());
-    const completo = confirmadas === 2;
-    $("#resumen").innerHTML = `
-      <div class="estado">
-        <div class="big">${completo ? `${fmt(total.points)}<small>/25</small>` : "–"}</div>
-        <div>
-          ${completo ? `<span class="badge ok">✓ Perfil completo</span>` : `<span class="badge inc">Perfil incompleto</span>`}
-          <div class="note">${completo ? `Nota total · ${scoreLabel(total.points, 25)}` : `${confirmadas} de 2 evaluaciones confirmadas`}</div>
-        </div>
+    // ---------- Postural (solo resultados) ----------
+    function resultadosPosturales(ev) {
+      const p = ev.postural, desv = Array.isArray(p.desviaciones) ? p.desviaciones : null;
+      return `<h2 class="seccion">Evaluación postural</h2>
+        <div class="card"><div class="ev-head"><h2>Resultados</h2><span>${fmt(p.nota)}/10 ${tag(p.nota, 10)}</span></div>
+        <div class="note">Realizada el ${dia(p.fecha)}</div>
+        ${desv == null ? `<p class="note">Sin detalle de alteraciones.</p>` : desv.length
+          ? `<p style="margin:10px 0 0"><b>${desv.length} ${desv.length === 1 ? "alteración" : "alteraciones"}:</b></p><ul class="chips">${desv.map((x) => `<li class="tag l1">${esc(x.nombre)}</li>`).join("")}</ul>`
+          : `<p style="margin:10px 0 0">Sin alteraciones: postura excelente.</p>`}</div>`;
+    }
+
+    // ---------- Apartados y comparador ----------
+    function apartados(lista) {
+      const items = lista.map((e, i) => {
+        const desv = Array.isArray(e.postural.desviaciones) ? e.postural.desviaciones : [];
+        return `<div class="card apartado ${seleccion.has(e.id) ? "sel" : ""}">
+          <input type="checkbox" data-id="${e.id}" ${seleccion.has(e.id) ? "checked" : ""} aria-label="Seleccionar evaluación ${i + 1} para comparar">
+          <div>
+            <div class="ev-head"><h2>Evaluación n.º ${i + 1}</h2>${i === lista.length - 1 ? `<span class="badge ok">Actual</span>` : ""}</div>
+            <div class="note">${dia(e.fecha)}</div>
+            <div class="notas"><span>Total <b>${fmt(notaTotal(e))}/25</b></span><span>Antropometría <b>${fmt(e.antro.nota)}/15</b></span><span>Postural <b>${fmt(e.postural.nota)}/10</b></span></div>
+            <details><summary>Ver detalle</summary>
+              <dl class="datos">
+                <dt>Peso</dt><dd>${fmt(e.antro.datos?.peso)} kg</dd>
+                <dt>Altura</dt><dd>${fmt(e.antro.datos?.altura)} cm</dd>
+                ${(e.antro.metricas || []).map((m) => `<dt>${esc(m.nombre)}</dt><dd>${fmt(m.valor)} ${esc(m.unidad)}<small>${esc(m.categoria)}</small></dd>`).join("")}
+                <dt>Alteraciones posturales</dt><dd>${desv.length}</dd>
+              </dl>
+              ${desv.length ? `<ul class="chips">${desv.map((x) => `<li class="tag l1">${esc(x.nombre)}</li>`).join("")}</ul>` : ""}
+            </details>
+          </div></div>`;
+      }).join("");
+      const n = seleccion.size;
+      return `<h2 class="seccion">Mis evaluaciones</h2>
+        <p class="lead">${lista.length > 1 ? "Selecciona 2 o más para compararlas en orden de realización." : "Cuando repitas la evaluación podrás comparar tus resultados aquí."}</p>
+        ${items}
+        ${lista.length > 1 ? `<div class="card comparar-barra"><span>${n < 2 ? `Selecciona ${n ? "al menos 1 más" : "2 o más"}` : `${n} seleccionadas`}</span>
+          <button class="btn" type="button" id="comparar" ${n < 2 ? "disabled" : ""}>Comparar</button></div>` : ""}
+        <div id="comparacion"></div>`;
+    }
+
+    function pintarComparacion() {
+      const c = compararEvaluaciones([...seleccion]);
+      if (!c) { $("#comparacion").innerHTML = ""; return; }
+      const todas = evaluaciones();
+      const num = (e) => todas.findIndex((x) => x.id === e.id) + 1;
+      const d = (x, u) => !x ? "" : x.delta === 0 ? `<span class="delta flat">=</span>` : `<span class="delta ${x.mejora ? "up" : "down"}">${x.delta > 0 ? "▲ +" : "▼ "}${fmt(x.delta)}${u}</span>`;
+      const u = (f) => (["%", "kg"].includes(f.unidad) ? ` ${f.unidad}` : "");
+      $("#comparacion").innerHTML = `<div class="card">
+        <div class="ev-head"><h2>Comparación</h2><span class="note">de la n.º ${num(c.evaluaciones[0])} a la n.º ${num(c.evaluaciones.at(-1))}</span></div>
+        <div class="tabla-wrap"><table class="comp">
+          <thead><tr><th></th>${c.evaluaciones.map((e) => `<th>N.º ${num(e)}<br>${corto(e.fecha)}</th>`).join("")}${c.evaluaciones.length > 2 ? "<th>Total</th>" : ""}</tr></thead>
+          <tbody>${c.filas.map((f) => `<tr><td>${esc(f.nombre)}${f.unidad && !u(f) ? ` <span class="note">${esc(f.unidad)}</span>` : ""}</td>
+            ${f.valores.map((v, i) => `<td><b>${fmt(v)}${v == null ? "" : u(f)}</b>${d(f.cambios[i], u(f))}</td>`).join("")}
+            ${c.evaluaciones.length > 2 ? `<td>${d(f.total, u(f)) || "–"}</td>` : ""}</tr>`).join("")}</tbody>
+        </table></div>
+        <p class="note">Cada flecha compara con la evaluación anterior seleccionada. Verde = mejora.</p>
+        ${c.postural ? `<p style="margin:10px 0 0"><b style="color:var(--good)">Corregido:</b> ${c.postural.corregidas.map((x) => esc(x.nombre)).join(", ") || "nada todavía"}.</p>
+          <p style="margin:6px 0 0"><b style="color:var(--bad)">Nuevo:</b> ${c.postural.nuevas.map((x) => esc(x.nombre)).join(", ") || "ninguna alteración nueva"}.</p>` : ""}
       </div>`;
+    }
 
-    // ---------- Antropometría ----------
-    const m = (id) => antro?.metricas?.find((x) => x.id === id);
-    const met = (id, unidad) => { const x = m(id); return x ? [`${fmt(x.valor)} ${unidad}`, `${x.categoria} · ${x.puntos}/3 pts`] : ["–", "Sin dato (báscula solo de peso)"]; };
-    const imc = antro?.informativos?.find((i) => i.id === "imc");
-    const d = antro?.datos || {};
-    $("#antro").innerHTML = tarjeta({
-      titulo: "Evaluación antropométrica", confirmado: antro, clave: "antropometria", href: "modules/antropometria/index.html", max: 15,
-      filas: [
-        ["Sexo y edad", `${d.sexo === "mujer" ? "Mujer" : "Hombre"}, ${fmt(d.edad, 0)} años`],
-        ["Altura", `${fmt(d.altura)} cm`],
-        ["Peso", `${fmt(d.peso)} kg`],
-        ["IMC", imc ? `${fmt(imc.valor)} kg/m²` : "–", imc?.categoria],
-        ["% graso", ...met("grasa", "%")],
-        ["% agua", ...met("agua", "%")],
-        ["% muscular", ...met("muscular", "%")],
-        ["Edad metabólica", ...met("edadMetabolica", "años")],
-        ["Grasa visceral", ...met("visceral", "nivel")],
-      ],
-    });
+    // ---------- Volver al menú de evaluación ----------
+    function volverMenu() {
+      if (rondaEnCurso()) return "";
+      const panel = !volverAbierto ? "" : confirmarReinicio
+        ? `<div class="opcion" style="margin-top:12px;border-color:var(--bad)"><b>¿Seguro que quieres borrarlo todo?</b>
+            <p>Se eliminarán todas tus evaluaciones, tu plan y tu historial. No se puede deshacer.</p>
+            <div class="acciones"><button class="btn peligro" type="button" id="si-reiniciar">Sí, borrar todo</button><button class="btn secondary" type="button" id="no-reiniciar">Cancelar</button></div></div>`
+        : `<div class="opciones">
+            <div class="opcion"><b>Repetir la evaluación</b><p>Haz una nueva evaluación para ver tu progreso. Las anteriores se conservan aquí, en tu perfil.</p><button class="btn" type="button" id="repetir">Repetir evaluación</button></div>
+            <div class="opcion"><b>Reiniciar todo</b><p>Empieza de cero: se borran todas tus evaluaciones y tu plan.</p><button class="btn secondary" type="button" id="reiniciar">Reiniciar todo</button></div>
+          </div>`;
+      return `<div class="card volver" style="margin-top:28px"><div class="ev-head"><h2>Volver al menú de evaluación</h2>
+        <button class="btn secondary" type="button" id="volver" aria-expanded="${volverAbierto}">${volverAbierto ? "Cerrar" : "Volver al menú inicial"}</button></div>${panel}</div>`;
+    }
 
-    // ---------- Postural ----------
-    const desv = post?.desviaciones || [];
-    const NIVEL = ["Marcada", "Leve"];
-    $("#postural").innerHTML = tarjeta({
-      titulo: "Evaluación postural", confirmado: post, clave: "postural", href: "modules/postural/index.html", max: 10,
-      filas: [
-        ["Pruebas correctas", `${16 - desv.length} de 16`],
-        ["Desviaciones", desv.length ? `${desv.length}` : "Ninguna"],
-      ],
-      extra: post && desv.length
-        ? `<ul class="chips" style="list-style:none;padding:0;margin:10px 0 0;display:flex;flex-wrap:wrap;gap:6px">${desv
-            .sort((a, b) => a.nivel - b.nivel)
-            .map((x) => `<li class="tag l${x.nivel}">${esc(x.nombre)} · ${NIVEL[x.nivel]}</li>`).join("")}</ul>`
-        : "",
-    });
+    function enlazar(ult) {
+      const on = (id, f) => document.getElementById(id)?.addEventListener("click", f);
+      on("editar", () => { editando = true; pintar(); });
+      on("cancelar-edicion", () => { editando = false; pintar(); });
+      $("#form-datos")?.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const f = new FormData(e.target);
+        const cambios = { sexo: f.get("sexo") };
+        for (const [k] of CAMPOS) { const v = parseFloat(String(f.get(k)).replace(",", ".")); cambios[k] = Number.isFinite(v) && v > 0 ? v : undefined; }
+        try { editarDatos(ult.id, cambios); editando = false; pintar(); }
+        catch (err) { alertaForm(err.message); }
+      });
+      document.querySelectorAll(".apartado input[type=checkbox]").forEach((cb) => cb.addEventListener("change", () => {
+        cb.checked ? seleccion.add(cb.dataset.id) : seleccion.delete(cb.dataset.id);
+        pintar();
+      }));
+      on("comparar", () => { comparando = true; pintarComparacion(); $("#comparacion").scrollIntoView({ behavior: "smooth", block: "start" }); });
+      on("volver", () => { volverAbierto = !volverAbierto; confirmarReinicio = false; pintar(); document.getElementById("volver")?.scrollIntoView({ block: "center" }); });
+      on("repetir", () => { repetirEvaluacion(); location.href = "index.html"; });
+      on("reiniciar", () => { confirmarReinicio = true; pintar(); });
+      on("no-reiniciar", () => { confirmarReinicio = false; pintar(); });
+      on("si-reiniciar", () => { reiniciarTodo(); location.href = "index.html"; });
+    }
+    function alertaForm(msg) {
+      const p = document.createElement("p"); p.className = "aviso"; p.textContent = msg;
+      $("#form-datos").append(p);
+    }
+
+    // ---------- Sin evaluación completa todavía ----------
+    function pintarSinEvaluacion() {
+      const pend = pendientes();
+      const ult = (k) => leer(k).filter((r) => r && r.fecha).sort((a, b) => new Date(a.fecha) - new Date(b.fecha)).at(-1);
+      const antro = ult("sportfy.antropometria.historial"), post = ult("sportfy.postural.historial");
+      $("#intro").textContent = "Cuando confirmes las dos evaluaciones con el tick verde, se guardarán aquí y empezará tu plan.";
+      const fila = (nombre, r, clave, href, max) => `<div class="card"><div class="ev-head"><h2>${nombre}</h2>
+        ${r ? `<span class="badge ok">✓ Confirmada</span>` : `<span class="badge inc">Pendiente</span>`}</div>
+        <div class="note">${r ? `${fmt(r.nota)}/${max} · ${dia(r.fecha)}` : pend[clave] ? "Tienes resultados sin confirmar: vuelve y pulsa el tick verde." : "Aún no la has hecho."}</div>
+        <div class="acciones"><a href="${href}" style="font-weight:600">${r ? "Repetir →" : "Hacer evaluación →"}</a></div></div>`;
+      $("#contenido").innerHTML = fila("Evaluación antropométrica", antro, "antropometria", "modules/antropometria/index.html", 15)
+        + fila("Evaluación postural", post, "postural", "modules/postural/index.html", 10);
+    }
+
+    pintar();
   </script>
 </body>
 </html>

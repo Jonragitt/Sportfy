@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Análisis de resultados · Forty5</title>
+  <title>Mi plan · Forty5</title>
   <link rel="stylesheet" href="shared/esquinas.css?v=202611051850">
   <link rel="icon" href="shared/logo/icono.svg" type="image/svg+xml">
   <link rel="stylesheet" href="shared/styles.css?v=202611052135">
@@ -65,12 +65,13 @@
     .empty { text-align: center; padding: 24px 16px; }
     .empty p { margin: 0 0 12px; color: var(--muted); }
     .empty .btn { text-decoration: none; display: inline-block; margin: 4px; }
+    .tabs a { white-space: nowrap; }
     .guardado { font-size: .85rem; color: var(--good); font-weight: 600; margin: 10px 0 0; }
     @media (max-width: 420px) { .big { font-size: 2rem; } .kpi b { font-size: 1.15rem; } }
   </style>
 </head>
 <body class="con-esquinas con-fondo">
-  <a class="esquina menu" href="index.html" aria-label="Menú principal"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 11L12 4l8.5 7M6 9.5V20h4.5v-5.5h3V20H18V9.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+  <a class="esquina menu" href="analisis.html" aria-label="Menú principal"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 11L12 4l8.5 7M6 9.5V20h4.5v-5.5h3V20H18V9.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
   <a class="esquina perfil" href="perfil.html" aria-label="Mi perfil"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M4.5 20.5c1.2-4 4.1-6 7.5-6s6.3 2 7.5 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></a>
   <main class="wrap">
     <nav class="topbar" aria-label="Navegación">
@@ -85,21 +86,22 @@
         if (history.length > 1 && document.referrer.startsWith(location.origin)) { e.preventDefault(); history.back(); }
       });
     </script>
-    <h1>Análisis de resultados</h1>
-    <p class="lead">Qué dicen tus evaluaciones, qué trabajar primero y los datos con los que se ajusta tu plan de gimnasio.</p>
+    <div id="repeticion"></div>
+    <h1>Tu plan</h1>
+    <p class="lead">Calculado a partir de tu última evaluación: qué dicen tus resultados, qué trabajar primero y los datos con los que se ajusta tu rutina de gimnasio.</p>
 
     <div id="contenido"></div>
   </main>
 
   <nav class="tabs" aria-label="Menú principal">
-    <a href="index.html">Inicio</a>
-    <a href="analisis.html" aria-current="page">Análisis</a>
+    <a href="analisis.html" aria-current="page">Mi plan</a>
     <a href="perfil.html">Perfil</a>
   </nav>
 
   <script type="module">
     import { analizar, perfilRutina, guardarPerfilRutina, series, comparar, evolucionPostural, proximaEvaluacion, CORRECTIVOS } from "./shared/analisis.js?v=202611130030";
     import { ACTIVIDAD } from "./shared/plan.js?v=202611130030";
+    import { sincronizar, evaluaciones, rondaEnCurso } from "./shared/evaluaciones.js?v=202611130100";
 
     const $ = (s) => document.querySelector(s);
     const fmt = (n, d = 1) => (n == null || !Number.isFinite(n) ? "–" : Number(n).toLocaleString("es-ES", { maximumFractionDigits: d }));
@@ -110,18 +112,22 @@
     const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
     const nivelTag = (pct) => (pct >= 70 ? 2 : pct >= 50 ? 1 : 0);
 
-    const histAntro = leer("sportfy.antropometria.historial");
-    let histPost = leer("sportfy.postural.historial");
-    // Evaluaciones posturales anteriores al historial: se usa la última nota guardada.
-    const scores = leer("sportfy.scores", {});
-    if (!histPost.length && scores.postural?.score != null) histPost = [{ fecha: scores.postural.date, nota: scores.postural.score, max: 10, desviaciones: null }];
+    // El plan se calcula con las evaluaciones completas (apartados del perfil).
+    sincronizar();
+    const apartados = evaluaciones();
+    const histAntro = apartados.map((e) => e.antro);
+    const histPost = apartados.map((e) => e.postural);
+    if (apartados.length && rondaEnCurso()) {
+      $("#repeticion").innerHTML = `<div class="card" style="border-color:var(--accent)"><b>Tienes una nueva evaluación en curso.</b>
+        <p class="note" style="margin:4px 0 8px">Tu plan se actualizará cuando confirmes la antropometría y la postural.</p>
+        <a class="btn" style="text-decoration:none;display:inline-block" href="index.html">Continuar evaluación</a></div>`;
+    }
 
     const a = analizar(histAntro, histPost);
 
     if (!a.antro && !a.postural) {
-      $("#contenido").innerHTML = `<div class="card empty"><p>Todavía no hay resultados que analizar. Haz tus evaluaciones y confírmalas con el tick verde.</p>
-        <a class="btn" href="modules/antropometria/index.html">Evaluación antropométrica</a>
-        <a class="btn" href="modules/postural/index.html">Evaluación postural</a></div>`;
+      $("#contenido").innerHTML = `<div class="card empty"><p>Tu plan aparecerá cuando completes la evaluación antropométrica y la postural y confirmes las dos con el tick verde.</p>
+        <a class="btn" href="index.html">Ir a las evaluaciones</a></div>`;
     } else {
       pintar();
     }
@@ -240,7 +246,7 @@
       const evP = evolucionPostural(histPost);
       const prox = proximaEvaluacion(histAntro, histPost);
       html.push(`<section class="sec"><h2>Tu evolución</h2>
-        <p class="lead">${hayEvol ? "Cambios desde tu primera evaluación." : "Repite las evaluaciones en las mismas condiciones para ver aquí cómo cambias."}${prox ? ` Próxima evaluación recomendada: <b>${fechaLarga(prox)}</b>.` : ""}</p>
+        <p class="lead">${hayEvol ? "Cambios desde tu primera evaluación." : "Cuando repitas la evaluación desde tu perfil, aquí verás cómo cambias."}${prox ? ` Próxima evaluación recomendada: <b>${fechaLarga(prox)}</b>.` : ""}</p>
         ${evP ? `<div class="card" style="margin-bottom:12px"><div class="grid2">
           <div><b style="color:var(--good)">Corregido (${evP.corregidas.length})</b><ul class="chips">${evP.corregidas.map((d) => `<li class="tag l2">${esc(d.nombre)}</li>`).join("") || `<li class="note">Nada todavía</li>`}</ul></div>
           <div><b style="color:var(--bad)">Nuevo (${evP.nuevas.length})</b><ul class="chips">${evP.nuevas.map((d) => `<li class="tag l0">${esc(d.nombre)}</li>`).join("") || `<li class="note">Ninguna alteración nueva</li>`}</ul></div>
@@ -263,7 +269,7 @@
       if (!p) {
         $("#plan").innerHTML = `<div class="card"><p style="margin:0"><b>Objetivo: ${esc(perfil.objetivo.nombre)}.</b> ${esc(perfil.objetivo.texto)}</p>
           <p class="note">Para calcular calorías y macros necesitamos tu evaluación antropométrica con edad, altura y peso.</p>
-          <a class="btn" style="text-decoration:none;display:inline-block;margin-top:8px" href="modules/antropometria/index.html">Hacer evaluación antropométrica</a></div>`;
+          </div>`;
         return;
       }
       const kcalM = p.macros.proteina * 4 + p.macros.grasa * 9 + p.macros.hidratos * 4;

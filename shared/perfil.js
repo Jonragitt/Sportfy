@@ -33,5 +33,13 @@ export function montarTick(contenedor, botonResultados, onConfirmar, rutaPerfil)
     onConfirmar();
     botonResultados.classList.add("oculto");
     contenedor.innerHTML = `<div class="confirmado"><span>✓ Guardado en tu perfil</span><a href="${rutaPerfil}">Ver perfil →</a></div>`;
+    // Si con esto quedan confirmadas las dos evaluaciones, se guarda el apartado
+    // y la app pasa al modo plan: el motor de cálculo empieza el análisis.
+    const base = new URL(rutaPerfil, location.href);
+    import(new URL("evaluaciones.js", import.meta.url).href).then(({ sincronizar, modo }) => {
+      if (sincronizar() && modo() === "plan") {
+        contenedor.innerHTML = `<div class="confirmado"><span>✓ Evaluación completa: tu plan está listo</span><a href="${new URL("analisis.html", base).href}">Ver mi plan →</a></div>`;
+      }
+    }).catch(() => { /* sin cambios de modo */ });
   });
 }
