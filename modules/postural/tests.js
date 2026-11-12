@@ -25,6 +25,7 @@ export const SECTIONS = [
       },
       {
         id: "hombros",
+        exclusive: true, // alteraciones opuestas: solo se puede marcar una (por lado)
         name: "Hombros",
         how: "El acromion debe quedar alineado con la oreja y la cadera.",
         options: [
@@ -42,6 +43,7 @@ export const SECTIONS = [
       },
       {
         id: "cadera",
+        exclusive: true, // alteraciones opuestas: solo se puede marcar una (por lado)
         name: "Cadera / pelvis",
         how: "Las espinas ilíacas anterior y posterior deben quedar casi a la misma altura (pelvis neutra).",
         options: [
@@ -59,6 +61,7 @@ export const SECTIONS = [
       },
       {
         id: "rodilla",
+        exclusive: true, // alteraciones opuestas: solo se puede marcar una (por lado)
         name: "Rodilla",
         how: "La línea debe pasar ligeramente por delante del eje de la rodilla, sin bloquearla ni flexionarla.",
         options: [
@@ -108,6 +111,7 @@ export const SECTIONS = [
       },
       {
         id: "escapulas",
+        exclusive: true, // alteraciones opuestas: solo se puede marcar una (por lado)
         name: "Escápulas",
         how: "De espaldas, el borde interno de cada escápula debe quedar a unos 5-7 cm de la columna.",
         options: [
@@ -137,6 +141,7 @@ export const SECTIONS = [
       },
       {
         id: "rodillaFrontal",
+        exclusive: true, // alteraciones opuestas: solo se puede marcar una (por lado)
         name: "Rodillas",
         how: "De frente, con los pies juntos: deben tocarse a la vez rodillas y tobillos.",
         options: [
@@ -154,6 +159,7 @@ export const SECTIONS = [
       },
       {
         id: "tobillo",
+        exclusive: true, // alteraciones opuestas: solo se puede marcar una (por lado)
         name: "Tobillos",
         how: "De espaldas, el tendón de Aquiles debe quedar vertical respecto al talón.",
         options: [
@@ -185,6 +191,8 @@ export const SECTIONS = [
     zones: [
       {
         id: "sohPies",
+        // El arco no puede caer y quedar alto a la vez: solo una de las dos por lado.
+        grupos: [["sohArcoCae", "sohPieCavo"]],
         name: "Pies",
         how: "Los pies deben quedar fijos, apuntando al frente y con el peso repartido por igual.",
         options: [
@@ -216,6 +224,7 @@ export const SECTIONS = [
       },
       {
         id: "sohRodillas",
+        exclusive: true, // alteraciones opuestas: solo se puede marcar una (por lado)
         name: "Rodillas",
         how: "Las rodillas deben seguir la línea de los pies, sin ir hacia dentro ni hacia fuera.",
         options: [

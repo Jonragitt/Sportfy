@@ -1,4 +1,4 @@
-import { SECTIONS, SIDES, ALL_ZONES, MAX_POINTS, computeScore, selectedOptions, optionLabel, alteredZoneCount } from "./tests.js?v=202611052135";
+import { SECTIONS, SIDES, ALL_ZONES, MAX_POINTS, computeScore, selectedOptions, optionLabel, alteredZoneCount } from "./tests.js?v=202611130200";
 import { saveScore, getScores, scoreLabel } from "../../shared/scores.js?v=202611052135";
 import { marcarPendiente, quitarPendiente, montarTick } from "../../shared/perfil.js";
 
@@ -27,11 +27,14 @@ function circle(zone, value, label) {
   const input = el("input", { type: "checkbox", class: "circle", name: zone.id, value });
   if (label) input.setAttribute("aria-label", label);
   input.addEventListener("change", () => {
-    // Zonas exclusivas (positivo/negativo): un solo resultado por lado.
-    if (zone.exclusive && input.checked) {
-      const side = value.includes(":") ? value.split(":")[1] : null;
+    // Opciones opuestas (anteversión/retroversión, valgo/varo, positivo/negativo…):
+    // al marcar una se desmarca la contraria del mismo lado.
+    if (input.checked) {
+      const [id, side = null] = value.split(":");
+      const rivales = zone.exclusive ? zone.options.map((o) => o.id) : (zone.grupos || []).find((g) => g.includes(id)) || [];
       form.querySelectorAll(`input[name="${zone.id}"]:checked`).forEach((other) => {
-        if (other !== input && (side == null || other.value.endsWith(`:${side}`))) other.checked = false;
+        const [oid, oside = null] = other.value.split(":");
+        if (other !== input && oid !== id && rivales.includes(oid) && oside === side) other.checked = false;
       });
     }
     onChange(zone);
@@ -40,7 +43,7 @@ function circle(zone, value, label) {
 }
 
 // Botón "Ver ejemplo": despliega el GIF de la alteración (en bilaterales, izquierda y derecha).
-const GIF_V = "202611052135";
+const GIF_V = "202611051800";
 // Solo un ejemplo abierto a la vez: al abrir uno se cierra el anterior.
 let demoAbierto = null;
 function demo(opt, sides) {
@@ -91,6 +94,14 @@ function exerciseCard(section) {
   return el("div", { class: "card ejercicio" }, el("h3", {}, "Cómo se hace"), fig);
 }
 
+// Título de la zona, con aviso cuando las opciones son excluyentes.
+function titulo(zone) {
+  const h = el("h3", {}, zone.name);
+  if (zone.exclusive && zone.options.length > 1) h.append(" ", el("span", { class: "unica" }, isBilateralZone(zone) ? "Una opción por lado" : "Solo una opción"));
+  return h;
+}
+const isBilateralZone = (zone) => SECTIONS.some((s) => s.bilateral && s.zones.includes(zone));
+
 // Zona normal: un círculo por opción.
 function zoneCard(zone) {
   const options = el("div", { class: "options" });
@@ -101,7 +112,7 @@ function zoneCard(zone) {
       panel
     );
   }
-  return el("div", { class: "card" }, el("h3", {}, zone.name), el("p", { class: "how" }, zone.how), options);
+  return el("div", { class: "card" }, titulo(zone), el("p", { class: "how" }, zone.how), options);
 }
 
 // Zona bilateral: columnas I y D con un círculo por lado en cada opción.
@@ -119,7 +130,7 @@ function bilateralCard(zone, section) {
     for (const k of Object.keys(SIDES)) row.append(el("label", { class: "lado-cel" }, circle(zone, `${opt.id}:${k}`, `${opt.name}, lado ${SIDES[k].toLowerCase()}`)));
     rows.append(row, panel);
   }
-  return el("div", { class: "card" }, el("h3", {}, zone.name), el("p", { class: "how" }, zone.how), rows);
+  return el("div", { class: "card" }, titulo(zone), el("p", { class: "how" }, zone.how), rows);
 }
 
 function render() {
