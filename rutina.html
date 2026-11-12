@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mi rutina · Forty5</title>
+  <link rel="stylesheet" href="shared/esquinas.css?v=202611051850">
+  <link rel="icon" href="shared/logo/icono.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="shared/styles.css?v=202611051940">
+  <style>
+    .tabs a { white-space: nowrap; padding: 10px 18px; }
+    .prefs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .prefs label:last-child { grid-column: 1 / -1; }
+    .prefs label { display: grid; gap: 4px; font-size: .85rem; color: var(--muted); font-weight: 600; }
+    select { font: inherit; font-size: 1rem; padding: 9px 10px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); color: var(--text); width: 100%; }
+    .resumen { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+    .semanas { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 10px; }
+    .semanas button { font: inherit; font-size: .82rem; font-weight: 700; padding: 8px 4px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; line-height: 1.2; }
+    .semanas button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .semanas small { display: block; font-weight: 500; opacity: .85; }
+    .dias { display: flex; gap: 6px; overflow-x: auto; padding: 4px 0; margin: 18px 0 0; scrollbar-width: none; }
+    .dias button { flex: none; font: inherit; font-weight: 700; padding: 9px 14px; border-radius: 99px; border: 1px solid rgba(255,255,255,.35); background: rgba(0,0,0,.45); color: #fff; cursor: pointer; }
+    .dias button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); }
+    .dias button.hecho::after { content: " ✓"; }
+    .bloque-titulo { font-size: .8rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 700; margin: 16px 0 6px; }
+    .ej { border-top: 1px solid var(--border); padding: 12px 0; display: grid; grid-template-columns: 30px 1fr; gap: 10px; }
+    .ej:first-of-type { border-top: 0; }
+    .num { width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: #fff; font-weight: 800; display: grid; place-content: center; font-size: .9rem; }
+    .num.ss { background: var(--mid); }
+    .ej h4 { margin: 0; font-size: 1rem; }
+    .pauta { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 4px; font-size: .92rem; }
+    .pauta b { font-size: 1.05rem; }
+    .ej p { margin: 4px 0 0; font-size: .88rem; }
+    .por-que { color: var(--good); font-weight: 600; }
+    .lado { color: var(--accent); font-weight: 600; }
+    .lista { margin: 0; padding-left: 18px; }
+    .hecho-btn { margin-top: 12px; width: 100%; }
+    .vol { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 6px; margin-top: 8px; }
+    .vol div { border: 1px solid var(--border); border-radius: 10px; padding: 6px 10px; font-size: .85rem; }
+    .vol b { display: block; font-size: 1.1rem; }
+    .aviso { margin: 10px 0 0; padding: 10px 12px; border-radius: 10px; font-size: .9rem; background: color-mix(in srgb, var(--mid) 15%, transparent); }
+    .empty { text-align: center; padding: 24px 16px; }
+    .empty p { margin: 0 0 12px; color: var(--muted); }
+    .empty .btn { text-decoration: none; display: inline-block; }
+  </style>
+</head>
+<body class="con-esquinas con-fondo">
+  <a class="esquina menu" href="analisis.html" aria-label="Menú principal"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 11L12 4l8.5 7M6 9.5V20h4.5v-5.5h3V20H18V9.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+  <a class="esquina perfil" href="perfil.html" aria-label="Mi perfil"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M4.5 20.5c1.2-4 4.1-6 7.5-6s6.3 2 7.5 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></a>
+  <main class="wrap">
+    <nav class="topbar" aria-label="Navegación">
+      <a class="icon-btn" id="atras" href="analisis.html" aria-label="Volver atrás">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+      <a class="topbar-logo" href="analisis.html" aria-label="Forty5 · Inicio"><img class="logo-img" src="shared/logo/forty5-titulo.png" alt="Forty5" width="900" height="214"></a>
+      <span class="hueco" aria-hidden="true"></span>
+    </nav>
+    <h1>Mi rutina</h1>
+    <p class="lead" id="intro">Diseñada para ti con los resultados de tu evaluación: objetivo, nivel, postura y lado débil.</p>
+    <div id="contenido"></div>
+  </main>
+
+  <nav class="tabs" aria-label="Menú principal">
+    <a href="analisis.html">Mi plan</a>
+    <a href="rutina.html" aria-current="page">Rutina</a>
+    <a href="perfil.html">Perfil</a>
+  </nav>
+
+  <script type="module">
+    import { perfilRutina } from "./shared/analisis.js?v=202611130130";
+    import { sincronizar, evaluaciones, rondaEnCurso } from "./shared/evaluaciones.js?v=202611130100";
+    import { generarRutina, semanaDelCiclo, MATERIAL, SEMANAS, REPARTOS } from "./shared/rutina.js?v=202611130130";
+
+    const $ = (s) => document.querySelector(s);
+    const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+    const leer = (k, def) => { try { return JSON.parse(localStorage.getItem(k)) ?? def; } catch { return def; } };
+    const escribir = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* sin almacenamiento */ } };
+
+    sincronizar();
+    const apartados = evaluaciones();
+    // La rutina solo se abre con las dos evaluaciones completadas y confirmadas.
+    if (!apartados.length) {
+      $("#intro").textContent = "Tu rutina se abrirá cuando completes y confirmes las dos evaluaciones.";
+      $("#contenido").innerHTML = `<div class="card empty"><p>Necesitamos tu evaluación antropométrica y tu evaluación postural, las dos confirmadas con el tick verde, para diseñar tu rutina.</p>
+        <a class="btn" href="index.html">Ir a las evaluaciones</a></div>`;
+      document.querySelector(".tabs").innerHTML = `<a href="index.html">Inicio</a><a href="perfil.html">Perfil</a>`;
+      document.querySelector(".esquina.menu").href = "index.html";
+    } else {
+      const perfil = perfilRutina(apartados.map((e) => e.antro), apartados.map((e) => e.postural), { actividad: leer("sportfy.actividad", "ligera") });
+      const auto = semanaDelCiclo(perfil.fecha);
+      let prefs = { dias: perfil.diasFuerza ?? 3, minutos: 60, material: "gimnasio", ...leer("sportfy.preferencias", {}) };
+      let semana = auto, dia = 1;
+      const hechos = () => leer("sportfy.sesionesHechas", {});
+      const claveSemana = () => { const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); return d.toISOString().slice(0, 10); };
+
+      function pintar() {
+        const r = generarRutina(perfil, { ...prefs, semana });
+        escribir("sportfy.rutina", r);
+        const hechosSemana = hechos()[claveSemana()] ?? [];
+        const s = r.sesiones[Math.min(dia, r.sesiones.length) - 1];
+        const opt = (obj, val, txt) => Object.entries(obj).map(([k, v]) => `<option value="${k}" ${String(k) === String(val) ? "selected" : ""}>${esc(txt(k, v))}</option>`).join("");
+        const html = [];
+        if (rondaEnCurso()) html.push(`<div class="card" style="border-color:var(--accent)"><b>Tienes una nueva evaluación en curso.</b> <span class="note">Tu rutina se recalculará cuando confirmes las dos evaluaciones.</span> <a href="index.html">Continuar →</a></div>`);
+        html.push(`<div class="card">
+          <div class="prefs">
+            <label>Días por semana<select id="p-dias">${opt(REPARTOS, prefs.dias, (k) => `${k} días`)}</select></label>
+            <label>Tiempo por sesión<select id="p-min">${opt({ 45: 0, 60: 0, 75: 0, 90: 0 }, prefs.minutos, (k) => `${k} min`)}</select></label>
+            <label>Dónde entrenas<select id="p-mat">${opt(MATERIAL, prefs.material, (k, v) => v.nombre)}</select></label>
+          </div>
+          <div class="resumen">
+            <span class="tag l2">${esc(r.objetivo?.nombre)}</span>
+            <span class="tag l1">Nivel ${esc(r.nivel)}</span>
+            <span class="tag l1">${esc(r.reparto.nombre)}</span>
+            ${r.ladoDebil ? `<span class="tag l0">Lado débil: ${r.ladoDebil === "I" ? "izquierdo" : "derecho"}</span>` : ""}
+          </div>
+          <div class="semanas" role="group" aria-label="Semana del ciclo">${SEMANAS.map((w) => `<button type="button" data-semana="${w.n}" aria-pressed="${w.n === semana}">Sem. ${w.n}${w.n === auto ? " · hoy" : ""}<small>${esc(w.nombre)}</small></button>`).join("")}</div>
+          <p class="note" style="margin:8px 0 0">${esc(r.semana.nota)}</p>
+        </div>`);
+
+        html.push(`<div class="dias" role="group" aria-label="Día">${r.sesiones.map((x) => `<button type="button" data-dia="${x.dia}" aria-pressed="${x.dia === s.dia}" class="${hechosSemana.includes(x.dia) ? "hecho" : ""}">Día ${x.dia}</button>`).join("")}</div>`);
+
+        let n = 0;
+        const ejercicios = s.bloques.map((b, i) => {
+          const ss = b.superserieDe;
+          if (!ss) n++;
+          return `<div class="ej">
+            <span class="num ${ss ? "ss" : ""}" title="${ss ? "Superserie con el anterior" : ""}">${ss ? `${n}b` : b.superserie ? `${n}a` : n}</span>
+            <div>
+              <h4>${esc(b.nombre)}</h4>
+              <div class="pauta"><span><b>${b.series} × ${esc(b.reps)}</b></span>${b.rir != null ? `<span>RIR ${b.rir}</span>` : ""}<span>Descanso ${esc(ss ? "al terminar el par" : b.descanso)}</span>${b.superserie ? `<span class="note">Superserie con el siguiente</span>` : ""}</div>
+              <p class="note">${esc(b.tecnica)}</p>
+              ${b.motivo ? `<p class="por-que">${esc(b.motivo)}</p>` : ""}
+              ${b.lado ? `<p class="lado">${esc(b.lado)}</p>` : ""}
+            </div></div>`;
+        }).join("");
+
+        html.push(`<div class="card">
+          <div class="row" style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:baseline"><h2 style="margin:0">Día ${s.dia} · ${esc(s.nombre)}</h2><span class="note">≈ ${s.minutos} min</span></div>
+          <div class="bloque-titulo">Calentamiento</div>
+          <ul class="lista"><li>${esc(s.calentamiento.general)}</li>${s.calentamiento.movilidad.map((m) => `<li>${esc(m)} · 1 min</li>`).join("")}</ul>
+          ${s.activacion.length ? `<div class="bloque-titulo">Activación correctiva</div><ul class="lista">${s.activacion.map((a) => `<li>${esc(a.nombre)} · ${a.series} × ${esc(a.reps)} <span class="note">(${esc(a.motivo)})</span></li>`).join("")}</ul>` : ""}
+          <p class="note" style="margin:6px 0 0">${esc(s.calentamiento.aproximacion)}</p>
+          <div class="bloque-titulo">Entrenamiento</div>
+          ${ejercicios}
+          ${s.cardio ? `<div class="bloque-titulo">Final</div><p style="margin:0">${esc(s.cardio)}</p>` : ""}
+          ${s.recortados.length ? `<p class="aviso">Para que quepa en ${prefs.minutos} min se han quitado: ${esc(s.recortados.join(", "))}. Si tienes más tiempo, súbelo arriba.</p>` : ""}
+          <button class="btn ${hechosSemana.includes(s.dia) ? "secondary" : ""} hecho-btn" type="button" id="hecho">${hechosSemana.includes(s.dia) ? "✓ Sesión completada esta semana" : "Marcar sesión como hecha"}</button>
+        </div>`);
+
+        if (r.cardioExtra) html.push(`<div class="card"><h3>Cardio en los días sin pesas</h3><p style="margin:4px 0 0">${r.cardioExtra.dias} ${r.cardioExtra.dias === 1 ? "día" : "días"} a la semana: ${esc(r.cardioExtra.tipo)}.${r.cardioExtra.pasos ? ` Y cada día, ${esc(r.cardioExtra.pasos)}.` : ""}</p></div>`);
+
+        const NOM = { piernas: "Piernas", gluteo: "Glúteo", isquios: "Isquios", pecho: "Pecho", espalda: "Espalda", hombro: "Hombro", brazos: "Brazos", core: "Core", gemelo: "Gemelo" };
+        html.push(`<div class="card"><h3>Cómo progresar</h3><p style="margin:4px 0 0">${esc(r.progresion)}</p>
+          <p class="note" style="margin:8px 0 0"><b>RIR</b> = repeticiones que te quedan en recámara al terminar la serie. RIR 2 = podrías hacer 2 más con buena técnica.</p>
+          <div class="bloque-titulo">Series a la semana por grupo</div>
+          <div class="vol">${Object.entries(r.volumen).sort((a, b) => b[1] - a[1]).map(([g, v]) => `<div>${esc(NOM[g] ?? g)}<b>${v}</b></div>`).join("")}</div>
+          ${r.precauciones.length ? `<p class="aviso"><b>Precauciones por tu postura:</b> ${r.precauciones.map(esc).join(" ")}</p>` : ""}
+        </div>`);
+
+        $("#contenido").innerHTML = html.join("");
+        const on = (sel, ev, f) => document.querySelectorAll(sel).forEach((el) => el.addEventListener(ev, f));
+        const guardar = () => { escribir("sportfy.preferencias", prefs); dia = Math.min(dia, prefs.dias); pintar(); };
+        on("#p-dias", "change", (e) => { prefs.dias = Number(e.target.value); guardar(); });
+        on("#p-min", "change", (e) => { prefs.minutos = Number(e.target.value); guardar(); });
+        on("#p-mat", "change", (e) => { prefs.material = e.target.value; guardar(); });
+        on("[data-semana]", "click", (e) => { semana = Number(e.currentTarget.dataset.semana); pintar(); });
+        on("[data-dia]", "click", (e) => { dia = Number(e.currentTarget.dataset.dia); pintar(); });
+        on("#hecho", "click", () => {
+          const h = hechos(), k = claveSemana(), lista = new Set(h[k] ?? []);
+          lista.has(s.dia) ? lista.delete(s.dia) : lista.add(s.dia);
+          h[k] = [...lista];
+          escribir("sportfy.sesionesHechas", h);
+          if (lista.has(s.dia) && dia < r.sesiones.length) dia++;
+          pintar();
+        });
+      }
+      pintar();
+    }
+  </script>
+</body>
+</html>

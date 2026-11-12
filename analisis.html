@@ -65,7 +65,7 @@
     .empty { text-align: center; padding: 24px 16px; }
     .empty p { margin: 0 0 12px; color: var(--muted); }
     .empty .btn { text-decoration: none; display: inline-block; margin: 4px; }
-    .tabs a { white-space: nowrap; }
+    .tabs a { white-space: nowrap; padding: 10px 18px; }
     .guardado { font-size: .85rem; color: var(--good); font-weight: 600; margin: 10px 0 0; }
     @media (max-width: 420px) { .big { font-size: 2rem; } .kpi b { font-size: 1.15rem; } }
   </style>
@@ -95,6 +95,7 @@
 
   <nav class="tabs" aria-label="Menú principal">
     <a href="analisis.html" aria-current="page">Mi plan</a>
+    <a href="rutina.html">Rutina</a>
     <a href="perfil.html">Perfil</a>
   </nav>
 
@@ -301,7 +302,7 @@
         ${p.ajuste.motivos.length ? `<div class="ajuste"><p><b>Ajuste automático por tu evolución${p.ajuste.kcal ? ` (${p.ajuste.kcal > 0 ? "+" : ""}${p.ajuste.kcal} kcal)` : ""}</b></p>${p.ajuste.motivos.map((m) => `<p>${esc(m)}</p>`).join("")}</div>`
           : `<div class="ajuste"><p>Cuando repitas la evaluación antropométrica (en 4–6 semanas), las calorías se reajustarán solas según cómo haya cambiado tu peso y tu músculo.</p></div>`}
         ${perfil.precauciones.length ? `<p class="precaucion"><b>Precauciones en el gimnasio:</b> ${perfil.precauciones.map(esc).join(" ")}</p>` : ""}
-        <p class="guardado">✓ Datos guardados para generar tu rutina de gimnasio</p>
+        <a class="btn" href="rutina.html" style="display:block;text-align:center;text-decoration:none;margin-top:14px">Ver mi rutina de gimnasio →</a>
         <p class="note" style="margin:4px 0 0">Estimaciones con fórmulas validadas (Katch-McArdle, Mifflin-St Jeor). No sustituyen el consejo médico o de un nutricionista.</p>
       </div>`;
       $("#actividad").addEventListener("change", (ev) => { escribir("sportfy.actividad", ev.target.value); pintarPlan(); });
