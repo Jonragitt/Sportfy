@@ -264,6 +264,11 @@ export const SECTIONS = [
     id: "slb",
     title: "Puente de cadera a una pierna (SLB)",
     bilateral: true,
+    // Cómo se hace el test: imágenes propias que sustituyen a los ejemplos por opción.
+    media: [
+      { src: "ejercicios/slb-lateral.gif", alt: "Puente de cadera a una pierna visto de perfil, en bucle", caption: "Vista lateral", w: 380, h: 508 },
+      { src: "ejercicios/slb-fases.png", alt: "Fases del puente a una pierna: posición inicial, inicio de la elevación, elevación progresiva, puente completo y retorno controlado", caption: "Fases del movimiento", w: 900, h: 1260, wide: true },
+    ],
     intro:
       "Tumbado boca arriba, rodillas flexionadas y brazos cruzados sobre el pecho. Estira una pierna y eleva la cadera con la otra hasta alinear hombro, cadera y rodilla. Mantén 5 segundos y repite con cada pierna. Marca el lado de la pierna de apoyo: I (izquierda) o D (derecha).",
     zones: [
