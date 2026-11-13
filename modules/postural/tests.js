@@ -285,7 +285,6 @@ export const SECTIONS = [
     id: "slb",
     title: "Puente de cadera a una pierna (SLB)",
     bilateral: true,
-    ejemplos: true, // además del cómo se hace, cada opción mantiene su "Ver ejemplo"
     // Cómo se hace el test: imágenes propias que sustituyen a los ejemplos por opción.
     media: [
       { src: "ejercicios/slb-lateral.gif", alt: "Puente de cadera a una pierna visto de perfil, en bucle", caption: "Vista lateral", w: 380, h: 508 },
@@ -341,7 +340,6 @@ export const SECTIONS = [
     id: "wallAngel",
     title: "Wall angel test",
     bilateral: true,
-    ejemplos: true, // además del cómo se hace, cada opción mantiene su "Ver ejemplo"
     media: [
       { src: "ejercicios/wa-lateral.gif", alt: "Wall angel visto de perfil: los brazos se deslizan por la pared de W a arriba, en bucle", caption: "Vista lateral", w: 380, h: 508 },
       { src: "ejercicios/wa-fases.png", alt: "Fases del wall angel: posición inicial, inicio del deslizamiento, subida progresiva, brazos arriba y bajada controlada", caption: "Fases del movimiento", w: 900, h: 1814, wide: true },
@@ -374,7 +372,6 @@ export const SECTIONS = [
     id: "lunge",
     title: "Lunge test / dorsiflexión (10 cm)",
     bilateral: true,
-    ejemplos: true, // además del cómo se hace, cada opción mantiene su "Ver ejemplo"
     media: [
       { src: "ejercicios/lunge-lateral.gif", alt: "Lunge test visto de perfil: la rodilla avanza hasta tocar la pared sin despegar el talón, en bucle", caption: "Vista lateral", w: 380, h: 508 },
       { src: "ejercicios/lunge-fases.png", alt: "Fases del lunge test: posición inicial, rodilla hacia delante, talón apoyado, rodilla toca la pared y cambio de pierna", caption: "Fases del movimiento", w: 900, h: 1364, wide: true },
