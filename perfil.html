@@ -300,7 +300,7 @@
   <script type="module" src="shared/racha.js?v=202611130500"></script>
   <script type="module">
     // Tarjeta "Tu cuenta": con quién has iniciado sesión y si el progreso está guardado en la nube.
-    import { cuenta, googleAppleListos, iniciarSesion, cerrarSesion } from "./shared/cuenta.js?v=202611130650";
+    import { cuenta, googleAppleListos, iniciarSesion, cerrarSesion } from "./shared/cuenta.js?v=202611130655";
     const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
     const TEXTO = { guardado: "✓ Progreso guardado en la nube", error: "No se ha podido guardar ahora; se reintentará solo.", conectado: "Conectando con la nube…" };
     let estado = null;

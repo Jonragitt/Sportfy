@@ -130,7 +130,10 @@ async function sincronizar(n) {
       // Primera vez en este dispositivo con esta cuenta.
       if (hayNube && hayLocal && JSON.stringify(nube.datos) !== JSON.stringify(progresoLocal())) return elegirProgreso(n, nube);
       if (hayNube) return aplicarNube(nube);
-      escribir(NUBE, { version: 0, hashes: {} });
+      // Deja creada la ficha de la persona aunque aún no tenga progreso que subir.
+      const version = Date.now();
+      await n.escribir([], [], version);
+      escribir(NUBE, { version, hashes: {} });
     } else if ((nube.meta?.actualizado ?? 0) > (est.version ?? 0)) {
       return aplicarNube(nube); // otro dispositivo guardó después: manda la nube
     }
