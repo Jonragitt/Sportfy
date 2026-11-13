@@ -1,0 +1,17 @@
+{
+  "name": "Forty5",
+  "short_name": "Forty5",
+  "description": "Tu rutina de gimnasio y tu dieta a tu medida, a partir de tu evaluación corporal y postural.",
+  "lang": "es",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0b0b0d",
+  "theme_color": "#0b0b0d",
+  "icons": [
+    { "src": "shared/logo/icono-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "shared/logo/icono-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "shared/logo/icono-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
