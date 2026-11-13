@@ -53,13 +53,17 @@
     const ya = [...document.head.querySelectorAll("style")].map((s) => s.textContent);
     for (const t of nuevos) if (!ya.includes(t)) { const s = document.createElement("style"); s.textContent = t; document.head.append(s); }
     document.title = doc.title;
-    // La barra de pestañas es la misma: se conserva y solo cambia cuál está marcada.
-    const navVieja = document.querySelector("main .tabs.arriba");
+    // La cabecera (logo, título y pestañas) es la misma: se conserva y solo cambian el título y
+    // la pestaña marcada, así no se mueve nada.
+    const cabVieja = document.querySelector("main .cabecera");
     const main = document.importNode(doc.querySelector("main"), true);
-    const navNueva = main.querySelector(".tabs.arriba");
-    if (navVieja && navNueva) {
-      navNueva.replaceWith(navVieja);
-      navVieja.querySelectorAll("a").forEach((a) => { if (nombre(a.href) === p) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
+    const cabNueva = main.querySelector(".cabecera");
+    if (cabVieja && cabNueva) {
+      cabVieja.querySelector("h1").textContent = cabNueva.querySelector("h1")?.textContent ?? "";
+      const logo = cabNueva.querySelector(".topbar-logo")?.getAttribute("href");
+      if (logo) cabVieja.querySelector(".topbar-logo")?.setAttribute("href", logo);
+      cabVieja.querySelectorAll(".tabs.arriba a").forEach((a) => { if (nombre(a.href) === p) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
+      cabNueva.replaceWith(cabVieja);
     }
     main.classList.add("entrando");
     main.addEventListener("animationend", () => main.classList.remove("entrando"), { once: true });
@@ -111,7 +115,12 @@
   });
   addEventListener("popstate", () => { const p = nombre(location.href); if (PAGINAS.includes(p)) ir(p, { historial: false }); else location.reload(); });
 
+  // Alto de la cabecera fija, para que el contenido empiece justo debajo.
+  const medir = () => { const c = document.querySelector(".cabecera"); if (c) document.documentElement.style.setProperty("--alto-cabecera", `${Math.ceil(c.getBoundingClientRect().height)}px`); };
+  addEventListener("resize", medir);
   document.addEventListener("DOMContentLoaded", () => {
+    medir();
+    if (window.ResizeObserver) { const c = document.querySelector(".cabecera"); if (c) new ResizeObserver(medir).observe(c); }
     document.querySelectorAll("body script:not([src])").forEach((s) => { s.dataset.pestana = ""; });
     try { history.replaceState({ pestana: actual }, "", location.href); } catch { /* sin historial */ }
     for (const p of PAGINAS) if (p !== actual) traer(p).catch(() => {});

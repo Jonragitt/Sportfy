@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <style>@view-transition { navigation: auto; }</style>
-  <script src="shared/pestanas.js?v=202611131900"></script>
+  <script src="shared/pestanas.js?v=202611132000"></script>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Mi plan · Forty5</title>
@@ -15,7 +15,7 @@
   <meta name="apple-mobile-web-app-title" content="Forty5">
   <link rel="stylesheet" href="shared/esquinas.css?v=202611130620">
   <link rel="icon" href="shared/logo/icono.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="shared/styles.css?v=202611131900">
+  <link rel="stylesheet" href="shared/styles.css?v=202611132000">
   <style>
     .big { font-size: 2.4rem; font-weight: 800; line-height: 1; }
     .big small { font-size: 1.05rem; color: var(--muted); font-weight: 600; }
@@ -116,22 +116,24 @@
   </style>
   <script type="speculationrules">{"prefetch":[{"source":"list","urls":["rutina.html","analisis.html","dieta.html"],"eagerness":"immediate"}]}</script>
 </head>
-<body class="con-esquinas con-fondo">
+<body class="con-esquinas con-fondo con-cabecera">
   <a class="esquina menu" href="rutina.html" aria-label="Menú principal"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 11L12 4l8.5 7M6 9.5V20h4.5v-5.5h3V20H18V9.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
   <a class="esquina perfil" href="perfil.html" aria-label="Mi perfil"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M4.5 20.5c1.2-4 4.1-6 7.5-6s6.3 2 7.5 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></a>
   <main class="wrap">
-    <nav class="topbar" aria-label="Navegación">
-      <span class="hueco" aria-hidden="true"></span>
-      <a class="topbar-logo" href="index.html" aria-label="Forty5 · Inicio"><img class="logo-img" src="shared/logo/forty5-titulo.png" alt="Forty5" width="900" height="214"></a>
-      <span class="hueco" aria-hidden="true"></span>
-    </nav>
+    <header class="cabecera">
+      <nav class="topbar" aria-label="Navegación">
+        <span class="hueco" aria-hidden="true"></span>
+        <a class="topbar-logo" href="index.html" aria-label="Forty5 · Inicio"><img class="logo-img" src="shared/logo/forty5-titulo.png" alt="Forty5" width="900" height="214"></a>
+        <span class="hueco" aria-hidden="true"></span>
+      </nav>
+      <h1>Tu plan</h1>
+      <nav class="tabs arriba" aria-label="Menú principal">
+        <a href="rutina.html">Rutina</a>
+        <a href="analisis.html" aria-current="page">Mi plan</a>
+        <a href="dieta.html">Dieta</a>
+      </nav>
+    </header>
     <div id="repeticion"></div>
-    <h1>Tu plan</h1>
-    <nav class="tabs arriba" aria-label="Menú principal">
-      <a href="rutina.html">Rutina</a>
-      <a href="analisis.html" aria-current="page">Mi plan</a>
-      <a href="dieta.html">Dieta</a>
-    </nav>
     <p class="lead">Calculado a partir de tu última evaluación: qué dicen tus resultados, qué trabajar primero y los datos con los que se ajusta tu rutina de gimnasio.</p>
 
     <div id="contenido"></div>
