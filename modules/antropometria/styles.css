@@ -124,9 +124,9 @@ body { padding-bottom: 110px; }
 input.vacio { border-color: var(--mal); }
 .perfil-link { float: right; font-weight: 600; color: var(--accent); }
 .logo { display: inline-block; width: min(230px, 62vw); height: auto; color: var(--text); vertical-align: middle; }
-/* Barra superior: atrás, logo e inicio (logo blanco sobre franja oscura) */
-.topbar { display: grid; grid-template-columns: 44px 1fr 44px; align-items: center; gap: 8px; margin: 0 0 16px;
-  padding: 8px; border-radius: 18px; background: #0b0b0d; }
+/* Barra superior: atrás, logo e inicio. Igual que en la evaluación postural (sin franja oscura),
+   para que el logo quede en el mismo sitio al pasar de una evaluación a otra. */
+.topbar { display: grid; grid-template-columns: 44px 1fr 44px; align-items: center; gap: 8px; margin: 0 0 8px; }
 .topbar-logo { justify-self: center; }
 .topbar-logo .logo-img { display: block; width: min(220px, 56vw); height: auto; }
 .icon-btn { width: 44px; height: 44px; border-radius: 50%; display: grid; place-content: center;
@@ -150,3 +150,6 @@ body.con-fondo::before {
 @media (prefers-reduced-motion: reduce) { .fondo-capa { transition: none; } }
 body.con-fondo .top h1, body.con-fondo .top p, body.con-fondo .top a { color: #fff; text-shadow: 0 1px 6px rgba(0,0,0,.6); }
 body.con-fondo legend { background: var(--card); padding: 2px 10px; border-radius: 8px; }
+
+/* Hueco de la barra de scroll siempre reservado: así nada se mueve al cambiar de paso o de pantalla. */
+html { overflow-y: scroll; scrollbar-gutter: stable; }

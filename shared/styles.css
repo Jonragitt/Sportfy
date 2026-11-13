@@ -275,5 +275,5 @@ html:has(body.con-cabecera) { scroll-padding-top: calc(var(--alto-cabecera, 200p
 
 /* Que la barra de scroll del ordenador no aparezca y desaparezca al cambiar de pestaña (movería
    el centro y con él el logo): el hueco de la barra está siempre reservado. */
-html:has(body.con-cabecera) { overflow-y: scroll; scrollbar-gutter: stable; }
+html { overflow-y: scroll; scrollbar-gutter: stable; } /* en todas las pantallas */
 body.con-cabecera main.wrap { min-height: 100vh; }
