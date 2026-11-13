@@ -5,7 +5,7 @@
 
 import { perfilRutina, guardarPerfilRutina } from "./analisis.js?v=202611130900";
 import { calcularPlan } from "./plan.js";
-import { generarRutina, semanaDelCiclo, CONDICIONES, DIAS_SEMANA } from "./rutina.js";
+import { generarRutina, semanaDelCiclo, CONDICIONES, DIAS_SEMANA } from "./rutina.js?v=202611130440";
 import { evaluaciones } from "./evaluaciones.js";
 
 export const PREFS_KEY = "sportfy.preferencias";

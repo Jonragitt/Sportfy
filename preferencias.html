@@ -24,6 +24,7 @@
     .chip { font: inherit; font-weight: 600; padding: 9px 14px; border-radius: 99px; border: 1.5px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; }
     .chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
     .chip.primera { border-style: dashed; }
+    .falta-dato { text-align: center; font-weight: 600; color: #fff; background: rgba(8,9,12,.62); padding: 10px 14px; border-radius: 12px; margin: 16px 0 0; }
     .avisos { margin: 12px 0 0; padding: 0; list-style: none; display: grid; gap: 8px; }
     .avisos li { padding: 10px 12px; border-radius: 10px; background: color-mix(in srgb, var(--mid) 15%, transparent); font-size: .9rem; }
     .avisos li.medico { background: color-mix(in srgb, var(--bad) 13%, transparent); }
@@ -46,8 +47,8 @@
 
   <script type="module">
     import { sincronizar, evaluaciones } from "./shared/evaluaciones.js?v=202611130100";
-    import { calcularTodo, guardarPreferencias, leerPreferencias } from "./shared/motor.js?v=202611130900";
-    import { DIAS_SEMANA, FOCOS, CONDICIONES, MATERIAL } from "./shared/rutina.js?v=202611130230";
+    import { calcularTodo, guardarPreferencias, leerPreferencias } from "./shared/motor.js?v=202611130440";
+    import { DIAS_SEMANA, FOCOS, CONDICIONES, MATERIAL, PARADA } from "./shared/rutina.js?v=202611130440";
 
     const $ = (s) => document.querySelector(s);
     const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -67,6 +68,7 @@
       condiciones: previas.condiciones?.length ? [...previas.condiciones] : ["ninguna"],
       minutos: previas.minutos ?? 60,
       material: previas.material ?? "gimnasio",
+      parada: previas.parada ?? null,
     };
 
     // Selección múltiple con una primera opción "ninguno" excluyente.
@@ -90,7 +92,7 @@
 
       $("#contenido").innerHTML = `
         <div class="card">
-          <span class="paso">Paso 1 de 3</span>
+          <span class="paso">Paso 1 de 4</span>
           <h2>¿Qué días puedes ir a entrenar?</h2>
           <p class="note" style="margin:0">Toca los días de la semana que te vienen bien.</p>
           <div class="semana" role="group" aria-label="Días de la semana">${DIAS_SEMANA.map((d, i) => `<button type="button" class="dia ${rec.diasSemana.includes(i) ? "rec" : ""}" data-dia="${i}" aria-pressed="${estado.diasSemana.includes(i)}" aria-label="${d}"><b>${LETRA[i]}</b><small>${d.slice(0, 3)}</small></button>`).join("")}</div>
@@ -103,14 +105,22 @@
         </div>
 
         <div class="card">
-          <span class="paso">Paso 2 de 3</span>
+          <span class="paso">Paso 2 de 4</span>
+          <h2>¿Cuánto tiempo llevas sin ir al gimnasio?</h2>
+          <p class="note" style="margin:0">Así ajustamos la intensidad de las primeras semanas para que vuelvas sin lesionarte.</p>
+          <div class="chips" role="radiogroup" aria-label="Tiempo sin ir al gimnasio">${Object.entries(PARADA).map(([k, v]) => `<button type="button" class="chip" role="radio" data-parada="${k}" aria-pressed="${estado.parada === k}" aria-checked="${estado.parada === k}">${esc(v.nombre)}</button>`).join("")}</div>
+          ${estado.parada && PARADA[estado.parada].consejo ? `<div class="ajuste">${esc(PARADA[estado.parada].consejo)}</div>` : ""}
+        </div>
+
+        <div class="card">
+          <span class="paso">Paso 3 de 4</span>
           <h2>¿A qué parte del cuerpo quieres darle más atención?</h2>
           <p class="note" style="margin:0">Puedes elegir varias. Sumaremos ejercicios y series a esas zonas sin descuidar el resto.</p>
           <div class="chips" role="group" aria-label="Zonas a priorizar">${Object.entries(FOCOS).map(([k, v]) => `<button type="button" class="chip ${k === "ninguno" ? "primera" : ""}" data-foco="${k}" aria-pressed="${estado.foco.includes(k)}">${esc(v.nombre)}</button>`).join("")}</div>
         </div>
 
         <div class="card">
-          <span class="paso">Paso 3 de 3</span>
+          <span class="paso">Paso 4 de 4</span>
           <h2>¿Tienes alguna condición de salud?</h2>
           <p class="note" style="margin:0">Es muy importante para tu seguridad: adaptamos los ejercicios, la intensidad y el cardio. Puedes marcar varias.</p>
           <div class="chips" role="group" aria-label="Condiciones de salud">${Object.entries(CONDICIONES).map(([k, v]) => `<button type="button" class="chip ${k === "ninguna" ? "primera" : ""}" data-cond="${k}" aria-pressed="${estado.condiciones.includes(k)}">${esc(v.nombre)}</button>`).join("")}</div>
@@ -118,7 +128,8 @@
           <p class="note" style="margin:10px 0 0">Forty5 no sustituye el consejo médico. Si tienes dolor o una lesión reciente, consulta con un profesional sanitario antes de empezar.</p>
         </div>
 
-        <button class="btn crear" type="button" id="crear" ${n ? "" : "disabled"}>Crear mi rutina →</button>`;
+        ${!estado.parada ? `<p class="falta-dato">Contesta cuánto tiempo llevas sin ir al gimnasio para crear tu rutina.</p>` : ""}
+        <button class="btn crear" type="button" id="crear" ${n && estado.parada ? "" : "disabled"}>Crear mi rutina →</button>`;
 
       const on = (sel, f) => document.querySelectorAll(sel).forEach((el) => el.addEventListener("click", f));
       on("[data-dia]", (e) => {
@@ -128,13 +139,14 @@
         estado.diasSemana = [...s].sort((a, b) => a - b);
         pintar();
       });
+      on("[data-parada]", (e) => { estado.parada = e.currentTarget.dataset.parada; pintar(); });
       on("#usar-rec", () => { estado.diasSemana = [...rec.diasSemana]; pintar(); });
       on("[data-foco]", (e) => { estado.foco = alternar(estado.foco, e.currentTarget.dataset.foco, "ninguno"); pintar(); });
       on("[data-cond]", (e) => { estado.condiciones = alternar(estado.condiciones, e.currentTarget.dataset.cond, "ninguna"); pintar(); });
       $("#p-min").addEventListener("change", (e) => { estado.minutos = Number(e.target.value); pintar(); });
       $("#p-mat").addEventListener("change", (e) => { estado.material = e.target.value; pintar(); });
       on("#crear", () => {
-        if (!estado.diasSemana.length) return;
+        if (!estado.diasSemana.length || !estado.parada) return;
         guardarPreferencias({ ...estado, dias: estado.diasSemana.length });
         calcularTodo({ apartados, prefs: estado, actividad, guardar: true });
         location.href = "rutina.html";

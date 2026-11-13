@@ -142,6 +142,16 @@ export const FOCOS = {
 };
 
 // Condiciones de salud: ejercicios a evitar o preferir, RIR mínimo, cardio y avisos.
+// Tiempo que llevas sin ir al gimnasio: tras un parón largo se empieza como principiante
+// y sin apurar las series (más repeticiones en recámara) para readaptar músculos y tendones.
+export const PARADA = {
+  entrenando: { nombre: "Entreno ahora", rirExtra: 0 },
+  menos3m: { nombre: "Menos de 3 meses", rirExtra: 0, consejo: "Llevas poco sin entrenar: la primera semana usa algo menos de peso del que movías y en 2–3 semanas estarás como antes." },
+  de3a12m: { nombre: "De 3 a 12 meses", rirExtra: 1, consejo: "Vuelves tras unos meses parado: las 2 primeras semanas deja 1 repetición más en recámara y sube el peso poco a poco. Recuperarás la fuerza antes de lo que crees." },
+  masAno: { nombre: "Más de 1 año", rirExtra: 1, principiante: true, consejo: "Tras más de un año sin entrenar empiezas como principiante: técnica primero y cargas cómodas las primeras 3–4 semanas para que tendones y articulaciones se readapten." },
+  nunca: { nombre: "Nunca he ido", rirExtra: 1, principiante: true, consejo: "Es tu primera vez en el gimnasio: aprende bien la técnica de cada ejercicio con poco peso y pide ayuda en sala si dudas. Lo importante estas semanas es la constancia." },
+};
+
 export const CONDICIONES = {
   ninguna: { nombre: "Ninguna" },
   lumbar: { nombre: "Dolor lumbar o hernia discal", evita: ["pesoMuerto", "remoBarra", "sentadillaBarra", "ruedaAbdominal", "pmrBarra", "pressMilitar", "hackSquat", "pulloverMancuerna"], prefiere: ["remoPechoApoyado", "hipThrust", "prensa", "deadBug", "birdDog", "sentadillaGoblet", "pallof"], aviso: "Nada de flexión de columna con carga: prioriza la estabilidad del core. Si el dolor baja a la pierna, consulta con un fisioterapeuta." },
@@ -225,7 +235,8 @@ function rangoTxt([a, b]) {
 export function generarRutina(perfil, prefs = {}) {
   if (!perfil) return null;
   const objetivo = perfil.objetivo?.id ?? "rendimiento";
-  const nivel = perfil.nivelInicial === "intermedio" ? "intermedio" : "principiante";
+  const parada = PARADA[prefs.parada] ?? null;
+  const nivel = perfil.nivelInicial === "intermedio" && !parada?.principiante ? "intermedio" : "principiante";
   const nivelNum = nivel === "intermedio" ? 2 : 1;
   const diasSemana = [...new Set((prefs.diasSemana ?? []).filter((d) => d >= 0 && d <= 6))].sort((a, b) => a - b);
   const pedidos = diasSemana.length || Math.round(prefs.dias ?? perfil.diasFuerza ?? 3);
@@ -299,7 +310,7 @@ export function generarRutina(perfil, prefs = {}) {
       const lado = ej.uni && ladoDebil ? `Empieza por el lado ${ladoDebil === "I" ? "izquierdo" : "derecho"} y haz 1 serie extra con él.` : null;
       bloques.push({
         id: ej.id, nombre: ej.nombre, hueco, tipo: tipoEj, grupo: ej.grupo, opcional,
-        series, reps: reps[tipoEj] ?? reps.compuesto, rir: tipoEj === "core" ? null : Math.max(semana.rir, rirMin), foco: enFoco,
+        series, reps: reps[tipoEj] ?? reps.compuesto, rir: tipoEj === "core" ? null : Math.max(Math.min(4, semana.rir + (semana.n <= 2 ? parada?.rirExtra ?? 0 : 0)), rirMin), foco: enFoco,
         descanso: rangoTxt(DESCANSO[tipoEj]), descansoSeg: (DESCANSO[tipoEj][0] + DESCANSO[tipoEj][1]) / 2,
         tecnica: ej.tecnica, motivo: motivos.length ? `Corrige: ${[...new Set(motivos)].join(", ").toLowerCase()}` : null, lado, uni: ej.uni,
       });
@@ -331,7 +342,8 @@ export function generarRutina(perfil, prefs = {}) {
     recuperacionActiva: pedidos > 6 ? "El 7.º día, recuperación activa: 30–40 min de paseo, movilidad y estiramientos suaves." : null,
     focos,
     condiciones: conds.map((c) => ({ id: c.id, nombre: c.nombre, aviso: c.aviso, medico: Boolean(c.medico) })),
-    consejos: consejosDias(diasSemana, reparto),
+    consejos: [...(parada?.consejo ? [parada.consejo] : []), ...consejosDias(diasSemana, reparto)],
+    parada: prefs.parada ?? null,
     minutos,
     material: materialId,
     semana,

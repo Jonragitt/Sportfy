@@ -58,3 +58,17 @@ test("ganar músculo: series y reps de hipertrofia", () => {
   assert.equal(r.objetivo.id, "ganarMusculo");
   assert.equal(r.sesiones[0].bloques[0].reps, "6–8");
 });
+
+test("tras un parón largo se empieza como principiante y con más repeticiones en recámara", async () => {
+  const { generarRutina } = await import("../rutina.js");
+  const perfil = { objetivo: { id: "ganarMusculo" }, nivelInicial: "intermedio", correctivos: [], diasFuerza: 3 };
+  const normal = generarRutina(perfil, { diasSemana: [0, 2, 4], semana: 2, parada: "entrenando" });
+  const vuelta = generarRutina(perfil, { diasSemana: [0, 2, 4], semana: 2, parada: "masAno" });
+  assert.equal(normal.nivel, "intermedio");
+  assert.equal(vuelta.nivel, "principiante");
+  const rir = (r) => r.sesiones[0].bloques.find((b) => b.rir != null).rir;
+  assert.equal(rir(vuelta), rir(normal) + 1);
+  assert.match(vuelta.consejos[0], /más de un año/);
+  // En la semana 3 ya no se añade margen extra.
+  assert.equal(rir(generarRutina(perfil, { diasSemana: [0, 2, 4], semana: 3, parada: "de3a12m" })), rir(generarRutina(perfil, { diasSemana: [0, 2, 4], semana: 3 })));
+});
