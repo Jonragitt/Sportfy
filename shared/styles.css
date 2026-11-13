@@ -137,10 +137,9 @@ body.con-fondo { background: #0b0b0d; }
 body.con-fondo::before {
   content: ""; position: fixed; inset: 0; z-index: -1;
   background:
-    linear-gradient(180deg, rgba(0,0,0,.45) 0%, rgba(0,0,0,.72) 45%, rgba(0,0,0,.85) 100%),
-    url("fondos/postural.jpg") center top / cover no-repeat;
+    linear-gradient(180deg, rgba(0,0,0,.45) 0%, rgba(0,0,0,.72) 45%, rgba(0,0,0,.85) 100%);
 }
-/* Fotos de deporte que se turnan cada 3 min (shared/fondo.js); la de postural queda de reserva. */
+/* Fotos de deporte que se turnan cada 3 min (shared/fondo.js); mientras cargan, fondo oscuro. */
 body.con-fondo.fondo-vivo::before {
   background: linear-gradient(180deg, rgba(0,0,0,.5) 0%, rgba(0,0,0,.74) 45%, rgba(0,0,0,.86) 100%);
 }
