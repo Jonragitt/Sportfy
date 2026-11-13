@@ -49,19 +49,96 @@ export const DIETA_CONDICIONES = {
 };
 
 /**
+ * Recalcula kcal y macros del plan según las condiciones de salud. Devuelve el plan
+ * ajustado, si se reparten los hidratos por igual (sin ciclado), las comidas mínimas,
+ * los objetivos extra (sodio, calcio, fibra…) y la lista de cambios aplicados.
+ */
+export function ajustarPorSalud(plan, condiciones = [], peso = null) {
+  const c = new Set(condiciones);
+  let { kcal } = plan;
+  let { proteina, grasa, hidratos } = plan.macros;
+  const mant = plan.mantenimiento ?? kcal;
+  const cambios = [];
+  let sinCiclado = false, comidasMin = null;
+  const extra = {};
+  const kg = peso ?? (plan.agua ? (plan.agua - 0.5) / 0.035 : null);
+
+  // Embarazo: nunca déficit; +300 kcal sobre mantenimiento (2.º–3.er trimestre) y proteína ≥ 1,1 g/kg.
+  if (c.has("embarazo")) {
+    const k = Math.max(kcal, mant + 300);
+    if (k !== kcal) cambios.push(`Embarazo: sin déficit y unas 300 kcal más sobre tu mantenimiento (${r10(k)} kcal).`);
+    kcal = k; sinCiclado = true;
+    if (kg && proteina < kg * 1.1) proteina = r5(kg * 1.1);
+    extra.hierro = "27 mg/día"; extra.acidoFolico = "suplemento según tu médico";
+  }
+  // Postparto: déficit suave como máximo (–300 kcal) para no afectar la recuperación ni la lactancia.
+  if (c.has("postparto") && kcal < mant - 300) {
+    cambios.push(`Postparto: déficit limitado a 300 kcal (${r10(mant - 300)} kcal en lugar de ${r10(kcal)}).`);
+    kcal = mant - 300;
+  }
+  // Osteoporosis: proteína ≥ 1,2 g/kg y déficit moderado (perder hueso al adelgazar rápido).
+  if (c.has("osteoporosis")) {
+    if (kg && proteina < kg * 1.2) { proteina = r5(kg * 1.2); cambios.push(`Osteoporosis: proteína mínima de 1,2 g por kg (${proteina} g).`); }
+    if (kcal < mant - 400) { cambios.push("Osteoporosis: déficit limitado a 400 kcal para no perder masa ósea."); kcal = mant - 400; }
+    extra.calcio = "1.200 mg/día"; extra.vitaminaD = "800–1.000 UI/día (consulta a tu médico)";
+  }
+  kcal = r10(kcal);
+  // Grasa: se recalcula para cuadrar las nuevas kcal, después de fijar la proteína.
+  grasa = Math.max(grasa * kcal / plan.kcal, 0.7 * (kg ?? 70));   // si suben o bajan las kcal, la grasa acompaña en proporción
+  hidratos = Math.max(0, (kcal - proteina * 4 - grasa * 9) / 4);
+
+  // Diabetes: hidratos ≤ 40 % de las kcal y repartidos igual cada día y en 5 comidas.
+  if (c.has("diabetes")) {
+    const max = kcal * 0.4 / 4;
+    if (hidratos > max) {
+      cambios.push(`Diabetes: hidratos limitados al 40 % de las calorías (${r5(max)} g en lugar de ${r5(hidratos)} g); el resto pasa a grasas saludables.`);
+      hidratos = max;
+    } else cambios.push("Diabetes: hidratos repartidos por igual en todas las comidas.");
+    sinCiclado = true; comidasMin = 5;
+    extra.fibra = Math.round(kcal / 1000 * 18);
+  }
+  // Cardíaco: grasa ≤ 30 % (saturadas < 7 %), sodio < 2.000 mg.
+  if (c.has("cardiaco")) {
+    const max = kcal * 0.3 / 9;
+    if (grasa > max) { cambios.push(`Problema cardíaco: grasa limitada al 30 % de las calorías (${r5(max)} g).`); grasa = max; }
+    extra.saturadas = `menos de ${r5(kcal * 0.07 / 9)} g/día`; extra.sodio = "menos de 2.000 mg/día (5 g de sal)";
+  }
+  // Hipertensión: patrón DASH, sodio < 2.000 mg y más potasio y fibra.
+  if (c.has("hipertension")) {
+    extra.sodio = "menos de 2.000 mg/día (5 g de sal)"; extra.potasio = "3.500–4.700 mg/día (fruta, verdura, legumbre)";
+    extra.fibra = Math.max(extra.fibra ?? 0, Math.round(kcal / 1000 * 16));
+    cambios.push("Hipertensión: dieta tipo DASH, con menos de 5 g de sal y más fruta, verdura y legumbre.");
+  }
+  // Artrosis: más omega-3 y control del peso.
+  if (c.has("artrosis")) { extra.omega3 = "pescado azul 2–3 veces por semana"; }
+
+  // Lo que falte o sobre tras los límites se compensa con la grasa (diabetes) o los hidratos (cardíaco).
+  const resto = kcal - proteina * 4 - hidratos * 4 - grasa * 9;
+  if (Math.abs(resto) > 20) {
+    if (c.has("cardiaco") && !c.has("diabetes")) hidratos += resto / 4;
+    else grasa += resto / 9;
+  }
+  const ajustado = { ...plan, kcal, macros: { proteina: r5(proteina), grasa: r5(Math.max(0, grasa)), hidratos: r5(Math.max(0, hidratos)) } };
+  return { plan: ajustado, sinCiclado, comidasMin, extra, cambios };
+}
+
+/**
  * Plan de dieta a partir del plan calórico y la rutina.
  * plan: resultado de calcularPlan (kcal, macros, agua, objetivo).
  * opciones: { diasEntreno: [0..6], comidas: 4|5, condiciones: [ids] }.
  */
-export function calcularDieta(plan, { diasEntreno = [], comidas = 5, condiciones = [] } = {}) {
-  if (!plan) return null;
+export function calcularDieta(planBase, { diasEntreno = [], comidas = 5, condiciones = [], peso = null } = {}) {
+  if (!planBase) return null;
+  const salud = ajustarPorSalud(planBase, condiciones, peso);
+  const plan = salud.plan;
   const { kcal, macros } = plan;
+  if (salud.comidasMin && comidas < salud.comidasMin) comidas = salud.comidasMin;
   const nEntreno = Math.min(7, new Set(diasEntreno).size);
   const nDescanso = 7 - nEntreno;
 
   // Días de entreno con más hidratos y días de descanso con menos, con la misma media semanal.
   // Proteína igual todos los días; la grasa compensa un poco en los días de descanso.
-  const ciclo = nEntreno && nDescanso ? 0.15 : 0;
+  const ciclo = nEntreno && nDescanso && !salud.sinCiclado ? 0.15 : 0;
   const hEntreno = macros.hidratos * (1 + ciclo * nDescanso / 7);
   const hDescanso = macros.hidratos * (1 - ciclo * nEntreno / 7);
   const dia = (h) => {
@@ -79,10 +156,12 @@ export function calcularDieta(plan, { diasEntreno = [], comidas = 5, condiciones
 
   const conds = condiciones.filter((c) => DIETA_CONDICIONES[c]);
   return {
-    kcal, macros,
+    kcal, macros, comidas,
+    base: { kcal: planBase.kcal, macros: planBase.macros },
+    cambios: salud.cambios, objetivosSalud: salud.extra,
     proteinaPorComida: r5(macros.proteina / reparto.length),
     agua: plan.agua,
-    fibra: Math.round(kcal / 1000 * 14),
+    fibra: salud.extra.fibra ?? Math.round(kcal / 1000 * 14),
     diaEntreno: { ...entreno, comidas: porComida(entreno) },
     diaDescanso: { ...descanso, comidas: porComida(descanso) },
     ciclado: ciclo > 0,
@@ -91,7 +170,7 @@ export function calcularDieta(plan, { diasEntreno = [], comidas = 5, condiciones
       despues: `En las 2 h siguientes: unos ${r5(macros.proteina * 0.25)} g de proteína y ${r5(entreno.hidratos * 0.3)} g de hidratos para recuperar.`,
     },
     salud: conds.map((c) => ({ id: c, texto: DIETA_CONDICIONES[c] })),
-    consejos: consejos(plan),
+    consejos: consejos(planBase),
   };
 }
 

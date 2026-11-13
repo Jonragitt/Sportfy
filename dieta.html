@@ -66,7 +66,7 @@
   <script type="module">
     import { sincronizar, evaluaciones } from "./shared/evaluaciones.js?v=202611130100";
     import { calcularTodo, leerPreferencias, necesitaPreferencias } from "./shared/motor.js?v=202611130900";
-    import { calcularDieta } from "./shared/dieta.js?v=202611131000";
+    import { calcularDieta } from "./shared/dieta.js?v=202611131030";
     import { DIAS_SEMANA } from "./shared/rutina.js?v=202611130230";
 
     const $ = (s) => document.querySelector(s);
@@ -99,7 +99,10 @@
           $("#contenido").innerHTML = `<div class="card"><p style="margin:0">Para calcular tu dieta necesitamos la evaluación antropométrica con edad, altura y peso.</p></div>`;
           return;
         }
-        const d = calcularDieta(p, { diasEntreno: rutina.diasSemana ?? [], comidas, condiciones: (rutina.condiciones ?? []).map((c) => c.id) });
+        const peso = apartados.at(-1)?.antro?.datos?.peso ?? null;
+        const d = calcularDieta(p, { diasEntreno: rutina.diasSemana ?? [], comidas, peso, condiciones: (rutina.condiciones ?? []).map((c) => c.id) });
+        const ETIQ = { sodio: "Sodio", potasio: "Potasio", fibra: "Fibra", saturadas: "Grasas saturadas", calcio: "Calcio", vitaminaD: "Vitamina D", hierro: "Hierro", acidoFolico: "Ácido fólico", omega3: "Omega-3" };
+        const objetivos = Object.entries(d.objetivosSalud).map(([k, v]) => `<li><b>${ETIQ[k] ?? k}:</b> ${esc(typeof v === "number" ? `${v} g/día` : v)}</li>`).join("");
         const dia = tipo === "entreno" ? d.diaEntreno : d.diaDescanso;
         const total = dia.proteina * 4 + dia.hidratos * 4 + dia.grasa * 9;
         const pct = (g, k) => Math.round(g * k / total * 100);
@@ -129,7 +132,8 @@
               <span><i class="punto" style="background:var(--mid)"></i>Grasas <b>${dia.grasa} g</b></span>
               <span><i class="punto" style="background:var(--good)"></i>Hidratos <b>${dia.hidratos} g</b></span>
             </div>
-            <label class="note" style="display:block;margin-top:12px">Comidas al día <select id="comidas"><option value="4" ${comidas === 4 ? "selected" : ""}>4 comidas</option><option value="5" ${comidas === 5 ? "selected" : ""}>5 comidas</option></select></label>
+            <label class="note" style="display:block;margin-top:12px">Comidas al día <select id="comidas"><option value="4" ${d.comidas === 4 ? "selected" : ""} ${d.comidas === 5 && comidas === 4 ? "disabled" : ""}>4 comidas</option><option value="5" ${d.comidas === 5 ? "selected" : ""}>5 comidas</option></select></label>
+            ${d.comidas !== comidas ? `<p class="note" style="margin:4px 0 0">Por tu salud te recomendamos 5 comidas al día.</p>` : ""}
             ${dia.comidas.map((c) => `<div class="comida">
               <div class="comida-head"><h3>${esc(c.nombre)}</h3><span>${fmt(c.kcal)} kcal</span></div>
               <p class="macros">P ${c.proteina} g · H ${c.hidratos} g · G ${c.grasa} g</p>
@@ -141,7 +145,10 @@
           ${tipo === "entreno" ? `<div class="card"><h2 style="margin:0 0 6px">Alrededor del entreno</h2>
             <div class="info"><p><b>Antes:</b> ${esc(d.entrenamiento.antes)}</p><p><b>Después:</b> ${esc(d.entrenamiento.despues)}</p></div></div>` : ""}
 
-          ${d.salud.length ? `<div class="card"><h2 style="margin:0 0 6px">Por tu salud</h2>${d.salud.map((s) => `<p class="aviso">${esc(s.texto)}</p>`).join("")}</div>` : ""}
+          ${d.salud.length || d.cambios.length ? `<div class="card"><h2 style="margin:0 0 6px">Ajustada a tu salud</h2>
+            ${d.cambios.length ? `<div class="info">${d.cambios.map((c) => `<p>${esc(c)}</p>`).join("")}<p class="note" style="margin-top:6px">Sin tus condiciones serían ${fmt(d.base.kcal)} kcal · P ${d.base.macros.proteina} g · H ${d.base.macros.hidratos} g · G ${d.base.macros.grasa} g.</p></div>` : ""}
+            ${objetivos ? `<ul style="margin:10px 0 0;padding-left:18px">${objetivos}</ul>` : ""}
+            ${d.salud.map((s) => `<p class="aviso">${esc(s.texto)}</p>`).join("")}</div>` : ""}
 
           <div class="card"><h2 style="margin:0 0 6px">Consejos</h2><ul style="margin:0;padding-left:18px">${d.consejos.map((c) => `<li>${esc(c)}</li>`).join("")}</ul>
             <p class="note" style="margin:10px 0 0">Estimaciones a partir de tu evaluación. No sustituyen el consejo de un médico o nutricionista.</p></div>`;

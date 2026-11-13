@@ -28,3 +28,19 @@ test("sin días de entreno no hay ciclado y las condiciones añaden consejos", (
   assert.equal(d.ciclado, false);
   assert.deepEqual(d.salud.map((s) => s.id), ["hipertension"]);
 });
+
+test("las condiciones de salud recalculan kcal y macros", async () => {
+  const { ajustarPorSalud } = await import("../dieta.js");
+  const diab = calcularDieta(plan, { diasEntreno: [0, 2, 4], condiciones: ["diabetes"], comidas: 4, peso: 92 });
+  assert.equal(diab.ciclado, false);
+  assert.equal(diab.comidas, 5);
+  assert.ok(diab.macros.hidratos * 4 <= diab.kcal * 0.4 + 20);
+  assert.ok(Math.abs(diab.macros.proteina * 4 + diab.macros.hidratos * 4 + diab.macros.grasa * 9 - diab.kcal) <= 40);
+  const emb = ajustarPorSalud(plan, ["embarazo"], 70);
+  assert.ok(emb.plan.kcal >= plan.mantenimiento + 290);
+  const card = ajustarPorSalud(plan, ["cardiaco"], 92);
+  assert.ok(card.plan.macros.grasa * 9 <= card.plan.kcal * 0.3 + 45);
+  const osteo = ajustarPorSalud(plan, ["osteoporosis"], 92);
+  assert.ok(osteo.plan.macros.proteina >= 110 && osteo.plan.kcal >= plan.mantenimiento - 410);
+  assert.equal(ajustarPorSalud(plan, ["lumbar"], 92).cambios.length, 0);
+});
