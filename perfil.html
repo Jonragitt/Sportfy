@@ -6,7 +6,7 @@
   <title>Mi perfil · Forty5</title>
   <link rel="stylesheet" href="shared/esquinas.css?v=202611130500">
   <link rel="icon" href="shared/logo/icono.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="shared/styles.css?v=202611051940">
+  <link rel="stylesheet" href="shared/styles.css?v=202611130600">
   <style>
     .estado { display: flex; align-items: center; gap: 12px; }
     .estado .big { font-size: 2.2rem; font-weight: 800; line-height: 1; }
@@ -323,5 +323,6 @@
     addEventListener("forty5:cuenta", (e) => { estado = e.detail?.estado ?? null; pintarCuenta(); });
     pintarCuenta();
   </script>
+  <script type="module" src="shared/fondo.js?v=202611130600"></script>
 </body>
 </html>

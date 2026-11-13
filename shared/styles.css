@@ -140,6 +140,17 @@ body.con-fondo::before {
     linear-gradient(180deg, rgba(0,0,0,.45) 0%, rgba(0,0,0,.72) 45%, rgba(0,0,0,.85) 100%),
     url("fondos/postural.jpg") center top / cover no-repeat;
 }
+/* Fotos de deporte que se turnan cada 3 min (shared/fondo.js); la de postural queda de reserva. */
+body.con-fondo.fondo-vivo::before {
+  background: linear-gradient(180deg, rgba(0,0,0,.5) 0%, rgba(0,0,0,.74) 45%, rgba(0,0,0,.86) 100%);
+}
+.fondo-capa {
+  position: fixed; inset: 0; z-index: -2; pointer-events: none;
+  background: #0b0b0d center / cover no-repeat;
+  opacity: 0; transition: opacity 2.5s ease;
+}
+.fondo-capa.ver { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .fondo-capa { transition: none; } }
 body.con-fondo main > h1,
 body.con-fondo main > .lead,
 body.con-fondo #form > h2,
