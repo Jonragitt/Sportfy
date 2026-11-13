@@ -31,3 +31,15 @@ test("el primer día no pregunta ni marca fallos anteriores", () => {
   assert.equal(e.pendiente, null);
   assert.deepEqual(e.racha.dias, {});
 });
+
+test("diaGuiado: el de ayer mientras dure su plazo, si no el de hoy", async () => {
+  const { diaGuiado } = await import("../racha.js");
+  const L_X_V = [0, 2, 4];
+  // Jueves 12: el miércoles 11 sigue pendiente (último día para terminarlo).
+  assert.deepEqual(diaGuiado({ desde: "2026-11-09", dias: {} }, L_X_V, new Date(2026, 10, 12, 9)), { dia: "2026-11-11", ayer: true });
+  // Viernes 13 a las 00:05: ya toca el de hoy; el del miércoles caducó.
+  assert.deepEqual(diaGuiado({ desde: "2026-11-09", dias: { "2026-11-11": "si" } }, L_X_V, new Date(2026, 10, 13, 0, 5)), { dia: "2026-11-13", ayer: false });
+  // Hecho hoy o día sin gym: nada.
+  assert.equal(diaGuiado({ desde: "2026-11-09", dias: { "2026-11-13": "si" } }, L_X_V, new Date(2026, 10, 13, 20)), null);
+  assert.equal(diaGuiado({ desde: "2026-11-09", dias: { "2026-11-13": "si" } }, L_X_V, new Date(2026, 10, 15, 12)), null);
+});
