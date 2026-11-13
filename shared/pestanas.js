@@ -12,7 +12,7 @@
 
   // Lo que pone el código de la propia pestaña (scripts dentro del .html) se apunta para quitarlo
   // al cambiar; lo de los módulos compartidos (shared/*.js) se queda.
-  const deLaPestana = () => /\.html(\?[^:\s)]*)?:\d+/.test(new Error().stack || "");
+  const deLaPestana = () => /\.html(\?[^:\s)]*)?:\d+|\/paginas\/[a-z]+\.js/.test(new Error().stack || "");
   const escuchas = [], intervalos = [];
   for (const obj of [window, document]) {
     const poner = obj.addEventListener;
@@ -43,9 +43,10 @@
     return cache.get(p);
   };
 
-  let ocupado = false;
+  let ocupado = false, montando = null;
   function cambiar(doc, p) {
     limpiar();
+    montando = null;
     // Estilos propios de cada pestaña (los <style> del <head>): fuera los que sobran, dentro los nuevos.
     const nuevos = [...doc.head.querySelectorAll("style")].map((s) => s.textContent);
     document.head.querySelectorAll("style").forEach((s) => { if (!nuevos.includes(s.textContent)) s.remove(); });
@@ -57,6 +58,10 @@
     // Scripts: los compartidos ya están cargados; los de la pestaña se ejecutan de nuevo.
     document.querySelectorAll("script[data-pestana]").forEach((s) => s.remove());
     for (const viejo of doc.body.querySelectorAll("script")) {
+      // El código de cada pestaña está en shared/paginas/*.js y exporta montar(): se importa y se
+      // monta otra vez (sin scripts en línea, que algunos visores como claude.ai bloquean).
+      const pagina = viejo.dataset.pagina;
+      if (pagina) { montando = import(new URL(pagina, location.href).href).then((m) => m.montar()); continue; }
       const src = viejo.getAttribute("src");
       if (src && document.querySelector(`script[src="${CSS.escape(src)}"]`)) continue;
       const s = document.createElement("script");
@@ -66,6 +71,7 @@
       document.body.append(s);
     }
     scrollTo(0, 0);
+    return montando; // la transición espera a que la pestaña pinte su contenido
   }
 
   async function ir(p, { historial = true } = {}) {
@@ -77,7 +83,7 @@
       if (historial) { try { history.pushState({ pestana: p }, "", p); } catch { /* sin historial */ } }
       if (document.startViewTransition && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
         await document.startViewTransition(() => cambiar(doc, p)).updateCallbackDone;
-      } else cambiar(doc, p);
+      } else await cambiar(doc, p);
     } catch { location.href = p; return; } finally { ocupado = false; }
     dispatchEvent(new CustomEvent("forty5:pestana", { detail: p }));
   }
