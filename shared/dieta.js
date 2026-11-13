@@ -217,10 +217,14 @@ export function calcularDieta(planBase, { diasEntreno = [], comidas = 5, condici
   const entreno = delDia(hEntreno), descanso = delDia(hDescanso);
 
   const reparto = COMIDAS[comidas] ?? COMIDAS[5];
-  const porComida = (d) => reparto.map(([nombre, f], i) => {
+  const porComida = (d) => { const usadas = new Set(); return reparto.map(([nombre, f], i) => {
     const ops = opcionesDe(nombre, condiciones);
     const elegida = ops.find((o) => o.id === eleccion[nombre]);
-    const op = elegida ?? ops[(dia + i) % ops.length];
+    // Rotación por día, sin repetir en el mismo día un plato que ya salga en otra comida.
+    let k = (dia + i) % ops.length;
+    for (let n = 0; n < ops.length && usadas.has(ops[k].id); n++) k = (k + 1) % ops.length;
+    const op = elegida ?? ops[k];
+    usadas.add(op.id);
     return {
       nombre, kcal: r10(d.kcal * f),
       proteina: r5(d.proteina * f), hidratos: r5(d.hidratos * f), grasa: r5(d.grasa * f),
@@ -228,7 +232,7 @@ export function calcularDieta(planBase, { diasEntreno = [], comidas = 5, condici
       ejemplo: ejemplo(op, { proteina: d.proteina * f, hidratos: d.hidratos * f, grasa: d.grasa * f }),
       preparacion: op.prep,
     };
-  });
+  }); };
 
   const conds = condiciones.filter((c) => DIETA_CONDICIONES[c]);
   return {

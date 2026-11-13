@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Mi rutina · Forty5</title>
-  <link rel="stylesheet" href="shared/esquinas.css?v=202611051850">
+  <link rel="stylesheet" href="shared/esquinas.css?v=202611130400">
   <link rel="icon" href="shared/logo/icono.svg" type="image/svg+xml">
   <link rel="stylesheet" href="shared/styles.css?v=202611051940">
   <style>
@@ -69,6 +69,7 @@
 
   <script type="module">
     import { sincronizar, evaluaciones, rondaEnCurso } from "./shared/evaluaciones.js?v=202611130100";
+    import { fechaActual, diaSemana, fechaLarga, esHoy } from "./shared/reloj.js?v=202611130400";
     import { semanaDelCiclo, MATERIAL, SEMANAS, FOCOS } from "./shared/rutina.js?v=202611130230";
     import { calcularTodo, leerPreferencias, guardarPreferencias, necesitaPreferencias } from "./shared/motor.js?v=202611130900";
 
@@ -90,14 +91,41 @@
     } else {
       const actividad = leer("sportfy.actividad", "ligera");
       let prefs = { minutos: 60, material: "gimnasio", ...leerPreferencias() };
-      const auto = semanaDelCiclo(calcularTodo({ apartados, prefs, actividad }).perfil.fecha);
-      let semana = auto, dia = 1;
-      // Abre directamente la sesión de hoy si hoy toca entrenar.
-      const hoy = (new Date().getDay() + 6) % 7;
-      const idxHoy = (prefs.diasSemana ?? []).slice(0, 6).indexOf(hoy);
-      if (idxHoy >= 0) dia = idxHoy + 1;
+      // El reloj marca el día: según él tocan la semana del ciclo y la sesión (o el descanso).
+      const inicio = calcularTodo({ apartados, prefs, actividad }).perfil.fecha;
+      let auto, semana, dia;
+      const elegirHoy = () => {
+        const f = fechaActual();
+        auto = semanaDelCiclo(inicio, f); semana = auto;
+        const sHoy = calcularTodo({ apartados, prefs, actividad, semana }).rutina.sesiones.find((x) => x.diaSemana === diaSemana(f));
+        dia = sHoy ? sHoy.dia : (dia ?? 1);
+      };
+      elegirHoy();
+      addEventListener("forty5:fecha", () => { elegirHoy(); pintar(); });
       const hechos = () => leer("sportfy.sesionesHechas", {});
-      const claveSemana = () => { const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); return d.toISOString().slice(0, 10); };
+      const claveSemana = () => { const d = fechaActual(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
+
+      // Tarjeta grande con lo que toca el día que marca el reloj.
+      function tarjetaHoy(r, hechosSemana) {
+        const f = fechaActual(), ds = diaSemana(f);
+        const rHoy = semana === auto ? r : calcularTodo({ apartados, prefs, actividad, semana: auto }).rutina;
+        const sHoy = rHoy.sesiones.find((x) => x.diaSemana === ds);
+        const cuando = `${esHoy() ? "Hoy" : "El"} ${fechaLarga(f)} · Semana ${auto} · ${rHoy.semana.nombre}`;
+        if (!rHoy.diasSemana.length) return `<div class="card hoy-toca"><p class="hoy-fecha">${esc(cuando)}</p>
+          <p class="hoy-titulo">Elige tus días</p><p class="hoy-sub">Para saber qué sesión toca cada día, marca en qué días entrenas.</p><a class="btn" href="preferencias.html">Elegir días</a></div>`;
+        if (sHoy) {
+          const hecha = hechosSemana.includes(sHoy.dia);
+          return `<div class="card hoy-toca"><p class="hoy-fecha">${esc(cuando)}</p>
+            <p class="hoy-titulo">${esc(sHoy.nombre)}</p>
+            <p class="hoy-sub">${sHoy.bloques.length} ejercicios · ≈ ${sHoy.minutos} min${hecha ? " · <b>✓ hecha</b>" : ""}</p>
+            ${dia === sHoy.dia && semana === auto ? `<a class="btn" href="#sesion">Ver la sesión ↓</a>` : `<button class="btn" type="button" id="ir-hoy">Ver la sesión de ${esHoy() ? "hoy" : "ese día"}</button>`}</div>`;
+        }
+        const cardio = rHoy.cardioExtra?.diasSemana?.includes(ds);
+        return `<div class="card hoy-toca"><p class="hoy-fecha">${esc(cuando)}</p>
+          <p class="hoy-titulo">${cardio ? "Cardio" : "Descanso"}</p>
+          <p class="hoy-sub">${cardio ? esc(rHoy.cardioExtra.tipo) + "." : esc(rHoy.recuperacionActiva ?? "Sin pesas: descansa, camina y duerme bien para recuperar.")}</p>
+          ${rHoy.cardioExtra?.pasos ? `<p class="note" style="margin:0">Y ${esc(rHoy.cardioExtra.pasos)}.</p>` : ""}</div>`;
+      }
 
       function pintar() {
         const r = calcularTodo({ apartados, prefs, actividad, semana, guardar: true }).rutina;
@@ -105,6 +133,7 @@
         const s = r.sesiones[Math.min(dia, r.sesiones.length) - 1];
         const opt = (obj, val, txt) => Object.entries(obj).map(([k, v]) => `<option value="${k}" ${String(k) === String(val) ? "selected" : ""}>${esc(txt(k, v))}</option>`).join("");
         const html = [];
+        html.push(tarjetaHoy(r, hechosSemana));
         if (rondaEnCurso()) html.push(`<div class="card" style="border-color:var(--accent)"><b>Tienes una nueva evaluación en curso.</b> <span class="note">Tu rutina se recalculará cuando confirmes las dos evaluaciones.</span> <a href="index.html">Continuar →</a></div>`);
         html.push(`<div class="card">
           <div class="prefs">
@@ -142,7 +171,7 @@
             </div></div>`;
         }).join("");
 
-        html.push(`<div class="card">
+        html.push(`<div class="card" id="sesion" style="scroll-margin-top:130px">
           <div class="row" style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:baseline"><h2 style="margin:0">${esc(s.diaNombre ?? `Día ${s.dia}`)} · ${esc(s.nombre)}</h2><span class="note">≈ ${s.minutos} min</span></div>
           <div class="bloque-titulo">Calentamiento</div>
           <ul class="lista"><li>${esc(s.calentamiento.general)}</li>${s.calentamiento.movilidad.map((m) => `<li>${esc(m)} · 1 min</li>`).join("")}</ul>
@@ -172,6 +201,7 @@
         const guardar = () => { prefs = guardarPreferencias({ minutos: prefs.minutos, material: prefs.material }); pintar(); };
         on("#p-min", "change", (e) => { prefs.minutos = Number(e.target.value); guardar(); });
         on("#p-mat", "change", (e) => { prefs.material = e.target.value; guardar(); });
+        on("#ir-hoy", "click", () => { elegirHoy(); pintar(); document.getElementById("sesion")?.scrollIntoView({ behavior: "smooth" }); });
         on("[data-semana]", "click", (e) => { semana = Number(e.currentTarget.dataset.semana); pintar(); });
         on("[data-dia]", "click", (e) => { dia = Number(e.currentTarget.dataset.dia); pintar(); });
         on("#hecho", "click", () => {
@@ -187,5 +217,6 @@
     }
   </script>
   <script type="module" src="shared/deslizar.js?v=202611131130"></script>
+  <script type="module" src="shared/reloj.js?v=202611130400"></script>
 </body>
 </html>

@@ -16,3 +16,42 @@
 /* Deja hueco arriba para que los botones no tapen la barra de la página */
 body.con-esquinas .topbar { margin-top: 58px; }
 .topbar .hueco { width: 44px; height: 44px; }
+
+/* Reloj al lado del icono de perfil (shared/reloj.js). */
+.reloj { position: fixed; z-index: 30; top: max(12px, env(safe-area-inset-top)); right: calc(max(12px, env(safe-area-inset-right)) + 54px); }
+.reloj.solo { right: max(12px, env(safe-area-inset-right)); }
+.reloj-btn {
+  height: 46px; padding: 0 14px; border-radius: 23px; cursor: pointer; font: inherit;
+  display: grid; place-content: center; justify-items: center; line-height: 1.05;
+  color: #fff; background: rgba(15,16,20,.55); border: 1px solid rgba(255,255,255,.35);
+  box-shadow: 0 6px 18px rgba(0,0,0,.3);
+  -webkit-backdrop-filter: blur(14px) saturate(160%); backdrop-filter: blur(14px) saturate(160%);
+}
+.reloj-btn:hover { border-color: #e4572e; }
+.reloj-hora { font-size: 1.05rem; font-weight: 800; letter-spacing: .02em; font-variant-numeric: tabular-nums; }
+.reloj-fecha { font-size: .7rem; font-weight: 600; opacity: .85; white-space: nowrap; text-transform: capitalize; }
+.reloj.otro-dia .reloj-btn { border-color: #e4572e; }
+.reloj.otro-dia .reloj-fecha { color: #ff8a5c; opacity: 1; }
+.reloj-panel {
+  position: absolute; right: 0; top: 54px; width: 210px; padding: 12px; border-radius: 16px;
+  display: grid; gap: 8px; color: #fff; background: rgba(15,16,20,.85); border: 1px solid rgba(255,255,255,.25);
+  box-shadow: 0 10px 28px rgba(0,0,0,.35);
+  -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+}
+.reloj-panel[hidden], .reloj-hoy[hidden] { display: none; }
+.reloj-panel label { display: grid; gap: 4px; font-size: .8rem; font-weight: 600; }
+.reloj-panel input { font: inherit; padding: 8px; border-radius: 10px; border: 1px solid rgba(255,255,255,.3); background: rgba(255,255,255,.1); color: #fff; color-scheme: dark; }
+.reloj-hoy { font: inherit; font-weight: 700; padding: 8px; border-radius: 10px; border: 0; background: #e4572e; color: #fff; cursor: pointer; }
+/* La barra de pestañas fija queda por debajo de los botones de arriba. */
+body.con-esquinas .tabs.arriba { top: calc(max(12px, env(safe-area-inset-top)) + 54px); }
+
+/* Tarjeta grande de "Hoy toca" en Rutina y Dieta. */
+.hoy-toca { border: 2px solid var(--accent, #e4572e); }
+.hoy-toca .hoy-fecha { font-size: .85rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--accent, #e4572e); margin: 0; }
+.hoy-toca .hoy-titulo { font-size: clamp(1.7rem, 7vw, 2.4rem); line-height: 1.1; font-weight: 900; margin: 4px 0 6px; }
+.hoy-toca .hoy-sub { font-size: 1.05rem; margin: 0 0 8px; }
+.hoy-toca .hoy-lista { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 8px; }
+.hoy-toca .hoy-lista li { font-weight: 700; display: flex; justify-content: space-between; gap: 10px; align-items: baseline; font-size: 1.1rem; border-top: 1px solid var(--border); padding-top: 8px; }
+.hoy-toca .hoy-lista li:first-child { border-top: 0; padding-top: 0; }
+.hoy-toca .hoy-lista small { display: block; font-size: .78rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+.hoy-toca .hoy-lista .kc { font-weight: 800; white-space: nowrap; font-size: .95rem; }

@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Mi dieta · Forty5</title>
-  <link rel="stylesheet" href="shared/esquinas.css?v=202611051850">
+  <link rel="stylesheet" href="shared/esquinas.css?v=202611130400">
   <link rel="icon" href="shared/logo/icono.svg" type="image/svg+xml">
   <link rel="stylesheet" href="shared/styles.css?v=202611051940">
   <style>
@@ -69,7 +69,8 @@
   <script type="module">
     import { sincronizar, evaluaciones } from "./shared/evaluaciones.js?v=202611130100";
     import { calcularTodo, leerPreferencias, necesitaPreferencias } from "./shared/motor.js?v=202611130900";
-    import { calcularDieta } from "./shared/dieta.js?v=202611131300";
+    import { fechaActual, diaSemana, fechaLarga, esHoy } from "./shared/reloj.js?v=202611130400";
+    import { calcularDieta } from "./shared/dieta.js?v=202611130410";
     import { DIAS_SEMANA } from "./shared/rutina.js?v=202611130230";
 
     const $ = (s) => document.querySelector(s);
@@ -92,9 +93,11 @@
       const prefs = leerPreferencias();
       const { perfil, rutina } = calcularTodo({ apartados, prefs, actividad });
       const p = perfil.plan;
-      const hoy = (new Date().getDay() + 6) % 7;
-      const diasEntreno = [...new Set([...(rutina.diasSemana ?? []), ...(rutina.cardioExtra?.diasSemana ?? [])])];
-      let tipo = (rutina.diasSemana ?? []).includes(hoy) ? "entreno" : "descanso";
+      // El reloj marca el día: según él toca día de entreno o de descanso y el menú de ese día.
+      let hoy, tipo;
+      const elegirHoy = () => { hoy = diaSemana(fechaActual()); tipo = (rutina.diasSemana ?? []).includes(hoy) ? "entreno" : "descanso"; };
+      elegirHoy();
+      addEventListener("forty5:fecha", () => { elegirHoy(); pintar(); });
       let comidas = leer("sportfy.dieta.comidas", 5);
       let eleccion = leer("sportfy.dieta.opciones", {});
 
@@ -111,7 +114,18 @@
         const total = dia.proteina * 4 + dia.hidratos * 4 + dia.grasa * 9;
         const pct = (g, k) => Math.round(g * k / total * 100);
         const nombresEntreno = (rutina.diasSemana ?? []).map((i) => DIAS_SEMANA[i]);
+        const tipoHoy = (rutina.diasSemana ?? []).includes(hoy) ? "entreno" : "descanso";
+        const diaHoy = tipoHoy === "entreno" ? d.diaEntreno : d.diaDescanso;
+        const sesionHoy = (rutina.sesiones ?? []).find((x) => x.diaSemana === hoy);
         $("#contenido").innerHTML = `
+          <div class="card hoy-toca">
+            <p class="hoy-fecha">${esHoy() ? "Hoy" : "El"} ${esc(fechaLarga(fechaActual()))}</p>
+            <p class="hoy-titulo">${tipoHoy === "entreno" ? "Día de entreno" : "Día de descanso"}</p>
+            <p class="hoy-sub"><b>${fmt(diaHoy.kcal)} kcal</b> · P ${diaHoy.proteina} g · H ${diaHoy.hidratos} g · G ${diaHoy.grasa} g${sesionHoy ? ` <span class="note">(${esc(sesionHoy.nombre)})</span>` : ""}</p>
+            <ul class="hoy-lista">${diaHoy.comidas.map((c) => `<li><span><small>${esc(c.nombre)}</small>${esc(c.plato)}</span><span class="kc">${fmt(c.kcal)} kcal</span></li>`).join("")}</ul>
+            ${tipo !== tipoHoy ? `<button class="btn secondary" type="button" id="ver-hoy" style="margin-top:12px">Ver las cantidades de ${esHoy() ? "hoy" : "ese día"}</button>` : `<a class="btn secondary" href="#menu" style="margin-top:12px">Ver cantidades y preparación ↓</a>`}
+          </div>
+
           <div class="card">
             <span class="tag l2" style="font-size:.85rem">Objetivo: ${esc(perfil.objetivo.nombre)}</span>
             <div class="kpis">
@@ -122,7 +136,7 @@
             </div>
           </div>
 
-          <div class="card">
+          <div class="card" id="menu" style="scroll-margin-top:130px">
             <h2 style="margin:0 0 6px">Tu día de comidas</h2>
             <div class="selector" role="group" aria-label="Tipo de día">
               <button type="button" data-tipo="entreno" aria-pressed="${tipo === "entreno"}">Día de entreno</button>
@@ -145,7 +159,7 @@
                 <option value="" ${c.auto ? "selected" : ""}>Variar cada día</option>
                 ${c.opciones.map((o) => `<option value="${esc(o.id)}" ${!c.auto && o.id === c.opcion ? "selected" : ""}>${esc(o.nombre)}</option>`).join("")}
               </select></label>
-              <p class="plato">${esc(c.plato)}${c.auto ? ` <span class="note">· hoy</span>` : ""}</p>
+              <p class="plato">${esc(c.plato)}${c.auto ? ` <span class="note">· ${esHoy() ? "hoy" : "ese día"}</span>` : ""}</p>
               <ul>${c.ejemplo.map((e) => `<li>${esc(e.nombre)}: <b>${esc(e.texto)}</b></li>`).join("")}${["Comida", "Cena"].includes(c.nombre) ? "<li>Verdura al gusto, fresca o congelada (medio plato)</li>" : ""}</ul>
               ${c.preparacion ? `<p class="note" style="margin:4px 0 0">🍳 ${esc(c.preparacion)}</p>` : ""}
             </div>`).join("")}
@@ -165,6 +179,7 @@
           <div class="card"><h2 style="margin:0 0 6px">Consejos</h2><ul style="margin:0;padding-left:18px">${d.consejos.map((c) => `<li>${esc(c)}</li>`).join("")}</ul>
             <p class="note" style="margin:10px 0 0">Estimaciones a partir de tu evaluación. No sustituyen el consejo de un médico o nutricionista.</p></div>`;
 
+        $("#ver-hoy")?.addEventListener("click", () => { elegirHoy(); pintar(); document.getElementById("menu")?.scrollIntoView({ behavior: "smooth" }); });
         document.querySelectorAll("[data-tipo]").forEach((b) => b.addEventListener("click", () => { tipo = b.dataset.tipo; pintar(); }));
         document.querySelectorAll("[data-comida]").forEach((sel) => sel.addEventListener("change", () => {
           if (sel.value) eleccion[sel.dataset.comida] = sel.value; else delete eleccion[sel.dataset.comida];
@@ -176,5 +191,6 @@
     }
   </script>
   <script type="module" src="shared/deslizar.js?v=202611131130"></script>
+  <script type="module" src="shared/reloj.js?v=202611130400"></script>
 </body>
 </html>
