@@ -111,9 +111,10 @@
     function pintar() {
       const lista = evaluaciones();
       const ronda = rondaEnCurso();
-      if (lista.length && !ronda && !document.querySelector("#tab-rutina")) {
+      if (lista.length && !ronda && document.querySelector(".tabs")) {
         document.querySelector(".esquina.menu").href = "rutina.html";
-        document.querySelector(".tabs").innerHTML = `<a href="rutina.html" id="tab-rutina">Rutina</a><a href="analisis.html">Mi plan</a><a href="dieta.html">Dieta</a>`;
+        // En Mi perfil no va la barra de pestañas (se vuelve con el icono de casa).
+        document.querySelector(".tabs")?.remove();
       }
       if (!lista.length) return pintarSinEvaluacion();
       const ult = lista.at(-1);
