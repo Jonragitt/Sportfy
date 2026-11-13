@@ -137,7 +137,7 @@
         if (!estado.diasSemana.length) return;
         guardarPreferencias({ ...estado, dias: estado.diasSemana.length });
         calcularTodo({ apartados, prefs: estado, actividad, guardar: true });
-        location.href = "analisis.html";
+        location.href = "rutina.html";
       });
     }
     pintar();

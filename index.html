@@ -8,10 +8,10 @@
     // Ya evaluado (y sin repetición en curso): el menú pasa a ser el plan.
     try {
       const ev = JSON.parse(localStorage.getItem("sportfy.evaluaciones") || "[]");
-      if (ev.length && !localStorage.getItem("sportfy.rondaInicio")) location.replace("analisis.html");
+      if (ev.length && !localStorage.getItem("sportfy.rondaInicio")) location.replace("rutina.html");
     } catch {}
   </script>
-  <link rel="stylesheet" href="shared/esquinas.css?v=202611130400">
+  <link rel="stylesheet" href="shared/esquinas.css?v=202611130430">
   <link rel="icon" href="shared/logo/icono.svg" type="image/svg+xml">
   <link rel="stylesheet" href="shared/styles.css?v=202611052135">
   <style>
@@ -143,14 +143,14 @@
 
     // Si ya están confirmadas las dos evaluaciones, se guarda el apartado y se pasa al plan.
     sincronizar();
-    if (modo() === "plan") location.replace("analisis.html");
+    if (modo() === "plan") location.replace("rutina.html");
     const previas = evaluaciones();
     if (previas.length && rondaEnCurso()) {
       document.querySelector("#repeticion").innerHTML = `<div class="card" style="border-color:var(--accent)">
         <b>Estás repitiendo tu evaluación (n.º ${previas.length + 1})</b>
         <p class="note" style="margin:4px 0 8px">Haz la antropometría y la postural y confírmalas con el tick. Tus ${previas.length} ${previas.length === 1 ? "evaluación anterior sigue guardada" : "evaluaciones anteriores siguen guardadas"} en tu perfil.</p>
         <button class="btn secondary" id="cancelar" type="button">Volver a mi plan sin repetir</button></div>`;
-      document.querySelector("#cancelar").addEventListener("click", () => { cancelarRepeticion(); location.replace("analisis.html"); });
+      document.querySelector("#cancelar").addEventListener("click", () => { cancelarRepeticion(); location.replace("rutina.html"); });
     }
 
     const $ = (s) => document.querySelector(s);
@@ -298,5 +298,6 @@
     }
   </script>
   <script type="module" src="shared/reloj.js?v=202611130400"></script>
+  <script type="module" src="shared/racha.js?v=202611130430"></script>
 </body>
 </html>

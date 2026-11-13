@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Mi perfil · Forty5</title>
-  <link rel="stylesheet" href="shared/esquinas.css?v=202611130400">
+  <link rel="stylesheet" href="shared/esquinas.css?v=202611130430">
   <link rel="icon" href="shared/logo/icono.svg" type="image/svg+xml">
   <link rel="stylesheet" href="shared/styles.css?v=202611051940">
   <style>
@@ -102,7 +102,7 @@
       const lista = evaluaciones();
       const ronda = rondaEnCurso();
       if (lista.length && !ronda && !document.querySelector("#tab-rutina")) {
-        document.querySelector(".esquina.menu").href = "analisis.html";
+        document.querySelector(".esquina.menu").href = "rutina.html";
         document.querySelector(".tabs").innerHTML = `<a href="rutina.html" id="tab-rutina">Rutina</a><a href="analisis.html">Mi plan</a><a href="dieta.html">Dieta</a>`;
       }
       if (!lista.length) return pintarSinEvaluacion();
@@ -296,5 +296,6 @@
     pintar();
   </script>
   <script type="module" src="shared/reloj.js?v=202611130400"></script>
+  <script type="module" src="shared/racha.js?v=202611130430"></script>
 </body>
 </html>

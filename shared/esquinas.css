@@ -55,3 +55,54 @@ body.con-esquinas .tabs.arriba { top: calc(max(12px, env(safe-area-inset-top)) +
 .hoy-toca .hoy-lista li:first-child { border-top: 0; padding-top: 0; }
 .hoy-toca .hoy-lista small { display: block; font-size: .78rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
 .hoy-toca .hoy-lista .kc { font-weight: 800; white-space: nowrap; font-size: .95rem; }
+
+/* Racha de gym (shared/racha.js): fuego a la derecha del perfil; perfil y reloj se apartan. */
+.esquina.racha { right: max(12px, env(safe-area-inset-right)); width: auto; min-width: 46px; padding: 0 12px 0 9px; border-radius: 23px;
+  display: flex; align-items: center; gap: 3px; font: inherit; cursor: pointer; color: #ff7a3d; }
+.esquina.racha svg { width: 24px; height: 24px; }
+.esquina.racha .racha-n { color: #fff; font-size: 1.05rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.esquina.racha.apagada { color: #9aa1ad; }
+.esquina.racha.apagada svg path + path { fill: #c9ced6; }
+body.con-racha .esquina.perfil { right: calc(max(12px, env(safe-area-inset-right)) + 74px); }
+body.con-racha .reloj { right: calc(max(12px, env(safe-area-inset-right)) + 128px); }
+body.con-racha .reloj.solo { right: calc(max(12px, env(safe-area-inset-right)) + 74px); }
+@media (max-width: 370px) { .reloj-btn { padding: 0 10px; } .reloj-fecha { font-size: .64rem; } }
+
+.racha-panel {
+  position: fixed; z-index: 40; top: calc(max(12px, env(safe-area-inset-top)) + 54px); right: max(12px, env(safe-area-inset-right));
+  width: 252px; padding: 12px; border-radius: 16px; color: #fff;
+  background: rgba(15,16,20,.9); border: 1px solid rgba(255,255,255,.22); box-shadow: 0 10px 28px rgba(0,0,0,.4);
+  -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); font-size: .85rem;
+}
+.racha-panel[hidden] { display: none; }
+.racha-cab { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; text-transform: capitalize; }
+.racha-cab button { font: inherit; font-size: 1.2rem; line-height: 1; width: 30px; height: 30px; border-radius: 50%; border: 0; background: rgba(255,255,255,.1); color: #fff; cursor: pointer; }
+.racha-sem, .racha-cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; text-align: center; }
+.racha-sem span { font-size: .7rem; font-weight: 700; opacity: .6; }
+.racha-cal span { height: 29px; display: grid; place-content: center; border-radius: 8px; font-size: .78rem; font-weight: 600; color: rgba(255,255,255,.75); }
+.racha-cal .si { background: rgba(255,122,61,.28); }
+.racha-cal .mal { background: rgba(214,48,49,.45); color: #fff; font-weight: 800; }
+.racha-cal .toca { box-shadow: inset 0 0 0 1.5px #ff7a3d; color: #fff; }
+.racha-cal .futuro { box-shadow: inset 0 0 0 1px rgba(255,255,255,.3); }
+.racha-cal .hoy { outline: 2px solid #fff; outline-offset: -2px; color: #fff; }
+.racha-ley { display: flex; flex-wrap: wrap; gap: 4px 10px; margin-top: 8px; font-size: .72rem; opacity: .85; }
+.racha-ley i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 4px; vertical-align: -1px; }
+.racha-ley i.si { background: rgba(255,122,61,.6); } .racha-ley i.mal { background: rgba(214,48,49,.8); } .racha-ley i.toca { box-shadow: inset 0 0 0 1.5px #ff7a3d; }
+.racha-datos { margin: 8px 0 0; font-size: .8rem; }
+.racha-hoy { width: 100%; margin-top: 8px; font: inherit; font-weight: 700; padding: 9px; border: 0; border-radius: 10px; background: #e4572e; color: #fff; cursor: pointer; }
+
+/* Pregunta de racha a pantalla completa: hay que contestarla para seguir. */
+html.racha-bloqueo, html.racha-bloqueo body { overflow: hidden; }
+.racha-modal { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; padding: 20px;
+  background: rgba(8,9,12,.82); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+.racha-modal-caja { width: min(380px, 100%); text-align: center; color: #fff; padding: 28px 22px; border-radius: 22px;
+  background: linear-gradient(160deg, rgba(40,30,26,.95), rgba(18,19,24,.95)); border: 1px solid rgba(255,122,61,.5); box-shadow: 0 20px 60px rgba(0,0,0,.5); }
+.racha-modal-llama { color: #ff7a3d; } .racha-modal-llama svg { width: 84px; height: 84px; }
+.racha-modal-n { margin: 4px 0 0; font-size: 1.1rem; font-weight: 800; color: #ffb38a; }
+.racha-modal-caja h2 { margin: 10px 0 6px; font-size: 1.6rem; color: #fff; }
+.racha-modal-caja p { margin: 0 0 6px; font-size: 1.05rem; }
+.racha-modal-btns { display: grid; gap: 10px; margin: 18px 0 12px; }
+.racha-modal-btns button { font: inherit; font-size: 1.1rem; font-weight: 800; padding: 14px; border-radius: 14px; cursor: pointer; border: 0; }
+.racha-modal-btns [data-v="si"] { background: #e4572e; color: #fff; }
+.racha-modal-btns [data-v="no"] { background: rgba(255,255,255,.12); color: #fff; border: 1px solid rgba(255,255,255,.25); }
+.racha-modal-nota { font-size: .85rem !important; opacity: .7; }
