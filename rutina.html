@@ -23,6 +23,11 @@
     .dias button { flex: none; font: inherit; font-weight: 700; padding: 9px 14px; border-radius: 99px; border: 1px solid rgba(255,255,255,.35); background: rgba(0,0,0,.45); color: #fff; cursor: pointer; }
     .dias button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); }
     .dias button.hecho::after { content: " ✓"; }
+    .dias.semana7 { display: grid; grid-template-columns: repeat(4, 1fr); overflow: visible; }
+    @media (min-width: 700px) { .dias.semana7 { grid-template-columns: repeat(7, 1fr); } }
+    .dias.semana7 button { border-radius: 14px; text-align: center; padding: 8px 4px; min-width: 0; line-height: 1.2; }
+    .dias button small { display: block; font-size: .72rem; font-weight: 600; opacity: .85; margin-top: 2px; }
+    .dias button.reposo { border-style: dashed; }
     .bloque-titulo { font-size: .8rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 700; margin: 16px 0 6px; }
     .ej { border-top: 1px solid var(--border); padding: 12px 0; display: grid; grid-template-columns: 30px 1fr; gap: 10px; }
     .ej:first-of-type { border-top: 0; }
@@ -71,7 +76,7 @@
     import { sincronizar, evaluaciones, rondaEnCurso } from "./shared/evaluaciones.js?v=202611130100";
     import { marcarRacha } from "./shared/racha.js?v=202611130430";
     import { fechaActual, diaSemana, fechaLarga, esHoy } from "./shared/reloj.js?v=202611130400";
-    import { semanaDelCiclo, MATERIAL, SEMANAS, FOCOS } from "./shared/rutina.js?v=202611130230";
+    import { semanaDelCiclo, MATERIAL, SEMANAS, FOCOS, DIAS_SEMANA } from "./shared/rutina.js?v=202611130230";
     import { calcularTodo, leerPreferencias, guardarPreferencias, necesitaPreferencias } from "./shared/motor.js?v=202611130900";
 
     const $ = (s) => document.querySelector(s);
@@ -94,12 +99,14 @@
       let prefs = { minutos: 60, material: "gimnasio", ...leerPreferencias() };
       // El reloj marca el día: según él tocan la semana del ciclo y la sesión (o el descanso).
       const inicio = calcularTodo({ apartados, prefs, actividad }).perfil.fecha;
-      let auto, semana, dia;
+      let auto, semana, dia, reposo = null; // reposo: día de la semana (0 = lunes) elegido sin sesión
       const elegirHoy = () => {
         const f = fechaActual();
         auto = semanaDelCiclo(inicio, f); semana = auto;
         const sHoy = calcularTodo({ apartados, prefs, actividad, semana }).rutina.sesiones.find((x) => x.diaSemana === diaSemana(f));
         dia = sHoy ? sHoy.dia : (dia ?? 1);
+        const conDias = calcularTodo({ apartados, prefs, actividad, semana }).rutina.diasSemana.length;
+        reposo = !sHoy && conDias ? diaSemana(f) : null;
       };
       elegirHoy();
       addEventListener("forty5:fecha", () => { elegirHoy(); pintar(); });
@@ -119,7 +126,7 @@
           return `<div class="card hoy-toca"><p class="hoy-fecha">${esc(cuando)}</p>
             <p class="hoy-titulo">${esc(sHoy.nombre)}</p>
             <p class="hoy-sub">${sHoy.bloques.length} ejercicios · ≈ ${sHoy.minutos} min${hecha ? " · <b>✓ hecha</b>" : ""}</p>
-            ${dia === sHoy.dia && semana === auto ? `<a class="btn" href="#sesion">Ver la sesión ↓</a>` : `<button class="btn" type="button" id="ir-hoy">Ver la sesión de ${esHoy() ? "hoy" : "ese día"}</button>`}</div>`;
+            ${dia === sHoy.dia && semana === auto && reposo == null ? `<a class="btn" href="#sesion">Ver la sesión ↓</a>` : `<button class="btn" type="button" id="ir-hoy">Ver la sesión de ${esHoy() ? "hoy" : "ese día"}</button>`}</div>`;
         }
         const cardio = rHoy.cardioExtra?.diasSemana?.includes(ds);
         return `<div class="card hoy-toca"><p class="hoy-fecha">${esc(cuando)}</p>
@@ -155,7 +162,15 @@
           <p class="note" style="margin:8px 0 0">${esc(r.semana.nota)}</p>
         </div>`);
 
-        html.push(`<div class="dias" role="group" aria-label="Día">${r.sesiones.map((x) => `<button type="button" data-dia="${x.dia}" aria-pressed="${x.dia === s.dia}" class="${hechosSemana.includes(x.dia) ? "hecho" : ""}">${esc(x.diaNombre ?? `Día ${x.dia}`)}</button>`).join("")}</div>`);
+        // Los 7 días de la semana: los de pesas abren su sesión y los de reposo dicen qué toca.
+        const porDia = new Map(r.sesiones.filter((x) => x.diaSemana != null).map((x) => [x.diaSemana, x]));
+        const hoyDs = diaSemana(fechaActual());
+        if (r.diasSemana.length) html.push(`<div class="dias semana7" role="group" aria-label="Día">${DIAS_SEMANA.map((nombre, d) => {
+          const x = porDia.get(d);
+          const marcado = x ? reposo == null && x.dia === s.dia : reposo === d;
+          return `<button type="button" ${x ? `data-dia="${x.dia}"` : `data-reposo="${d}" class="reposo"`} aria-pressed="${marcado}" ${x && hechosSemana.includes(x.dia) ? `class="hecho"` : ""}>${esc(nombre.slice(0, 3))}${d === hoyDs ? " · hoy" : ""}<small>${x ? esc(x.nombre) : r.cardioExtra?.diasSemana?.includes(d) ? "Cardio" : "Reposo"}</small></button>`;
+        }).join("")}</div>`);
+        else html.push(`<div class="dias" role="group" aria-label="Día">${r.sesiones.map((x) => `<button type="button" data-dia="${x.dia}" aria-pressed="${x.dia === s.dia}" class="${hechosSemana.includes(x.dia) ? "hecho" : ""}">${esc(x.diaNombre ?? `Día ${x.dia}`)}</button>`).join("")}</div>`);
 
         let n = 0;
         const ejercicios = s.bloques.map((b, i) => {
@@ -172,6 +187,15 @@
             </div></div>`;
         }).join("");
 
+        if (reposo != null) {
+          const cardio = r.cardioExtra?.diasSemana?.includes(reposo);
+          html.push(`<div class="card" id="sesion" style="scroll-margin-top:130px">
+            <h2 style="margin:0">${esc(DIAS_SEMANA[reposo])} · ${cardio ? "Cardio" : "Reposo"}</h2>
+            <p style="margin:8px 0 0">${cardio ? `No hay pesas. Toca cardio: ${esc(r.cardioExtra.tipo)}.` : "No hay nada que hacer en el gimnasio: descansar también es parte del plan, porque es cuando el músculo se recupera y crece."}</p>
+            ${r.recuperacionActiva ? `<p class="note" style="margin:8px 0 0"><b>Si te apetece moverte:</b> ${esc(r.recuperacionActiva)}</p>` : ""}
+            ${r.cardioExtra?.pasos ? `<p class="note" style="margin:6px 0 0">Y como cada día, ${esc(r.cardioExtra.pasos)}.</p>` : ""}
+          </div>`);
+        } else
         html.push(`<div class="card" id="sesion" style="scroll-margin-top:130px">
           <div class="row" style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:baseline"><h2 style="margin:0">${esc(s.diaNombre ?? `Día ${s.dia}`)} · ${esc(s.nombre)}</h2><span class="note">≈ ${s.minutos} min</span></div>
           <div class="bloque-titulo">Calentamiento</div>
@@ -204,7 +228,8 @@
         on("#p-mat", "change", (e) => { prefs.material = e.target.value; guardar(); });
         on("#ir-hoy", "click", () => { elegirHoy(); pintar(); document.getElementById("sesion")?.scrollIntoView({ behavior: "smooth" }); });
         on("[data-semana]", "click", (e) => { semana = Number(e.currentTarget.dataset.semana); pintar(); });
-        on("[data-dia]", "click", (e) => { dia = Number(e.currentTarget.dataset.dia); pintar(); });
+        on("[data-dia]", "click", (e) => { dia = Number(e.currentTarget.dataset.dia); reposo = null; pintar(); });
+        on("[data-reposo]", "click", (e) => { reposo = Number(e.currentTarget.dataset.reposo); pintar(); });
         on("#hecho", "click", () => {
           const h = hechos(), k = claveSemana(), lista = new Set(h[k] ?? []);
           lista.has(s.dia) ? lista.delete(s.dia) : lista.add(s.dia);
