@@ -91,6 +91,7 @@ function montar() {
     capas[0].style.backgroundImage = `url("${previa}")`;
     capas[0].dataset.foto = yaVista.id;
     capas[0].classList.add("al-momento", "ver");
+    document.documentElement.style.setProperty("--fondo-actual", `url("${previa}")`);
     document.body.classList.add("fondo-vivo");
     requestAnimationFrame(() => requestAnimationFrame(() => capas[0].classList.remove("al-momento")));
   }
@@ -104,6 +105,7 @@ function montar() {
       const sig = primera && !yaVista ? visible : 1 - visible;
       capas[sig].style.backgroundImage = `url("${foto.url}")`;
       capas[sig].dataset.foto = foto.id;
+      document.documentElement.style.setProperty("--fondo-actual", `url("${foto.url}")`); // copia en la cabecera fija
       capas[sig].classList.add("ver"); if (sig !== visible) capas[visible].classList.remove("ver");
       visible = sig;
       document.body.classList.add("fondo-vivo");
