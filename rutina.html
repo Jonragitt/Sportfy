@@ -68,7 +68,7 @@
   <script type="module">
     import { sincronizar, evaluaciones, rondaEnCurso } from "./shared/evaluaciones.js?v=202611130100";
     import { semanaDelCiclo, MATERIAL, SEMANAS, FOCOS } from "./shared/rutina.js?v=202611130230";
-    import { calcularTodo, leerPreferencias, guardarPreferencias, necesitaPreferencias } from "./shared/motor.js?v=202611130500";
+    import { calcularTodo, leerPreferencias, guardarPreferencias, necesitaPreferencias } from "./shared/motor.js?v=202611130900";
 
     const $ = (s) => document.querySelector(s);
     const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));

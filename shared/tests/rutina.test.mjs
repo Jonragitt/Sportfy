@@ -45,7 +45,7 @@ test("la sesión cabe en el tiempo elegido", () => {
 });
 
 test("lado débil y periodización", () => {
-  const r = generarRutina(perfil([{ id: "slbCaidaPelvis:I" }]), { dias: 3, semana: 4 });
+  const r = generarRutina(perfil([{ id: "slbAsimetria:I" }]), { dias: 3, semana: 4 });
   assert.equal(r.ladoDebil, "I");
   assert.ok(r.sesiones.some((s) => s.bloques.some((b) => b.lado?.includes("izquierdo"))));
   assert.equal(r.semana.nombre, "Descarga");

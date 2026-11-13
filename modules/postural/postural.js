@@ -1,4 +1,4 @@
-import { SECTIONS, SIDES, ALL_ZONES, MAX_POINTS, computeScore, selectedOptions, optionLabel, alteredZoneCount } from "./tests.js?v=202611130810";
+import { SECTIONS, SIDES, ALL_ZONES, MAX_POINTS, computeScore, selectedOptions, optionLabel, alteredZoneCount } from "./tests.js?v=202611130900";
 import { saveScore, getScores, scoreLabel } from "../../shared/scores.js?v=202611052135";
 import { marcarPendiente, quitarPendiente, montarTick } from "../../shared/perfil.js";
 
@@ -13,7 +13,7 @@ function el(tag, attrs = {}, ...children) {
     if (k === "class") node.className = v;
     else node.setAttribute(k, v);
   }
-  for (const c of children) node.append(c);
+  for (const c of children) if (c != null) node.append(c);
   return node;
 }
 
@@ -43,7 +43,7 @@ function circle(zone, value, label) {
 }
 
 // Botón "Ver ejemplo": despliega el GIF de la alteración (en bilaterales, izquierda y derecha).
-const GIF_V = "202611130810";
+const GIF_V = "202611130900";
 // Solo un ejemplo abierto a la vez: al abrir uno se cierra el anterior.
 let demoAbierto = null;
 function demo(opt, sides) {
@@ -124,7 +124,7 @@ function bilateralCard(zone, section) {
   for (const k of Object.keys(SIDES)) head.append(el("span", { class: "lado-tag", title: SIDES[k] }, k));
   const rows = el("div", { class: "lados" }, head);
   for (const opt of zone.options) {
-    const { btn, panel } = section.media && !section.ejemplos ? { btn: "", panel: "" } : demo(opt, Object.keys(SIDES));
+    const { btn, panel } = (section.media && !section.ejemplos) || opt.sinEjemplo ? { btn: "", panel: "" } : demo(opt, Object.keys(SIDES));
     const row = el(
       "div",
       { class: "lado-row" },

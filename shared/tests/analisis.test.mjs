@@ -74,7 +74,7 @@ test("evolución: series, comparación y alteraciones corregidas", () => {
 test("perfil para la rutina se guarda en localStorage", () => {
   const store = {};
   const storage = { setItem: (k, v) => (store[k] = v) };
-  const perfil = perfilRutina([medir(base, "2026-01-01")], [{ fecha: "2026-01-02", nota: 8, desviaciones: [{ id: "slbIsquios:I", nombre: "x" }] }], { actividad: "activa" });
+  const perfil = perfilRutina([medir(base, "2026-01-01")], [{ fecha: "2026-01-02", nota: 8, desviaciones: [{ id: "slbTiembla:I", nombre: "x" }] }], { actividad: "activa" });
   guardarPerfilRutina(perfil, storage);
   const g = JSON.parse(store[ANALISIS_KEY]);
   assert.equal(g.objetivo.id, "perdidaGrasa");

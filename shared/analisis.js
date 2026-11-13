@@ -119,7 +119,7 @@ export const PATRONES = [
   {
     id: "cruzadoInferior",
     nombre: "Pelvis adelantada y zona lumbar arqueada",
-    alteraciones: ["caderaAnteversion", "sohInclinacion", "sohHiperlordosis", "slbLumbar"],
+    alteraciones: ["caderaAnteversion", "sohInclinacion", "sohHiperlordosis", "slbLumbar", "slbArquea"],
     texto: "Tu pelvis tiende a inclinarse hacia delante y la zona lumbar se arquea de más. Suele ir con flexores de cadera acortados y glúteo y abdomen poco activos, y es una causa frecuente de molestias lumbares.",
     fortalecer: "Glúteo y core: puente de glúteo, hip thrust, dead bug y plancha con retroversión.",
     movilizar: "Flexores de cadera y cuádriceps: estiramiento de psoas en zancada y de cuádriceps.",
@@ -151,7 +151,7 @@ export const PATRONES = [
   {
     id: "asimetria",
     nombre: "Asimetrías entre lados",
-    alteraciones: ["acromionAsimetrico", "acromionIzqBajo", "acromionDerBajo", "crestasAsimetricas", "crestaIzqAlta", "crestaDerAlta", "sohCargaAsimetrica", "slbCaidaPelvis", "slbRotacion"],
+    alteraciones: ["acromionAsimetrico", "acromionIzqBajo", "acromionDerBajo", "crestasAsimetricas", "crestaIzqAlta", "crestaDerAlta", "sohCargaAsimetrica", "slbCaidaPelvis", "slbRotacion", "slbRotaTronco", "slbAsimetria"],
     texto: "Hay diferencias entre tu lado izquierdo y el derecho (altura de hombros o pelvis, reparto de la carga o control de la pelvis). A la larga sobrecargan siempre el mismo lado.",
     fortalecer: "Trabajo unilateral empezando por el lado débil: zancadas, sentadilla búlgara, puente a una pierna y paseo del granjero con una mano.",
     movilizar: "Cuadrado lumbar y cadera del lado más cargado; revisa también hábitos como cargar la mochila siempre del mismo lado.",
@@ -159,8 +159,8 @@ export const PATRONES = [
   {
     id: "gluteoDebil",
     nombre: "Glúteo poco activo",
-    alteraciones: ["slbIsquios"],
-    texto: "En el puente trabajan más los isquiotibiales que el glúteo. Es la base de muchos de los otros patrones: un glúteo débil desestabiliza pelvis y rodillas.",
+    alteraciones: ["slbIsquios", "slbTalon", "slbTiembla"],
+    texto: "En el puente tu glúteo no hace bien su trabajo: compensan los isquiotibiales o el pie, o la cadera tiembla por falta de fuerza. Es la base de muchos de los otros patrones: un glúteo débil desestabiliza pelvis y rodillas.",
     fortalecer: "Activación de glúteo: puente con los pies cerca, hip thrust, clamshell y patada de glúteo.",
     movilizar: "Isquiotibiales y flexores de cadera.",
   },
