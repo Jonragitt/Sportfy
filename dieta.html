@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="es">
 <head>
+  <style>@view-transition { navigation: auto; }</style>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Mi dieta · Forty5</title>
@@ -13,7 +14,7 @@
   <meta name="apple-mobile-web-app-title" content="Forty5">
   <link rel="stylesheet" href="shared/esquinas.css?v=202611130620">
   <link rel="icon" href="shared/logo/icono.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="shared/styles.css?v=202611130730">
+  <link rel="stylesheet" href="shared/styles.css?v=202611131400">
   <style>
     .tabs a { white-space: nowrap; padding: 10px 18px; }
     .tabs.arriba { position: sticky; top: 10px; left: auto; bottom: auto; transform: none; width: fit-content; max-width: 100%; margin: 6px auto 18px; }
@@ -53,6 +54,7 @@
     .empty .btn { text-decoration: none; display: inline-block; }
     select { font: inherit; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); color: var(--text); }
   </style>
+  <script type="speculationrules">{"prefetch":[{"source":"list","urls":["rutina.html","analisis.html","dieta.html"],"eagerness":"immediate"}]}</script>
 </head>
 <body class="con-esquinas con-fondo">
   <a class="esquina menu" href="rutina.html" aria-label="Menú principal"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 11L12 4l8.5 7M6 9.5V20h4.5v-5.5h3V20H18V9.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
@@ -201,6 +203,6 @@
   <script type="module" src="shared/reloj.js?v=202611130400"></script>
   <script type="module" src="shared/racha.js?v=202611130500"></script>
   <script type="module" src="shared/cuenta.js?v=202611130700"></script>
-  <script type="module" src="shared/fondo.js?v=202611130620"></script>
+  <script type="module" src="shared/fondo.js?v=202611131400"></script>
 </body>
 </html>

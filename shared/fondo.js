@@ -56,7 +56,7 @@ export function saltoInicial(lista, ultima, azar = Math.random()) {
   if (lista.length > 1 && lista[r].id === ultima) r = (r + 1) % lista.length;
   return r;
 }
-const ULTIMA = "sportfy.fondoUltima", SALTO = "sportfy.fondoSalto";
+const ULTIMA = "sportfy.fondoUltima", SALTO = "sportfy.fondoSalto", ACTUAL = "sportfy.fondoActual";
 
 function leerRutina() { try { return JSON.parse(localStorage.getItem("sportfy.rutina")); } catch { return null; } }
 // Al abrir la app empieza la cuenta del reloj y se elige con qué foto se entra. Al pasar de un
@@ -81,14 +81,26 @@ function montar() {
     document.body.prepend(c); return c;
   });
   let visible = 0, actual = null, reloj = null;
+  // Al pasar de un apartado a otro, la foto que ya se veía se pone al momento (está en la caché),
+  // sin fundido desde negro. Si toca otra, luego se funde como siempre.
+  let previa = null; try { previa = sessionStorage.getItem(ACTUAL); } catch { /* sin almacenamiento */ }
+  const yaVista = previa && FOTOS.find((f) => f.url === previa);
+  if (yaVista) {
+    actual = previa;
+    capas[0].style.backgroundImage = `url("${previa}")`;
+    capas[0].dataset.foto = yaVista.id;
+    capas[0].classList.add("al-momento", "ver");
+    document.body.classList.add("fondo-vivo");
+    requestAnimationFrame(() => requestAnimationFrame(() => capas[0].classList.remove("al-momento")));
+  }
 
   const poner = (foto, primera) => {
     if (foto.url === actual) return;
     const img = new Image();
     img.onload = () => {
       actual = foto.url;
-      try { localStorage.setItem(ULTIMA, foto.id); } catch { /* sin almacenamiento */ }
-      const sig = primera ? visible : 1 - visible;
+      try { localStorage.setItem(ULTIMA, foto.id); sessionStorage.setItem(ACTUAL, foto.url); } catch { /* sin almacenamiento */ }
+      const sig = primera && !yaVista ? visible : 1 - visible;
       capas[sig].style.backgroundImage = `url("${foto.url}")`;
       capas[sig].dataset.foto = foto.id;
       capas[sig].classList.add("ver"); if (sig !== visible) capas[visible].classList.remove("ver");

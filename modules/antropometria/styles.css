@@ -146,6 +146,7 @@ body.con-fondo::before {
   opacity: 0; transition: opacity 2.5s ease;
 }
 .fondo-capa.ver { opacity: 1; }
+.fondo-capa.al-momento { transition: none; }
 @media (prefers-reduced-motion: reduce) { .fondo-capa { transition: none; } }
 body.con-fondo .top h1, body.con-fondo .top p, body.con-fondo .top a { color: #fff; text-shadow: 0 1px 6px rgba(0,0,0,.6); }
 body.con-fondo legend { background: var(--card); padding: 2px 10px; border-radius: 8px; }
