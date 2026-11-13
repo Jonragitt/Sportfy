@@ -1,4 +1,4 @@
-import { SECTIONS, SIDES, ALL_ZONES, MAX_POINTS, computeScore, selectedOptions, optionLabel, alteredZoneCount } from "./tests.js?v=202611130600";
+import { SECTIONS, SIDES, ALL_ZONES, MAX_POINTS, computeScore, selectedOptions, optionLabel, alteredZoneCount } from "./tests.js?v=202611130610";
 import { saveScore, getScores, scoreLabel } from "../../shared/scores.js?v=202611052135";
 import { marcarPendiente, quitarPendiente, montarTick } from "../../shared/perfil.js";
 
@@ -43,7 +43,7 @@ function circle(zone, value, label) {
 }
 
 // Botón "Ver ejemplo": despliega el GIF de la alteración (en bilaterales, izquierda y derecha).
-const GIF_V = "202611130600";
+const GIF_V = "202611130610";
 // Solo un ejemplo abierto a la vez: al abrir uno se cierra el anterior.
 let demoAbierto = null;
 function demo(opt, sides) {

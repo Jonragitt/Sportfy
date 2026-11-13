@@ -291,7 +291,7 @@ export const SECTIONS = [
       { src: "ejercicios/slb-fases.png", alt: "Fases del puente a una pierna: posición inicial, inicio de la elevación, elevación progresiva, puente completo y retorno controlado", caption: "Fases del movimiento", w: 900, h: 1260, wide: true },
     ],
     intro:
-      "Tumbado boca arriba, rodillas flexionadas y brazos cruzados sobre el pecho. Estira una pierna y eleva la cadera con la otra hasta alinear hombro, cadera y rodilla. Mantén 5 segundos y repite con cada pierna. Marca el lado de la pierna de apoyo: I (izquierda) o D (derecha).",
+      "¿Por qué te pedimos este puente? Al sostener la cadera con una sola pierna se ve si tu glúteo hace bien su trabajo o si lo compensan los isquiotibiales o la zona lumbar, y si eres capaz de mantener la pelvis nivelada. Así puedes comprobar por ti mismo si tu glúteo está débil o si un lado controla peor que el otro, algo que de pie no siempre se aprecia. Marca el lado de la pierna de apoyo: I (izquierda) o D (derecha).",
     zones: [
       {
         id: "slbPuente",
@@ -331,7 +331,7 @@ export const SECTIONS = [
     title: "Wall angel test",
     bilateral: true,
     intro:
-      "De pie con talones, glúteos, espalda alta y cabeza apoyados en la pared. Coloca los brazos en W con codos y dorso de las manos contra la pared y deslízalos hacia arriba y abajo 5 veces. Marca el lado en que aparece cada compensación.",
+      "¿Por qué te pedimos el wall angel? Con la espalda contra la pared no puedes hacer trampas: si tus hombros, tu espalda alta o tus escápulas están rígidos, los brazos se despegan o la zona lumbar se arquea. Así puedes comprobar por ti mismo si los hombros adelantados o la espalda encorvada que viste de pie te limitan al levantar los brazos. Marca el lado en que aparece cada compensación.",
     zones: [
       {
         id: "wallAngelZona",
@@ -359,7 +359,7 @@ export const SECTIONS = [
     title: "Lunge test / dorsiflexión (10 cm)",
     bilateral: true,
     intro:
-      "Descalzo, frente a una pared, con el dedo gordo a 10 cm de ella. Lleva la rodilla hacia delante hasta tocar la pared sin despegar el talón del suelo. Repite con cada pie y marca el resultado de cada lado.",
+      "¿Por qué te pedimos este test? Mide cuánto se dobla tu tobillo, y un tobillo rígido es una de las causas más frecuentes de que las rodillas se vayan hacia dentro, los talones se levanten o el tronco se incline al hacer sentadillas. Así puedes comprobar por ti mismo si el origen de esas compensaciones está en tus tobillos y si un lado está peor que el otro. Marca el resultado de cada lado.",
     zones: [
       {
         id: "lungeDorsi",
