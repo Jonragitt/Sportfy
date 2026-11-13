@@ -38,6 +38,8 @@
     .tabla-wrap { overflow-x: auto; margin-top: 10px; }
     table.comp { border-collapse: collapse; width: 100%; font-size: .88rem; }
     .tabs a { white-space: nowrap; padding: 10px 18px; }
+    .tabs.arriba { position: sticky; top: 10px; left: auto; bottom: auto; transform: none; width: fit-content; max-width: 100%; margin: 6px auto 18px; }
+    .wrap { padding-bottom: 40px; }
     table.comp th, table.comp td { padding: 8px 6px; border-top: 1px solid var(--border); text-align: right; vertical-align: top; }
     table.comp th:first-child, table.comp td:first-child { text-align: left; }
     table.comp thead th { border-top: 0; font-size: .8rem; color: var(--muted); }
@@ -67,14 +69,14 @@
       });
     </script>
     <h1>Mi perfil</h1>
+    <nav class="tabs arriba" aria-label="Menú principal">
+      <a href="index.html" id="tab-inicio">Inicio</a>
+      <a href="perfil.html" aria-current="page">Perfil</a>
+    </nav>
     <p class="lead" id="intro"></p>
     <div id="contenido"></div>
   </main>
 
-  <nav class="tabs" aria-label="Menú principal">
-    <a href="index.html" id="tab-inicio">Inicio</a>
-    <a href="perfil.html" aria-current="page">Perfil</a>
-  </nav>
 
   <script type="module">
     import { scoreLabel } from "./shared/scores.js";

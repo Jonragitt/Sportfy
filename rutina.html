@@ -9,6 +9,8 @@
   <link rel="stylesheet" href="shared/styles.css?v=202611051940">
   <style>
     .tabs a { white-space: nowrap; padding: 10px 18px; }
+    .tabs.arriba { position: sticky; top: 10px; left: auto; bottom: auto; transform: none; width: fit-content; max-width: 100%; margin: 6px auto 18px; }
+    .wrap { padding-bottom: 40px; }
     .prefs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .prefs label { display: grid; gap: 4px; font-size: .85rem; color: var(--muted); font-weight: 600; }
     select { font: inherit; font-size: 1rem; padding: 9px 10px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); color: var(--text); width: 100%; }
@@ -55,15 +57,15 @@
       <span class="hueco" aria-hidden="true"></span>
     </nav>
     <h1>Mi rutina</h1>
+    <nav class="tabs arriba" aria-label="Menú principal">
+      <a href="analisis.html">Mi plan</a>
+      <a href="rutina.html" aria-current="page">Rutina</a>
+      <a href="perfil.html">Perfil</a>
+    </nav>
     <p class="lead" id="intro">Diseñada para ti con los resultados de tu evaluación: objetivo, nivel, postura y lado débil.</p>
     <div id="contenido"></div>
   </main>
 
-  <nav class="tabs" aria-label="Menú principal">
-    <a href="analisis.html">Mi plan</a>
-    <a href="rutina.html" aria-current="page">Rutina</a>
-    <a href="perfil.html">Perfil</a>
-  </nav>
 
   <script type="module">
     import { sincronizar, evaluaciones, rondaEnCurso } from "./shared/evaluaciones.js?v=202611130100";

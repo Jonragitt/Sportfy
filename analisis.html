@@ -66,6 +66,8 @@
     .empty p { margin: 0 0 12px; color: var(--muted); }
     .empty .btn { text-decoration: none; display: inline-block; margin: 4px; }
     .tabs a { white-space: nowrap; padding: 10px 18px; }
+    .tabs.arriba { position: sticky; top: 10px; left: auto; bottom: auto; transform: none; width: fit-content; max-width: 100%; margin: 6px auto 18px; }
+    .wrap { padding-bottom: 40px; }
     .guardado { font-size: .85rem; color: var(--good); font-weight: 600; margin: 10px 0 0; }
     @media (max-width: 420px) { .big { font-size: 2rem; } .kpi b { font-size: 1.15rem; } }
   </style>
@@ -81,16 +83,16 @@
     </nav>
     <div id="repeticion"></div>
     <h1>Tu plan</h1>
+    <nav class="tabs arriba" aria-label="Menú principal">
+      <a href="analisis.html" aria-current="page">Mi plan</a>
+      <a href="rutina.html">Rutina</a>
+      <a href="perfil.html">Perfil</a>
+    </nav>
     <p class="lead">Calculado a partir de tu última evaluación: qué dicen tus resultados, qué trabajar primero y los datos con los que se ajusta tu rutina de gimnasio.</p>
 
     <div id="contenido"></div>
   </main>
 
-  <nav class="tabs" aria-label="Menú principal">
-    <a href="analisis.html" aria-current="page">Mi plan</a>
-    <a href="rutina.html">Rutina</a>
-    <a href="perfil.html">Perfil</a>
-  </nav>
 
   <script type="module">
     import { analizar, perfilRutina, guardarPerfilRutina, series, comparar, evolucionPostural, proximaEvaluacion, CORRECTIVOS, correctivosPorLado } from "./shared/analisis.js?v=202611130900";
