@@ -6,7 +6,7 @@
 // - Sin configuración, la pantalla los muestra como "muy pronto" y todo se queda en el dispositivo.
 // Todo lo que la app guarda en localStorage bajo "sportfy." se sube a la nube y se baja en otro
 // dispositivo al iniciar sesión. Las claves de la cuenta van bajo "forty5." y no se sincronizan.
-import { FIREBASE_CONFIG } from "./firebase-config.js?v=202611130500";
+import { FIREBASE_CONFIG, APPLE_ACTIVO } from "./firebase-config.js?v=202611130630";
 
 const CUENTA = "forty5.cuenta";   // { tipo: "google" | "apple" | "local", nombre, desde }
 const NUBE = "forty5.nube";       // { version, hashes: { clave: hash } }
@@ -179,14 +179,14 @@ export function mostrarInicioSesion({ cerrable = false } = {}) {
   const modal = document.createElement("div");
   modal.className = "login-modal no-deslizar";
   modal.setAttribute("role", "dialog"); modal.setAttribute("aria-modal", "true"); modal.setAttribute("aria-labelledby", "login-titulo");
-  const listos = googleAppleListos();
+  const listos = googleAppleListos(), apple = listos && APPLE_ACTIVO;
   modal.innerHTML = `<div class="login-caja">
     <img class="login-logo" src="${new URL("./logo/forty5-titulo.png", import.meta.url)}" alt="Forty5" width="900" height="214">
     <h2 id="login-titulo">Guarda tu progreso</h2>
     <p class="login-sub">Inicia sesión para no perder tus evaluaciones, tu rutina, tu dieta y tu racha, y tenerlas en cualquier dispositivo.</p>
     <div class="login-btns">
       <button type="button" class="login-btn google" data-via="google" ${listos ? "" : "disabled"}>${ICONO_GOOGLE}<span>Continuar con Google</span>${listos ? "" : "<small>Muy pronto</small>"}</button>
-      <button type="button" class="login-btn apple" data-via="apple" ${listos ? "" : "disabled"}>${ICONO_APPLE}<span>Continuar con Apple</span>${listos ? "" : "<small>Muy pronto</small>"}</button>
+      <button type="button" class="login-btn apple" data-via="apple" ${apple ? "" : "disabled"}>${ICONO_APPLE}<span>Continuar con Apple</span>${apple ? "" : "<small>Muy pronto</small>"}</button>
     </div>
     <p class="login-error" hidden></p>
     <button type="button" class="login-sin" data-via="local">${cerrable ? "Cancelar" : "Seguir sin cuenta (solo en este dispositivo)"}</button>
