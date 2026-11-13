@@ -84,9 +84,9 @@
     <div id="repeticion"></div>
     <h1>Tu plan</h1>
     <nav class="tabs arriba" aria-label="Menú principal">
-      <a href="analisis.html" aria-current="page">Mi plan</a>
       <a href="rutina.html">Rutina</a>
-      <a href="perfil.html">Perfil</a>
+      <a href="analisis.html" aria-current="page">Mi plan</a>
+      <a href="dieta.html">Dieta</a>
     </nav>
     <p class="lead">Calculado a partir de tu última evaluación: qué dicen tus resultados, qué trabajar primero y los datos con los que se ajusta tu rutina de gimnasio.</p>
 
@@ -308,10 +308,12 @@
         ${rutina.condiciones.length ? `<p class="precaucion"><b>Tu salud:</b> ${rutina.condiciones.map((c) => `<b>${esc(c.nombre)}</b>: ${esc(c.aviso)}`).join(" ")}</p>` : ""}
         ${perfil.precauciones.length ? `<p class="precaucion"><b>Precauciones en el gimnasio:</b> ${perfil.precauciones.map(esc).join(" ")}</p>` : ""}
         <a class="btn" href="rutina.html" style="display:block;text-align:center;text-decoration:none;margin-top:14px">Ver mi rutina de gimnasio →</a>
+        <a class="btn ghost" href="dieta.html" style="display:block;text-align:center;text-decoration:none;margin-top:8px">Ver mi dieta →</a>
         <p class="note" style="margin:4px 0 0">Estimaciones con fórmulas validadas (Katch-McArdle, Mifflin-St Jeor). No sustituyen el consejo médico o de un nutricionista.</p>
       </div>`;
       $("#actividad").addEventListener("change", (ev) => { escribir("sportfy.actividad", ev.target.value); pintarPlan(); });
     }
   </script>
+  <script type="module" src="shared/deslizar.js?v=202611131000"></script>
 </body>
 </html>

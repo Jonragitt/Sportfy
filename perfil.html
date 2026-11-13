@@ -102,8 +102,8 @@
       const lista = evaluaciones();
       const ronda = rondaEnCurso();
       if (lista.length && !ronda && !document.querySelector("#tab-rutina")) {
-        $("#tab-inicio").textContent = "Mi plan"; $("#tab-inicio").href = "analisis.html"; document.querySelector(".esquina.menu").href = "analisis.html";
-        $("#tab-inicio").insertAdjacentHTML("afterend", `<a href="rutina.html" id="tab-rutina">Rutina</a>`);
+        document.querySelector(".esquina.menu").href = "analisis.html";
+        document.querySelector(".tabs").innerHTML = `<a href="rutina.html" id="tab-rutina">Rutina</a><a href="analisis.html">Mi plan</a><a href="dieta.html">Dieta</a>`;
       }
       if (!lista.length) return pintarSinEvaluacion();
       const ult = lista.at(-1);

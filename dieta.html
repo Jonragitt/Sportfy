@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mi dieta · Forty5</title>
+  <link rel="stylesheet" href="shared/esquinas.css?v=202611051850">
+  <link rel="icon" href="shared/logo/icono.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="shared/styles.css?v=202611051940">
+  <style>
+    .tabs a { white-space: nowrap; padding: 10px 18px; }
+    .tabs.arriba { position: sticky; top: 10px; left: auto; bottom: auto; transform: none; width: fit-content; max-width: 100%; margin: 6px auto 18px; }
+    .wrap { padding-bottom: 40px; }
+    .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin-top: 12px; }
+    .kpi { border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; }
+    .kpi span { font-size: .8rem; color: var(--muted); display: block; }
+    .kpi b { font-size: 1.3rem; display: block; }
+    .kpi small { font-size: .78rem; color: var(--muted); }
+    .kpi.destacado { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, transparent); }
+    .macro-bar { display: flex; height: 12px; border-radius: 99px; overflow: hidden; margin: 12px 0 4px; }
+    .macro-bar i:nth-child(1) { background: var(--accent); }
+    .macro-bar i:nth-child(2) { background: var(--mid); }
+    .macro-bar i:nth-child(3) { background: var(--good); }
+    .leyenda { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: .82rem; color: var(--muted); }
+    .leyenda b { color: var(--text); }
+    .punto { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 4px; }
+    .selector { display: flex; gap: 6px; margin-top: 4px; }
+    .selector button { flex: 1; font: inherit; font-weight: 700; padding: 10px; border-radius: 12px; border: 1.5px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; }
+    .selector button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .comida { border-top: 1px solid var(--border); padding: 12px 0 0; margin-top: 12px; }
+    .comida:first-of-type { border-top: 0; margin-top: 4px; padding-top: 4px; }
+    .comida-head { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+    .comida-head h3 { margin: 0; font-size: 1.05rem; }
+    .comida-head span { font-weight: 800; white-space: nowrap; }
+    .comida .macros { font-size: .82rem; color: var(--muted); margin: 2px 0 6px; }
+    .comida ul { margin: 0; padding-left: 18px; }
+    .comida li b { white-space: nowrap; }
+    .aviso { margin: 10px 0 0; padding: 10px 12px; border-radius: 10px; font-size: .9rem; background: color-mix(in srgb, var(--mid) 15%, transparent); }
+    .info { margin: 10px 0 0; padding: 10px 12px; border-radius: 10px; font-size: .9rem; background: color-mix(in srgb, var(--accent) 10%, transparent); }
+    .info p { margin: 0; } .info p + p { margin-top: 6px; }
+    .empty { text-align: center; padding: 24px 16px; }
+    .empty p { margin: 0 0 12px; color: var(--muted); }
+    .empty .btn { text-decoration: none; display: inline-block; }
+    select { font: inherit; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); color: var(--text); }
+  </style>
+</head>
+<body class="con-esquinas con-fondo">
+  <a class="esquina menu" href="analisis.html" aria-label="Menú principal"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 11L12 4l8.5 7M6 9.5V20h4.5v-5.5h3V20H18V9.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+  <a class="esquina perfil" href="perfil.html" aria-label="Mi perfil"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M4.5 20.5c1.2-4 4.1-6 7.5-6s6.3 2 7.5 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></a>
+  <main class="wrap">
+    <nav class="topbar" aria-label="Navegación">
+      <span class="hueco" aria-hidden="true"></span>
+      <a class="topbar-logo" href="analisis.html" aria-label="Forty5 · Inicio"><img class="logo-img" src="shared/logo/forty5-titulo.png" alt="Forty5" width="900" height="214"></a>
+      <span class="hueco" aria-hidden="true"></span>
+    </nav>
+    <h1>Mi dieta</h1>
+    <nav class="tabs arriba" aria-label="Menú principal">
+      <a href="rutina.html">Rutina</a>
+      <a href="analisis.html">Mi plan</a>
+      <a href="dieta.html" aria-current="page">Dieta</a>
+    </nav>
+    <p class="lead" id="intro">Calculada con tu evaluación y tus días de entreno: cuánto comer, cómo repartirlo en el día y qué elegir.</p>
+    <div id="contenido"></div>
+  </main>
+
+  <script type="module">
+    import { sincronizar, evaluaciones } from "./shared/evaluaciones.js?v=202611130100";
+    import { calcularTodo, leerPreferencias, necesitaPreferencias } from "./shared/motor.js?v=202611130900";
+    import { calcularDieta } from "./shared/dieta.js?v=202611131000";
+    import { DIAS_SEMANA } from "./shared/rutina.js?v=202611130230";
+
+    const $ = (s) => document.querySelector(s);
+    const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+    const fmt = (n, d = 0) => Number(n).toLocaleString("es-ES", { maximumFractionDigits: d });
+    const leer = (k, def) => { try { return JSON.parse(localStorage.getItem(k)) ?? def; } catch { return def; } };
+    const escribir = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* sin almacenamiento */ } };
+
+    sincronizar();
+    if (necesitaPreferencias()) location.replace("preferencias.html");
+    const apartados = evaluaciones();
+    if (!apartados.length) {
+      $("#intro").textContent = "Tu dieta se abrirá cuando completes y confirmes las dos evaluaciones.";
+      $("#contenido").innerHTML = `<div class="card empty"><p>Necesitamos tu evaluación antropométrica y tu evaluación postural, las dos confirmadas con el tick verde, para calcular tu dieta.</p>
+        <a class="btn" href="index.html">Ir a las evaluaciones</a></div>`;
+      document.querySelector(".tabs").innerHTML = `<a href="index.html">Inicio</a><a href="perfil.html">Perfil</a>`;
+      document.querySelector(".esquina.menu").href = "index.html";
+    } else {
+      const actividad = leer("sportfy.actividad", "ligera");
+      const prefs = leerPreferencias();
+      const { perfil, rutina } = calcularTodo({ apartados, prefs, actividad });
+      const p = perfil.plan;
+      const hoy = (new Date().getDay() + 6) % 7;
+      const diasEntreno = [...new Set([...(rutina.diasSemana ?? []), ...(rutina.cardioExtra?.diasSemana ?? [])])];
+      let tipo = (rutina.diasSemana ?? []).includes(hoy) ? "entreno" : "descanso";
+      let comidas = leer("sportfy.dieta.comidas", 5);
+
+      function pintar() {
+        if (!p) {
+          $("#contenido").innerHTML = `<div class="card"><p style="margin:0">Para calcular tu dieta necesitamos la evaluación antropométrica con edad, altura y peso.</p></div>`;
+          return;
+        }
+        const d = calcularDieta(p, { diasEntreno: rutina.diasSemana ?? [], comidas, condiciones: (rutina.condiciones ?? []).map((c) => c.id) });
+        const dia = tipo === "entreno" ? d.diaEntreno : d.diaDescanso;
+        const total = dia.proteina * 4 + dia.hidratos * 4 + dia.grasa * 9;
+        const pct = (g, k) => Math.round(g * k / total * 100);
+        const nombresEntreno = (rutina.diasSemana ?? []).map((i) => DIAS_SEMANA[i]);
+        $("#contenido").innerHTML = `
+          <div class="card">
+            <span class="tag l2" style="font-size:.85rem">Objetivo: ${esc(perfil.objetivo.nombre)}</span>
+            <div class="kpis">
+              <div class="kpi destacado"><span>Calorías al día (media)</span><b>${fmt(d.kcal)} kcal</b><small>${p.diferencia === 0 ? "mantenimiento" : `${p.diferencia > 0 ? "+" : ""}${fmt(p.diferencia)} vs mantenimiento`}</small></div>
+              <div class="kpi"><span>Proteína</span><b>${d.macros.proteina} g</b><small>unos ${d.proteinaPorComida} g en cada comida</small></div>
+              <div class="kpi"><span>Agua</span><b>${fmt(d.agua, 1)} L/día</b><small>más en días de entreno</small></div>
+              <div class="kpi"><span>Fibra</span><b>${d.fibra} g/día</b><small>verdura, fruta, legumbre e integrales</small></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h2 style="margin:0 0 6px">Tu día de comidas</h2>
+            <div class="selector" role="group" aria-label="Tipo de día">
+              <button type="button" data-tipo="entreno" aria-pressed="${tipo === "entreno"}">Día de entreno</button>
+              <button type="button" data-tipo="descanso" aria-pressed="${tipo === "descanso"}">Día de descanso</button>
+            </div>
+            <p class="note" style="margin:8px 0 0">${d.ciclado ? `Los días de fuerza (${esc(nombresEntreno.join(", "))}) llevan más hidratos y los de descanso menos; la proteína es la misma todos los días y la media semanal cuadra con tu plan.` : "Todos los días comes lo mismo: tu plan no tiene días de fuerza definidos."}</p>
+            <div class="macro-bar" aria-hidden="true"><i style="width:${pct(dia.proteina, 4)}%"></i><i style="width:${pct(dia.grasa, 9)}%"></i><i style="width:${pct(dia.hidratos, 4)}%"></i></div>
+            <div class="leyenda">
+              <span><b>${fmt(dia.kcal)} kcal</b></span>
+              <span><i class="punto" style="background:var(--accent)"></i>Proteína <b>${dia.proteina} g</b></span>
+              <span><i class="punto" style="background:var(--mid)"></i>Grasas <b>${dia.grasa} g</b></span>
+              <span><i class="punto" style="background:var(--good)"></i>Hidratos <b>${dia.hidratos} g</b></span>
+            </div>
+            <label class="note" style="display:block;margin-top:12px">Comidas al día <select id="comidas"><option value="4" ${comidas === 4 ? "selected" : ""}>4 comidas</option><option value="5" ${comidas === 5 ? "selected" : ""}>5 comidas</option></select></label>
+            ${dia.comidas.map((c) => `<div class="comida">
+              <div class="comida-head"><h3>${esc(c.nombre)}</h3><span>${fmt(c.kcal)} kcal</span></div>
+              <p class="macros">P ${c.proteina} g · H ${c.hidratos} g · G ${c.grasa} g</p>
+              <ul>${c.ejemplo.map((e) => `<li>${esc(e.nombre)}: <b>${esc(e.texto)}</b></li>`).join("")}${["Comida", "Cena"].includes(c.nombre) ? "<li>Verdura al gusto (medio plato)</li>" : ""}</ul>
+            </div>`).join("")}
+            <p class="note" style="margin:10px 0 0">Es un ejemplo: puedes cambiar cada alimento por otro del mismo grupo (pollo por pescado, arroz por patata o pasta…) manteniendo cantidades parecidas.</p>
+          </div>
+
+          ${tipo === "entreno" ? `<div class="card"><h2 style="margin:0 0 6px">Alrededor del entreno</h2>
+            <div class="info"><p><b>Antes:</b> ${esc(d.entrenamiento.antes)}</p><p><b>Después:</b> ${esc(d.entrenamiento.despues)}</p></div></div>` : ""}
+
+          ${d.salud.length ? `<div class="card"><h2 style="margin:0 0 6px">Por tu salud</h2>${d.salud.map((s) => `<p class="aviso">${esc(s.texto)}</p>`).join("")}</div>` : ""}
+
+          <div class="card"><h2 style="margin:0 0 6px">Consejos</h2><ul style="margin:0;padding-left:18px">${d.consejos.map((c) => `<li>${esc(c)}</li>`).join("")}</ul>
+            <p class="note" style="margin:10px 0 0">Estimaciones a partir de tu evaluación. No sustituyen el consejo de un médico o nutricionista.</p></div>`;
+
+        document.querySelectorAll("[data-tipo]").forEach((b) => b.addEventListener("click", () => { tipo = b.dataset.tipo; pintar(); }));
+        $("#comidas").addEventListener("change", (e) => { comidas = Number(e.target.value); escribir("sportfy.dieta.comidas", comidas); pintar(); });
+      }
+      pintar();
+    }
+  </script>
+  <script type="module" src="shared/deslizar.js?v=202611131000"></script>
+</body>
+</html>
