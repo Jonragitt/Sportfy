@@ -5,7 +5,8 @@ const ORDEN = ["rutina.html", "analisis.html", "dieta.html"];
 // Con shared/pestanas.js la pestaña cambia sin recargar, así que se pregunta cuál se ve ahora.
 const actualAhora = () => ORDEN.indexOf(window.forty5PestanaActual?.() ?? ((location.pathname.split("/").pop() || "analisis.html").replace(/^([^.]+)$/, "$1.html")));
 const enControl = (el) => el?.closest?.("input, select, textarea, button, a, label, .no-deslizar, .dias, .comparar, table, [contenteditable]");
-const sinPlan = () => document.querySelector(".tabs a[href='index.html']");
+// Netlify reescribe los enlaces (href="/" o "/index"), así que se compara por nombre.
+const sinPlan = () => [...document.querySelectorAll(".tabs a[href]")].some((a) => /^(index(\.html)?)?$/.test(new URL(a.href).pathname.split("/").pop()));
 let yendo = false;
 function ir(sentido) {
   const actual = actualAhora();

@@ -9,6 +9,8 @@
   // Netlify sirve las páginas sin ".html" (/rutina): se normaliza para reconocerlas igual.
   const nombre = (u) => { const n = new URL(u, location.href).pathname.split("/").pop() || "index.html"; return n.includes(".") ? n : n + ".html"; };
   let actual = nombre(location.href);
+  // Netlify también reescribe los enlaces (href="/analisis"), así que se compara por nombre.
+  const conPlan = (t) => !!t && [...t.querySelectorAll("a[href]")].some((a) => nombre(a.href) === "analisis.html");
   if (!PAGINAS.includes(actual)) return;
 
   // Lo que pone el código de la propia pestaña (scripts dentro del .html) se apunta para quitarlo
@@ -119,7 +121,7 @@
   }
   function montarLente() {
     const t = barra();
-    if (!t || t.querySelector(".lente") || !t.querySelector("a[href='analisis.html']")) return;
+    if (!t || t.querySelector(".lente") || !conPlan(t)) return;
     const l = document.createElement("i"); l.className = "lente"; l.setAttribute("aria-hidden", "true");
     t.prepend(l); t.classList.add("con-lente");
     // Que el navegador no empiece a "arrastrar el enlace" (eso cancela el gesto).
@@ -174,7 +176,7 @@
     const u = new URL(a.href, location.href);
     if (u.origin !== location.origin || u.hash) return;
     const p = nombre(u.href);
-    if (!PAGINAS.includes(p) || !document.querySelector(".tabs.arriba a[href='analisis.html']")) return; // sin plan, navegación normal
+    if (!PAGINAS.includes(p) || !conPlan(document.querySelector(".tabs.arriba"))) return; // sin plan, navegación normal
     e.preventDefault();
     ir(p);
   });
