@@ -69,7 +69,41 @@
     .tabs.arriba { position: sticky; top: 10px; left: auto; bottom: auto; transform: none; width: fit-content; max-width: 100%; margin: 6px auto 18px; }
     .wrap { padding-bottom: 40px; }
     .guardado { font-size: .85rem; color: var(--good); font-weight: 600; margin: 10px 0 0; }
-    @media (max-width: 420px) { .big { font-size: 2rem; } .kpi b { font-size: 1.15rem; } }
+    @media (max-width: 420px) { .big { font-size: 2rem; } }
+
+    /* Lectura más cómoda: texto algo más grande, más aire y grises más oscuros. */
+    main.wrap { font-size: 1.07rem; line-height: 1.6; }
+    main.wrap h2 { font-size: 1.5rem; }
+    main.wrap .card { padding: 20px 18px; margin: 14px 0; }
+    main.wrap .card h3 { font-size: 1.2rem; }
+    main.wrap .note, main.wrap .foco { font-size: .97rem; line-height: 1.55; }
+    main.wrap .lead { font-size: 1.05rem; }
+    main.wrap .sec { margin-top: 40px; }
+    main.wrap ul li + li, main.wrap ol li + li { margin-top: 4px; }
+    main.wrap p { margin-top: 0; }
+    body.con-fondo main.wrap .card { --muted: #3a404b; }
+    @media (prefers-color-scheme: dark) { body.con-fondo main.wrap .card { --muted: #c6ccd6; } }
+    .kpi span { font-size: .9rem; font-weight: 600; }
+    .kpi b { font-size: 1.45rem; margin: 2px 0; }
+    .kpi small { font-size: .9rem; line-height: 1.4; display: block; }
+    .leyenda { font-size: .95rem; gap: 6px 16px; }
+    .ajuste, .precaucion { font-size: 1rem; padding: 12px 14px; }
+    ol.prio { gap: 18px; }
+    ol.prio li > * + * { margin-top: 4px; }
+    .prueba p { margin: 10px 0 0; }
+    .ejercicios h4 { font-size: .92rem; }
+    .delta { font-size: 1rem; }
+    .chart .axis, .chart .val { font-size: 12.5px; }
+    /* En el móvil, cada dato en su propia fila: nombre a la izquierda y valor a la derecha. */
+    @media (max-width: 560px) {
+      .kpis { grid-template-columns: 1fr; gap: 10px; }
+      .kpi { display: grid; grid-template-columns: 1fr auto; align-items: baseline; column-gap: 12px; padding: 12px 14px; }
+      .kpi span { font-size: 1rem; color: var(--text); }
+      .kpi b { font-size: 1.35rem; margin: 0; text-align: right; }
+      .kpi small { grid-column: 1 / -1; margin-top: 2px; }
+      .big { font-size: 2.6rem; }
+      .hero { grid-template-columns: 1fr; gap: 8px; }
+    }
   </style>
 </head>
 <body class="con-esquinas con-fondo">
