@@ -105,13 +105,11 @@ export const SECTIONS = [
         options: [
           {
             id: "acromionIzqBajo",
-            demo: "acromionAsimetrico",
             name: "Izquierdo bajo",
             hint: "El hombro izquierdo queda más bajo que el derecho.",
           },
           {
             id: "acromionDerBajo",
-            demo: "acromionAsimetrico",
             name: "Derecho bajo",
             hint: "El hombro derecho queda más bajo que el izquierdo.",
           },
@@ -143,13 +141,11 @@ export const SECTIONS = [
         options: [
           {
             id: "crestaIzqAlta",
-            demo: "crestasAsimetricas",
             name: "Izquierdo alto",
             hint: "La cresta ilíaca izquierda queda más alta que la derecha.",
           },
           {
             id: "crestaDerAlta",
-            demo: "crestasAsimetricas",
             name: "Derecho alto",
             hint: "La cresta ilíaca derecha queda más alta que la izquierda.",
           },
