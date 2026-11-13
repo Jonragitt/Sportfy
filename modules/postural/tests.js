@@ -193,7 +193,6 @@ export const SECTIONS = [
     id: "soh",
     title: "Sentadilla profunda (SOH)",
     bilateral: true,
-    ejemplos: true, // además del cómo se hace, cada opción mantiene su "Ver ejemplo"
     // Cómo se hace el test: imágenes propias que sustituyen a los ejemplos por opción.
     media: [
       { src: "ejercicios/soh-lateral.gif", alt: "Sentadilla profunda con brazos arriba vista de perfil, en bucle", caption: "Vista lateral", w: 380, h: 508 },
