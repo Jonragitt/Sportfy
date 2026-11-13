@@ -2,14 +2,17 @@
 // Funciona con el dedo (móvil), arrastrando con el ratón, con el gesto de dos dedos del
 // trackpad y con las flechas ← → del teclado.
 const ORDEN = ["rutina.html", "analisis.html", "dieta.html"];
-const actual = ORDEN.indexOf(location.pathname.split("/").pop() || "analisis.html");
+// Con shared/pestanas.js la pestaña cambia sin recargar, así que se pregunta cuál se ve ahora.
+const actualAhora = () => ORDEN.indexOf(window.forty5PestanaActual?.() ?? (location.pathname.split("/").pop() || "analisis.html"));
 const enControl = (el) => el?.closest?.("input, select, textarea, button, a, label, .no-deslizar, .dias, .comparar, table, [contenteditable]");
 const sinPlan = () => document.querySelector(".tabs a[href='index.html']");
 let yendo = false;
 function ir(sentido) {
+  const actual = actualAhora();
   if (yendo || actual < 0 || sinPlan()) return;
   const destino = ORDEN[actual + sentido];
   if (!destino) return;
+  if (window.forty5IrPestana?.(destino)) return;
   yendo = true;
   location.href = destino;
 }
