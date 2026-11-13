@@ -206,27 +206,14 @@ body.con-fondo #result > .note {
 body.con-fondo .card { --muted: #474e5a; }
 @media (prefers-color-scheme: dark) { body.con-fondo .card { --muted: #b3bac6; } }
 
-/* Paso entre pestañas sin parpadeo (como en una sola página): el navegador mantiene la página
-   anterior hasta que la nueva está lista y las funde. La barra de arriba, las pestañas
-   y las esquinas se quedan quietos; solo entra el contenido, con un pequeño deslizamiento. */
+/* Paso entre páginas: el navegador funde una con otra en vez de dejar la pantalla en blanco. */
 @view-transition { navigation: auto; }
-body.con-fondo .topbar { view-transition-name: barra; }
-.tabs.arriba { view-transition-name: pestanas; }
-.esquina.menu { view-transition-name: esquina-menu; }
-.esquina.perfil { view-transition-name: esquina-perfil; }
-main.wrap { view-transition-name: contenido; }
-/* El fondo va en la raíz: la foto ya está puesta en las dos páginas, así que no se nota. */
-::view-transition-old(root), ::view-transition-new(root) { animation-duration: .18s; }
-::view-transition-group(contenido) { animation: none; }
-::view-transition-old(contenido) { animation: vt-salir .16s ease both; }
-::view-transition-new(contenido) { animation: vt-entrar .45s cubic-bezier(.2,.8,.2,1) both; }
-::view-transition-old(pestanas), ::view-transition-old(barra) { animation: none; opacity: 0; }
-::view-transition-new(pestanas), ::view-transition-new(barra) { animation: none; }
-::view-transition-group(pestanas), ::view-transition-group(barra) { animation-duration: .3s; }
-@keyframes vt-salir { to { opacity: 0; } }
-@keyframes vt-entrar { from { opacity: 0; transform: translateY(10px); } }
-@media (prefers-reduced-motion: reduce) { ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; } }
-/* La píldora de la pestaña elegida se desliza hasta la nueva. */
-.tabs.arriba a[aria-current="page"] { view-transition-name: pestana-activa; }
-::view-transition-group(pestana-activa) { animation-duration: .5s; animation-timing-function: cubic-bezier(.3,1.25,.45,1); }
-::view-transition-old(pestana-activa), ::view-transition-new(pestana-activa) { height: 100%; animation-duration: .3s; }
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: .2s; }
+@media (prefers-reduced-motion: reduce) { ::view-transition-old(root), ::view-transition-new(root) { animation: none; } }
+
+/* Rutina · Mi plan · Dieta (shared/pestanas.js): la barra se queda y la píldora cambia de color
+   con suavidad; el resto entra con un fundido corto. */
+.tabs a { transition: background-color .25s ease, color .25s ease; }
+main.entrando > :not(.topbar):not(.tabs) { animation: pestana-entra .22s ease-out both; }
+@keyframes pestana-entra { from { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { main.entrando > * { animation: none !important; } }

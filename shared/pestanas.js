@@ -53,7 +53,17 @@
     const ya = [...document.head.querySelectorAll("style")].map((s) => s.textContent);
     for (const t of nuevos) if (!ya.includes(t)) { const s = document.createElement("style"); s.textContent = t; document.head.append(s); }
     document.title = doc.title;
-    document.querySelector("main").replaceWith(document.importNode(doc.querySelector("main"), true));
+    // La barra de pestañas es la misma: se conserva y solo cambia cuál está marcada.
+    const navVieja = document.querySelector("main .tabs.arriba");
+    const main = document.importNode(doc.querySelector("main"), true);
+    const navNueva = main.querySelector(".tabs.arriba");
+    if (navVieja && navNueva) {
+      navNueva.replaceWith(navVieja);
+      navVieja.querySelectorAll("a").forEach((a) => { if (nombre(a.href) === p) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
+    }
+    main.classList.add("entrando");
+    main.addEventListener("animationend", () => main.classList.remove("entrando"), { once: true });
+    document.querySelector("main").replaceWith(main);
     actual = p;
     // Scripts: los compartidos ya están cargados; los de la pestaña se ejecutan de nuevo.
     document.querySelectorAll("script[data-pestana]").forEach((s) => s.remove());
@@ -81,9 +91,7 @@
     try { doc = await traer(p); } catch { location.href = p; return; }
     try {
       if (historial) { try { history.pushState({ pestana: p }, "", p); } catch { /* sin historial */ } }
-      if (document.startViewTransition && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
-        await document.startViewTransition(() => cambiar(doc, p)).updateCallbackDone;
-      } else await cambiar(doc, p);
+      await cambiar(doc, p);
     } catch { location.href = p; return; } finally { ocupado = false; }
     dispatchEvent(new CustomEvent("forty5:pestana", { detail: p }));
   }
