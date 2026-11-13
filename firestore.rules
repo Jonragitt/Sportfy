@@ -1,0 +1,14 @@
+rules_version = '2';
+// Cada persona solo puede leer y escribir su propio progreso.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /usuarios/{uid} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+      match /progreso/{clave} {
+        allow read, delete: if request.auth != null && request.auth.uid == uid;
+        allow create, update: if request.auth != null && request.auth.uid == uid
+          && request.resource.data.valor is string && request.resource.data.valor.size() < 1000000;
+      }
+    }
+  }
+}

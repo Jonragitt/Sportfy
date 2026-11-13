@@ -147,7 +147,8 @@ function montar() {
     btn.classList.toggle("apagada", e.actual === 0);
     btn.setAttribute("aria-label", `Racha de gym: ${e.actual} días. Ver calendario`);
     if (!panel.hidden) pintarPanel(e);
-    if (e.pendiente && !preguntando) preguntar(e);
+    // Primero el inicio de sesión: la pregunta de racha espera a que se cierre.
+    if (e.pendiente && !preguntando && !document.querySelector(".login-modal")) preguntar(e);
   }
   const abrir = (si) => { panel.hidden = !si; btn.setAttribute("aria-expanded", String(si)); if (si) { mes = new Date(); mes.setDate(1); pintarPanel(estado()); } };
   btn.addEventListener("click", () => abrir(panel.hidden));

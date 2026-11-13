@@ -106,3 +106,26 @@ html.racha-bloqueo, html.racha-bloqueo body { overflow: hidden; }
 .racha-modal-btns [data-v="si"] { background: #e4572e; color: #fff; }
 .racha-modal-btns [data-v="no"] { background: rgba(255,255,255,.12); color: #fff; border: 1px solid rgba(255,255,255,.25); }
 .racha-modal-nota { font-size: .85rem !important; opacity: .7; }
+
+/* Inicio de sesión (shared/cuenta.js). */
+.login-modal { position: fixed; inset: 0; z-index: 110; display: grid; place-items: center; padding: 20px; overflow-y: auto;
+  background: rgba(8,9,12,.86); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
+.login-caja { width: min(400px, 100%); text-align: center; color: #fff; padding: 26px 22px 18px; border-radius: 22px;
+  background: linear-gradient(160deg, rgba(36,30,28,.96), rgba(16,17,22,.96)); border: 1px solid rgba(255,255,255,.16); box-shadow: 0 20px 60px rgba(0,0,0,.5); }
+.login-logo { width: min(220px, 70%); height: auto; display: block; margin: 0 auto 10px; }
+.login-caja h2 { margin: 6px 0 6px; font-size: 1.6rem; color: #fff; }
+.login-sub { margin: 0 0 18px; font-size: 1rem; line-height: 1.5; color: rgba(255,255,255,.82); }
+.login-btns { display: grid; gap: 10px; }
+.login-btn { position: relative; display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; min-height: 52px; padding: 10px 16px;
+  font: inherit; font-size: 1.02rem; font-weight: 700; border-radius: 14px; cursor: pointer; border: 1px solid rgba(255,255,255,.2); background: rgba(255,255,255,.08); color: #fff; }
+.login-btn svg { width: 22px; height: 22px; flex: none; }
+.login-btn.google { background: #fff; color: #1f1f1f; border-color: #fff; }
+.login-btn.apple { background: #000; color: #fff; border-color: rgba(255,255,255,.35); }
+.login-btn.principal { background: #e4572e; border-color: #e4572e; }
+.login-btn[disabled] { flex-wrap: wrap; row-gap: 4px; }
+.login-btn small { flex-basis: auto; font-size: .68rem; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; padding: 2px 7px; border-radius: 99px; background: #e4572e; color: #fff; }
+.login-btn[disabled] { cursor: default; opacity: .55; }
+.login-btn[data-usar] { flex-direction: column; gap: 2px; }
+.login-btn[data-usar] small { position: static; background: none; color: rgba(255,255,255,.7); text-transform: none; letter-spacing: 0; padding: 0; font-weight: 600; }
+.login-error { margin: 12px 0 0; color: #ff9b85; font-weight: 600; font-size: .92rem; }
+.login-sin { margin-top: 14px; font: inherit; font-size: .95rem; font-weight: 600; color: rgba(255,255,255,.75); background: none; border: 0; text-decoration: underline; cursor: pointer; padding: 8px; }

@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Mi perfil · Forty5</title>
-  <link rel="stylesheet" href="shared/esquinas.css?v=202611130430">
+  <link rel="stylesheet" href="shared/esquinas.css?v=202611130500">
   <link rel="icon" href="shared/logo/icono.svg" type="image/svg+xml">
   <link rel="stylesheet" href="shared/styles.css?v=202611051940">
   <style>
@@ -75,6 +75,7 @@
     </nav>
     <p class="lead" id="intro"></p>
     <div id="contenido"></div>
+    <div id="cuenta"></div>
   </main>
 
 
@@ -296,6 +297,31 @@
     pintar();
   </script>
   <script type="module" src="shared/reloj.js?v=202611130400"></script>
-  <script type="module" src="shared/racha.js?v=202611130430"></script>
+  <script type="module" src="shared/racha.js?v=202611130500"></script>
+  <script type="module">
+    // Tarjeta "Tu cuenta": con quién has iniciado sesión y si el progreso está guardado en la nube.
+    import { cuenta, googleAppleListos, iniciarSesion, cerrarSesion } from "./shared/cuenta.js?v=202611130500";
+    const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    const TEXTO = { guardado: "✓ Progreso guardado en la nube", error: "No se ha podido guardar ahora; se reintentará solo.", conectado: "Conectando con la nube…" };
+    let estado = null;
+    function pintarCuenta() {
+      const c = cuenta();
+      const conSesion = c && c.tipo !== "local";
+      document.getElementById("cuenta").innerHTML = `<div class="card">
+        <h3>Tu cuenta</h3>
+        ${conSesion
+          ? `<p style="margin:4px 0 0">Has iniciado sesión con <b>${c.tipo === "apple" ? "Apple" : "Google"}</b>${c.nombre ? ` como <b>${esc(c.nombre)}</b>` : ""}${c.correo ? ` (${esc(c.correo)})` : ""}.</p>
+             <p class="note" style="margin:6px 0 0">${esc(TEXTO[estado] ?? "Tu progreso se guarda en la nube y lo tendrás en cualquier dispositivo.")}</p>
+             <button class="btn secondary" type="button" id="cerrar-sesion" style="margin-top:12px">Cerrar sesión</button>`
+          : `<p style="margin:4px 0 0">Ahora tu progreso solo está en este dispositivo. Inicia sesión para guardarlo y no perderlo si cambias de móvil.</p>
+             ${googleAppleListos() ? "" : `<p class="note" style="margin:6px 0 0">El inicio de sesión con Google y Apple estará disponible muy pronto.</p>`}
+             <button class="btn" type="button" id="iniciar-sesion" style="margin-top:12px">Iniciar sesión</button>`}
+      </div>`;
+      document.getElementById("cerrar-sesion")?.addEventListener("click", cerrarSesion);
+      document.getElementById("iniciar-sesion")?.addEventListener("click", iniciarSesion);
+    }
+    addEventListener("forty5:cuenta", (e) => { estado = e.detail?.estado ?? null; pintarCuenta(); });
+    pintarCuenta();
+  </script>
 </body>
 </html>
