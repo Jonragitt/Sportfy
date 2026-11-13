@@ -2,7 +2,8 @@
 // El tiempo cuenta desde que se abrió la página (se guarda en la sesión, así sigue al pasar de un
 // apartado a otro) y las fotos dependen de lo que el motor dice que toca el día del reloj:
 // pierna, torso, cardio, descanso o, si aún no hay rutina, todas.
-// Fotos de Unsplash (licencia libre de Unsplash, uso gratuito), servidas desde su CDN.
+// Fotos de Unsplash (licencia libre de Unsplash, uso gratuito), guardadas en shared/fondos/ para que
+// carguen también donde no se permiten imágenes de otras webs (como el visor de claude.ai).
 // Mismo día que marca el reloj (shared/reloj.js), sin montar el reloj en páginas que no lo llevan.
 function diaDelReloj() {
   let v = null; try { v = sessionStorage.getItem("sportfy.fechaVista"); } catch { /* sin almacenamiento */ }
@@ -12,19 +13,19 @@ function diaDelReloj() {
 
 export const CADA_MS = 3 * 60 * 1000;
 const INICIO = "sportfy.fondoInicio";
-const U = (id) => `https://images.unsplash.com/photo-${id}?ixlib=rb-4.1.0&fm=jpg&q=70&fit=crop&w=1080&h=1620&crop=entropy`;
+const L = (id) => new URL(`./fondos/${id}.jpg`, import.meta.url).href;
 
 export const FOTOS = [
-  { id: "pierna1", tipo: "pierna", url: U("1770026136877-8ddf98cd6500"), autor: "Unsplash · snHdA7fCneY" },
-  { id: "pierna2", tipo: "pierna", url: U("1770664612843-b44e26070024"), autor: "Unsplash · YFeoyqrFsGA" },
-  { id: "torso1", tipo: "torso", url: U("1704223523449-ca3925f89dcc"), autor: "Unsplash · Pv97-3sdjdY" },
-  { id: "torso2", tipo: "torso", url: U("1692372372344-41aed374b848"), autor: "Unsplash · fGAgXh6QQEU" },
-  { id: "cardio1", tipo: "cardio", url: U("1698671823406-035c77ff6fcd"), autor: "Unsplash · 6PujGXV5kyc" },
-  { id: "cardio2", tipo: "cardio", url: U("1526676317768-d9b14f15615a"), autor: "Unsplash · -4trKf0Kbow" },
-  { id: "descanso1", tipo: "descanso", url: U("1600881333168-2ef49b341f30"), autor: "Unsplash · amgv9YUg-MA" },
-  { id: "descanso2", tipo: "descanso", url: U("1713201679128-38da5657f611"), autor: "Unsplash · 8BW8wGBmy-E" },
-  { id: "general1", tipo: "general", url: U("1576678927484-cc907957088c"), autor: "Unsplash · VJ2s0c20qCo" },
-  { id: "general2", tipo: "general", url: U("1674834727149-00812f907676"), autor: "Unsplash · t9bG_FOXqMA" },
+  { id: "pierna1", tipo: "pierna", url: L("pierna1"), autor: "Unsplash · snHdA7fCneY" },
+  { id: "pierna2", tipo: "pierna", url: L("pierna2"), autor: "Unsplash · YFeoyqrFsGA" },
+  { id: "torso1", tipo: "torso", url: L("torso1"), autor: "Unsplash · Pv97-3sdjdY" },
+  { id: "torso2", tipo: "torso", url: L("torso2"), autor: "Unsplash · fGAgXh6QQEU" },
+  { id: "cardio1", tipo: "cardio", url: L("cardio1"), autor: "Unsplash · 6PujGXV5kyc" },
+  { id: "cardio2", tipo: "cardio", url: L("cardio2"), autor: "Unsplash · -4trKf0Kbow" },
+  { id: "descanso1", tipo: "descanso", url: L("descanso1"), autor: "Unsplash · amgv9YUg-MA" },
+  { id: "descanso2", tipo: "descanso", url: L("descanso2"), autor: "Unsplash · 8BW8wGBmy-E" },
+  { id: "general1", tipo: "general", url: L("general1"), autor: "Unsplash · VJ2s0c20qCo" },
+  { id: "general2", tipo: "general", url: L("general2"), autor: "Unsplash · t9bG_FOXqMA" },
 ];
 
 const TIPO_SESION = { pierna: "pierna", torso: "torso", empuje: "torso", tiron: "torso" };
