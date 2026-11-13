@@ -67,7 +67,9 @@
     }
     main.classList.add("entrando");
     main.addEventListener("animationend", () => main.classList.remove("entrando"), { once: true });
-    document.querySelector("main").replaceWith(main);
+    const viejo = document.querySelector("main");
+    main.style.minHeight = `${viejo.offsetHeight}px`; // mismo alto hasta que pinte la pestaña nueva
+    viejo.replaceWith(main);
     colocarLente(); // la píldora se desliza hasta la pestaña nueva
     actual = p;
     // Scripts: los compartidos ya están cargados; los de la pestaña se ejecutan de nuevo.
@@ -86,6 +88,7 @@
       document.body.append(s);
     }
     scrollTo(0, 0);
+    Promise.resolve(montando).finally(() => requestAnimationFrame(() => { main.style.minHeight = ""; }));
     return montando; // la transición espera a que la pestaña pinte su contenido
   }
 

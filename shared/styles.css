@@ -272,3 +272,8 @@ html:has(body.con-cabecera) { scroll-padding-top: calc(var(--alto-cabecera, 200p
 .tabs.agarrada a[aria-current="page"] { cursor: grab; }
 .tabs.arrastrando, .tabs.arrastrando a { cursor: grabbing; }
 @media (prefers-reduced-motion: reduce) { .tabs .lente { transition: none; } }
+
+/* Que la barra de scroll del ordenador no aparezca y desaparezca al cambiar de pestaña (movería
+   el centro y con él el logo): el hueco de la barra está siempre reservado. */
+html:has(body.con-cabecera) { overflow-y: scroll; scrollbar-gutter: stable; }
+body.con-cabecera main.wrap { min-height: 100vh; }
