@@ -10,7 +10,6 @@
   <style>
     .tabs a { white-space: nowrap; padding: 10px 18px; }
     .prefs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .prefs label:last-child { grid-column: 1 / -1; }
     .prefs label { display: grid; gap: 4px; font-size: .85rem; color: var(--muted); font-weight: 600; }
     select { font: inherit; font-size: 1rem; padding: 9px 10px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); color: var(--text); width: 100%; }
     .resumen { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
@@ -67,9 +66,9 @@
   </nav>
 
   <script type="module">
-    import { perfilRutina } from "./shared/analisis.js?v=202611130130";
     import { sincronizar, evaluaciones, rondaEnCurso } from "./shared/evaluaciones.js?v=202611130100";
-    import { generarRutina, semanaDelCiclo, MATERIAL, SEMANAS, REPARTOS } from "./shared/rutina.js?v=202611130130";
+    import { semanaDelCiclo, MATERIAL, SEMANAS, FOCOS } from "./shared/rutina.js?v=202611130230";
+    import { calcularTodo, leerPreferencias, guardarPreferencias, necesitaPreferencias } from "./shared/motor.js?v=202611130230";
 
     const $ = (s) => document.querySelector(s);
     const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -77,6 +76,7 @@
     const escribir = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* sin almacenamiento */ } };
 
     sincronizar();
+    if (necesitaPreferencias()) location.replace("preferencias.html");
     const apartados = evaluaciones();
     // La rutina solo se abre con las dos evaluaciones completadas y confirmadas.
     if (!apartados.length) {
@@ -86,16 +86,19 @@
       document.querySelector(".tabs").innerHTML = `<a href="index.html">Inicio</a><a href="perfil.html">Perfil</a>`;
       document.querySelector(".esquina.menu").href = "index.html";
     } else {
-      const perfil = perfilRutina(apartados.map((e) => e.antro), apartados.map((e) => e.postural), { actividad: leer("sportfy.actividad", "ligera") });
-      const auto = semanaDelCiclo(perfil.fecha);
-      let prefs = { dias: perfil.diasFuerza ?? 3, minutos: 60, material: "gimnasio", ...leer("sportfy.preferencias", {}) };
+      const actividad = leer("sportfy.actividad", "ligera");
+      let prefs = { minutos: 60, material: "gimnasio", ...leerPreferencias() };
+      const auto = semanaDelCiclo(calcularTodo({ apartados, prefs, actividad }).perfil.fecha);
       let semana = auto, dia = 1;
+      // Abre directamente la sesión de hoy si hoy toca entrenar.
+      const hoy = (new Date().getDay() + 6) % 7;
+      const idxHoy = (prefs.diasSemana ?? []).slice(0, 6).indexOf(hoy);
+      if (idxHoy >= 0) dia = idxHoy + 1;
       const hechos = () => leer("sportfy.sesionesHechas", {});
       const claveSemana = () => { const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); return d.toISOString().slice(0, 10); };
 
       function pintar() {
-        const r = generarRutina(perfil, { ...prefs, semana });
-        escribir("sportfy.rutina", r);
+        const r = calcularTodo({ apartados, prefs, actividad, semana, guardar: true }).rutina;
         const hechosSemana = hechos()[claveSemana()] ?? [];
         const s = r.sesiones[Math.min(dia, r.sesiones.length) - 1];
         const opt = (obj, val, txt) => Object.entries(obj).map(([k, v]) => `<option value="${k}" ${String(k) === String(val) ? "selected" : ""}>${esc(txt(k, v))}</option>`).join("");
@@ -103,7 +106,6 @@
         if (rondaEnCurso()) html.push(`<div class="card" style="border-color:var(--accent)"><b>Tienes una nueva evaluación en curso.</b> <span class="note">Tu rutina se recalculará cuando confirmes las dos evaluaciones.</span> <a href="index.html">Continuar →</a></div>`);
         html.push(`<div class="card">
           <div class="prefs">
-            <label>Días por semana<select id="p-dias">${opt(REPARTOS, prefs.dias, (k) => `${k} días`)}</select></label>
             <label>Tiempo por sesión<select id="p-min">${opt({ 45: 0, 60: 0, 75: 0, 90: 0 }, prefs.minutos, (k) => `${k} min`)}</select></label>
             <label>Dónde entrenas<select id="p-mat">${opt(MATERIAL, prefs.material, (k, v) => v.nombre)}</select></label>
           </div>
@@ -112,12 +114,16 @@
             <span class="tag l1">Nivel ${esc(r.nivel)}</span>
             <span class="tag l1">${esc(r.reparto.nombre)}</span>
             ${r.ladoDebil ? `<span class="tag l0">Lado débil: ${r.ladoDebil === "I" ? "izquierdo" : "derecho"}</span>` : ""}
+            ${r.focos.map((f) => `<span class="tag l2">Prioridad: ${esc(FOCOS[f].nombre.toLowerCase())}</span>`).join("")}
           </div>
+          <p class="note" style="margin:8px 0 0">${r.sesiones.map((x) => `<b>${esc(x.diaNombre ?? `Día ${x.dia}`)}</b>`).join(", ")} · <a href="preferencias.html">Cambiar días, zonas o salud</a></p>
+          ${r.consejos.map((c) => `<p class="aviso">${esc(c)}</p>`).join("")}
+          ${r.condiciones.length ? `<p class="aviso"><b>Adaptada a tu salud:</b> ${r.condiciones.map((c) => `${esc(c.nombre)}${c.medico ? " (consulta médica previa)" : ""}`).join(", ")}.</p>` : ""}
           <div class="semanas" role="group" aria-label="Semana del ciclo">${SEMANAS.map((w) => `<button type="button" data-semana="${w.n}" aria-pressed="${w.n === semana}">Sem. ${w.n}${w.n === auto ? " · hoy" : ""}<small>${esc(w.nombre)}</small></button>`).join("")}</div>
           <p class="note" style="margin:8px 0 0">${esc(r.semana.nota)}</p>
         </div>`);
 
-        html.push(`<div class="dias" role="group" aria-label="Día">${r.sesiones.map((x) => `<button type="button" data-dia="${x.dia}" aria-pressed="${x.dia === s.dia}" class="${hechosSemana.includes(x.dia) ? "hecho" : ""}">Día ${x.dia}</button>`).join("")}</div>`);
+        html.push(`<div class="dias" role="group" aria-label="Día">${r.sesiones.map((x) => `<button type="button" data-dia="${x.dia}" aria-pressed="${x.dia === s.dia}" class="${hechosSemana.includes(x.dia) ? "hecho" : ""}">${esc(x.diaNombre ?? `Día ${x.dia}`)}</button>`).join("")}</div>`);
 
         let n = 0;
         const ejercicios = s.bloques.map((b, i) => {
@@ -135,7 +141,7 @@
         }).join("");
 
         html.push(`<div class="card">
-          <div class="row" style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:baseline"><h2 style="margin:0">Día ${s.dia} · ${esc(s.nombre)}</h2><span class="note">≈ ${s.minutos} min</span></div>
+          <div class="row" style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:baseline"><h2 style="margin:0">${esc(s.diaNombre ?? `Día ${s.dia}`)} · ${esc(s.nombre)}</h2><span class="note">≈ ${s.minutos} min</span></div>
           <div class="bloque-titulo">Calentamiento</div>
           <ul class="lista"><li>${esc(s.calentamiento.general)}</li>${s.calentamiento.movilidad.map((m) => `<li>${esc(m)} · 1 min</li>`).join("")}</ul>
           ${s.activacion.length ? `<div class="bloque-titulo">Activación correctiva</div><ul class="lista">${s.activacion.map((a) => `<li>${esc(a.nombre)} · ${a.series} × ${esc(a.reps)} <span class="note">(${esc(a.motivo)})</span></li>`).join("")}</ul>` : ""}
@@ -147,7 +153,9 @@
           <button class="btn ${hechosSemana.includes(s.dia) ? "secondary" : ""} hecho-btn" type="button" id="hecho">${hechosSemana.includes(s.dia) ? "✓ Sesión completada esta semana" : "Marcar sesión como hecha"}</button>
         </div>`);
 
-        if (r.cardioExtra) html.push(`<div class="card"><h3>Cardio en los días sin pesas</h3><p style="margin:4px 0 0">${r.cardioExtra.dias} ${r.cardioExtra.dias === 1 ? "día" : "días"} a la semana: ${esc(r.cardioExtra.tipo)}.${r.cardioExtra.pasos ? ` Y cada día, ${esc(r.cardioExtra.pasos)}.` : ""}</p></div>`);
+        if (r.cardioExtra) html.push(`<div class="card"><h3>Cardio en los días sin pesas</h3><p style="margin:4px 0 0">${r.cardioExtra.diasNombre?.length ? `<b>${esc(r.cardioExtra.diasNombre.join(" y "))}</b>: ` : `${r.cardioExtra.dias} ${r.cardioExtra.dias === 1 ? "día" : "días"} a la semana: `}${esc(r.cardioExtra.tipo)}.${r.cardioExtra.pasos ? ` Y cada día, ${esc(r.cardioExtra.pasos)}.` : ""}</p></div>`);
+        if (r.recuperacionActiva) html.push(`<div class="card"><h3>Recuperación activa</h3><p style="margin:4px 0 0">${esc(r.recuperacionActiva)}</p></div>`);
+        if (r.condiciones.length) html.push(`<div class="card"><h3>Tu salud</h3>${r.condiciones.map((c) => `<p class="aviso"><b>${esc(c.nombre)}:</b> ${esc(c.aviso)}</p>`).join("")}<p class="note" style="margin:8px 0 0">Los ejercicios con riesgo para tu condición se han sustituido automáticamente.</p></div>`);
 
         const NOM = { piernas: "Piernas", gluteo: "Glúteo", isquios: "Isquios", pecho: "Pecho", espalda: "Espalda", hombro: "Hombro", brazos: "Brazos", core: "Core", gemelo: "Gemelo" };
         html.push(`<div class="card"><h3>Cómo progresar</h3><p style="margin:4px 0 0">${esc(r.progresion)}</p>
@@ -159,8 +167,7 @@
 
         $("#contenido").innerHTML = html.join("");
         const on = (sel, ev, f) => document.querySelectorAll(sel).forEach((el) => el.addEventListener(ev, f));
-        const guardar = () => { escribir("sportfy.preferencias", prefs); dia = Math.min(dia, prefs.dias); pintar(); };
-        on("#p-dias", "change", (e) => { prefs.dias = Number(e.target.value); guardar(); });
+        const guardar = () => { prefs = guardarPreferencias({ minutos: prefs.minutos, material: prefs.material }); pintar(); };
         on("#p-min", "change", (e) => { prefs.minutos = Number(e.target.value); guardar(); });
         on("#p-mat", "change", (e) => { prefs.material = e.target.value; guardar(); });
         on("[data-semana]", "click", (e) => { semana = Number(e.currentTarget.dataset.semana); pintar(); });

@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Personaliza tu rutina · Forty5</title>
+  <link rel="icon" href="shared/logo/icono.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="shared/styles.css?v=202611051940">
+  <style>
+    .marca { display: block; width: min(240px, 60vw); height: auto; margin: 8px auto 18px; filter: drop-shadow(0 2px 10px rgba(0,0,0,.6)); }
+    .paso { font-size: .78rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); }
+    .card h2 { margin: 2px 0 4px; font-size: 1.15rem; }
+    .semana { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 12px; }
+    .dia { font: inherit; display: grid; place-items: center; gap: 2px; padding: 10px 0; border-radius: 12px; border: 1.5px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; }
+    .dia b { font-size: 1.05rem; }
+    .dia small { font-size: .62rem; color: var(--muted); }
+    .dia.rec { border-style: dashed; border-color: var(--accent); }
+    .dia[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .dia[aria-pressed="true"] small { color: rgba(255,255,255,.85); }
+    .recomendado { margin-top: 12px; padding: 10px 12px; border-radius: 10px; background: color-mix(in srgb, var(--good) 12%, transparent); font-size: .92rem; }
+    .recomendado button { margin-top: 6px; }
+    .ajuste { margin-top: 10px; padding: 10px 12px; border-radius: 10px; background: color-mix(in srgb, var(--accent) 10%, transparent); font-size: .92rem; }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .chip { font: inherit; font-weight: 600; padding: 9px 14px; border-radius: 99px; border: 1.5px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; }
+    .chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .chip.primera { border-style: dashed; }
+    .avisos { margin: 12px 0 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+    .avisos li { padding: 10px 12px; border-radius: 10px; background: color-mix(in srgb, var(--mid) 15%, transparent); font-size: .9rem; }
+    .avisos li.medico { background: color-mix(in srgb, var(--bad) 13%, transparent); }
+    .prefs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+    .prefs label { display: grid; gap: 4px; font-size: .85rem; color: var(--muted); font-weight: 600; }
+    .prefs label:last-child { grid-column: 1 / -1; }
+    select { font: inherit; font-size: 1rem; padding: 9px 10px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); color: var(--text); width: 100%; }
+    .crear { width: 100%; padding: 16px; font-size: 1.1rem; border-radius: 14px; margin-top: 8px; }
+    .bxbtn { font: inherit; font-weight: 700; color: var(--accent); background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; }
+    @media (max-width: 380px) { .dia small { display: none; } }
+  </style>
+</head>
+<body class="con-fondo">
+  <main class="wrap">
+    <img class="marca" src="shared/logo/forty5-titulo.png" alt="Forty5" width="900" height="214">
+    <h1>Personaliza tu rutina</h1>
+    <p class="lead">Tu evaluación está completa. Antes de ver tu plan, cuéntanos cuándo puedes entrenar, qué quieres priorizar y si tienes alguna condición de salud: con todo ello el motor calcula tu rutina ideal.</p>
+    <div id="contenido"></div>
+  </main>
+
+  <script type="module">
+    import { sincronizar, evaluaciones } from "./shared/evaluaciones.js?v=202611130100";
+    import { calcularTodo, guardarPreferencias, leerPreferencias } from "./shared/motor.js?v=202611130230";
+    import { DIAS_SEMANA, FOCOS, CONDICIONES, MATERIAL } from "./shared/rutina.js?v=202611130230";
+
+    const $ = (s) => document.querySelector(s);
+    const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+    const leer = (k, def) => { try { return JSON.parse(localStorage.getItem(k)) ?? def; } catch { return def; } };
+    const LETRA = ["L", "M", "X", "J", "V", "S", "D"];
+
+    sincronizar();
+    const apartados = evaluaciones();
+    if (!apartados.length) location.replace("index.html");
+
+    const actividad = leer("sportfy.actividad", "ligera");
+    const previas = leerPreferencias();
+    const base = calcularTodo({ apartados, prefs: { condiciones: previas.condiciones ?? [] }, actividad });
+    const estado = {
+      diasSemana: previas.diasSemana?.length ? [...previas.diasSemana] : [...base.recomendacion.diasSemana],
+      foco: previas.foco?.length ? [...previas.foco] : ["ninguno"],
+      condiciones: previas.condiciones?.length ? [...previas.condiciones] : ["ninguna"],
+      minutos: previas.minutos ?? 60,
+      material: previas.material ?? "gimnasio",
+    };
+
+    // Selección múltiple con una primera opción "ninguno" excluyente.
+    function alternar(lista, valor, ninguno) {
+      if (valor === ninguno) return [ninguno];
+      const s = new Set(lista.filter((x) => x !== ninguno));
+      s.has(valor) ? s.delete(valor) : s.add(valor);
+      return s.size ? [...s] : [ninguno];
+    }
+
+    function pintar() {
+      const calc = calcularTodo({ apartados, prefs: { ...estado, diasSemana: estado.diasSemana }, actividad });
+      const rec = calc.recomendacion;
+      const n = estado.diasSemana.length;
+      const r = calc.rutina;
+      const ajuste = !n ? `<div class="ajuste">Marca al menos un día para crear tu rutina.</div>`
+        : n === rec.dias ? `<div class="ajuste">Perfecto: ${n} días, como te recomendamos. Reparto: <b>${esc(r.reparto.nombre)}</b>.</div>`
+        : `<div class="ajuste">Has elegido <b>${n} ${n === 1 ? "día" : "días"}</b> (te recomendamos ${rec.dias}). Reajustamos tu rutina a tus días con el reparto <b>${esc(r.reparto.nombre)}</b>${n < rec.dias ? ", con sesiones más completas para que no pierdas estímulo" : ", alternando grupos musculares para que te recuperes bien"}.${n > 6 ? " El 7.º día será de recuperación activa." : ""}</div>`;
+      const reparto = n ? `<p class="note" style="margin:8px 0 0">${r.sesiones.map((s) => `<b>${esc(s.diaNombre)}</b>: ${esc(s.nombre)}`).join(" · ")}${r.cardioExtra?.diasNombre?.length ? ` · <b>Cardio</b>: ${esc(r.cardioExtra.diasNombre.join(", "))}` : ""}</p>` : "";
+      const avisos = estado.condiciones.filter((c) => c !== "ninguna").map((c) => CONDICIONES[c]);
+
+      $("#contenido").innerHTML = `
+        <div class="card">
+          <span class="paso">Paso 1 de 3</span>
+          <h2>¿Qué días puedes ir a entrenar?</h2>
+          <p class="note" style="margin:0">Toca los días de la semana que te vienen bien.</p>
+          <div class="semana" role="group" aria-label="Días de la semana">${DIAS_SEMANA.map((d, i) => `<button type="button" class="dia ${rec.diasSemana.includes(i) ? "rec" : ""}" data-dia="${i}" aria-pressed="${estado.diasSemana.includes(i)}" aria-label="${d}"><b>${LETRA[i]}</b><small>${d.slice(0, 3)}</small></button>`).join("")}</div>
+          <div class="recomendado">⏰ <b>Recomendado según tu análisis:</b> ${esc(rec.texto)} Por ejemplo: ${esc(rec.nombres.join(", "))}.<br><button type="button" class="bxbtn" id="usar-rec">Usar los días recomendados</button></div>
+          ${ajuste}${reparto}
+          <div class="prefs">
+            <label>Tiempo por sesión<select id="p-min">${[45, 60, 75, 90].map((m) => `<option value="${m}" ${m === estado.minutos ? "selected" : ""}>${m} min</option>`).join("")}</select></label>
+            <label>Dónde entrenas<select id="p-mat">${Object.entries(MATERIAL).map(([k, v]) => `<option value="${k}" ${k === estado.material ? "selected" : ""}>${esc(v.nombre)}</option>`).join("")}</select></label>
+          </div>
+        </div>
+
+        <div class="card">
+          <span class="paso">Paso 2 de 3</span>
+          <h2>¿A qué parte del cuerpo quieres darle más atención?</h2>
+          <p class="note" style="margin:0">Puedes elegir varias. Sumaremos ejercicios y series a esas zonas sin descuidar el resto.</p>
+          <div class="chips" role="group" aria-label="Zonas a priorizar">${Object.entries(FOCOS).map(([k, v]) => `<button type="button" class="chip ${k === "ninguno" ? "primera" : ""}" data-foco="${k}" aria-pressed="${estado.foco.includes(k)}">${esc(v.nombre)}</button>`).join("")}</div>
+        </div>
+
+        <div class="card">
+          <span class="paso">Paso 3 de 3</span>
+          <h2>¿Tienes alguna condición de salud?</h2>
+          <p class="note" style="margin:0">Es muy importante para tu seguridad: adaptamos los ejercicios, la intensidad y el cardio. Puedes marcar varias.</p>
+          <div class="chips" role="group" aria-label="Condiciones de salud">${Object.entries(CONDICIONES).map(([k, v]) => `<button type="button" class="chip ${k === "ninguna" ? "primera" : ""}" data-cond="${k}" aria-pressed="${estado.condiciones.includes(k)}">${esc(v.nombre)}</button>`).join("")}</div>
+          ${avisos.length ? `<ul class="avisos">${avisos.map((c) => `<li class="${c.medico ? "medico" : ""}"><b>${esc(c.nombre)}:</b> ${esc(c.aviso)}</li>`).join("")}</ul>` : ""}
+          <p class="note" style="margin:10px 0 0">Forty5 no sustituye el consejo médico. Si tienes dolor o una lesión reciente, consulta con un profesional sanitario antes de empezar.</p>
+        </div>
+
+        <button class="btn crear" type="button" id="crear" ${n ? "" : "disabled"}>Crear mi rutina →</button>`;
+
+      const on = (sel, f) => document.querySelectorAll(sel).forEach((el) => el.addEventListener("click", f));
+      on("[data-dia]", (e) => {
+        const d = Number(e.currentTarget.dataset.dia);
+        const s = new Set(estado.diasSemana);
+        s.has(d) ? s.delete(d) : s.add(d);
+        estado.diasSemana = [...s].sort((a, b) => a - b);
+        pintar();
+      });
+      on("#usar-rec", () => { estado.diasSemana = [...rec.diasSemana]; pintar(); });
+      on("[data-foco]", (e) => { estado.foco = alternar(estado.foco, e.currentTarget.dataset.foco, "ninguno"); pintar(); });
+      on("[data-cond]", (e) => { estado.condiciones = alternar(estado.condiciones, e.currentTarget.dataset.cond, "ninguna"); pintar(); });
+      $("#p-min").addEventListener("change", (e) => { estado.minutos = Number(e.target.value); pintar(); });
+      $("#p-mat").addEventListener("change", (e) => { estado.material = e.target.value; pintar(); });
+      on("#crear", () => {
+        if (!estado.diasSemana.length) return;
+        guardarPreferencias({ ...estado, dias: estado.diasSemana.length });
+        calcularTodo({ apartados, prefs: estado, actividad, guardar: true });
+        location.href = "analisis.html";
+      });
+    }
+    pintar();
+  </script>
+</body>
+</html>

@@ -100,9 +100,11 @@ export function ajusteEvolucion(historial, objetivoId) {
  * objetivoId: perdidaGrasa | recomposicion | ganarMusculo | rendimiento.
  * opciones: { actividad, nivel: 'principiante'|'intermedio', historial }.
  */
-export function calcularPlan(datos, objetivoId = "rendimiento", { actividad = "ligera", nivel = "principiante", historial = [] } = {}) {
+export function calcularPlan(datos, objetivoId = "rendimiento", { actividad = "ligera", nivel = "principiante", historial = [], diasFuerza, diasCardio, sinDeficit = false } = {}) {
   if (!datos || ![datos.edad, datos.altura, datos.peso].every(isNum)) return null;
-  const obj = OBJETIVOS[objetivoId] ?? OBJETIVOS.rendimiento;
+  const base = OBJETIVOS[objetivoId] ?? OBJETIVOS.rendimiento;
+  // Días reales elegidos por la persona (si los hay) para un gasto más preciso.
+  const obj = { ...base, diasFuerza: diasFuerza ?? base.diasFuerza, diasCardio: diasCardio ?? base.diasCardio, ...(sinDeficit ? { ajusteKcal: Math.max(0, base.ajusteKcal), ritmo: 0, rangoRitmo: [-0.0025, 0.005] } : {}) };
   const { peso } = datos;
   const basal = metabolismoBasal(datos);
   const mantenimiento = gastoTotal(basal.kcal, peso, actividad, obj.diasFuerza, obj.diasCardio);

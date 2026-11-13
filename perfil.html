@@ -80,6 +80,8 @@
     import { scoreLabel } from "./shared/scores.js";
     import { pendientes } from "./shared/perfil.js";
     import { sincronizar, evaluaciones, rondaEnCurso, repetirEvaluacion, reiniciarTodo, editarDatos, compararEvaluaciones, notaTotal } from "./shared/evaluaciones.js?v=202611130100";
+    import { leerPreferencias } from "./shared/motor.js?v=202611130230";
+    import { DIAS_SEMANA, FOCOS, CONDICIONES, MATERIAL } from "./shared/rutina.js?v=202611130230";
 
     const $ = (s) => document.querySelector(s);
     const fmt = (n, d = 1) => (n == null || !Number.isFinite(Number(n)) ? "–" : Number(n).toLocaleString("es-ES", { maximumFractionDigits: d }));
@@ -116,7 +118,7 @@
         <div>${tag(total, 25)}<div class="note">Evaluación n.º ${lista.length} · ${dia(ult.fecha)}</div></div>
       </div></div>`);
 
-      html.push(datosFisicos(ult), resultadosPosturales(ult), apartados(lista), volverMenu());
+      html.push(datosFisicos(ult), resultadosPosturales(ult), preferenciasCard(), apartados(lista), volverMenu());
       $("#contenido").innerHTML = html.join("");
       enlazar(ult);
       if (comparando) pintarComparacion();
@@ -164,6 +166,21 @@
         ${desv == null ? `<p class="note">Sin detalle de alteraciones.</p>` : desv.length
           ? `<p style="margin:10px 0 0"><b>${desv.length} ${desv.length === 1 ? "alteración" : "alteraciones"}:</b></p><ul class="chips">${desv.map((x) => `<li class="tag l1">${esc(x.nombre)}</li>`).join("")}</ul>`
           : `<p style="margin:10px 0 0">Sin alteraciones: postura excelente.</p>`}</div>`;
+    }
+
+    // ---------- Preferencias de entrenamiento ----------
+    function preferenciasCard() {
+      const p = leerPreferencias();
+      if (!p.diasSemana?.length) return "";
+      const fo = (p.foco ?? []).filter((f) => f !== "ninguno").map((f) => FOCOS[f]?.nombre).filter(Boolean);
+      const co = (p.condiciones ?? []).filter((c) => c !== "ninguna").map((c) => CONDICIONES[c]?.nombre).filter(Boolean);
+      return `<h2 class="seccion">Mi entrenamiento</h2>
+        <div class="card"><dl class="datos">
+          <dt>Días</dt><dd>${p.diasSemana.map((d) => DIAS_SEMANA[d]).join(", ")}</dd>
+          <dt>Tiempo y lugar</dt><dd>${p.minutos ?? 60} min · ${esc(MATERIAL[p.material]?.nombre ?? "Gimnasio completo")}</dd>
+          <dt>Zonas prioritarias</dt><dd>${fo.length ? esc(fo.join(", ")) : "Ninguna en específico"}</dd>
+          <dt>Condiciones de salud</dt><dd>${co.length ? esc(co.join(", ")) : "Ninguna"}</dd>
+        </dl><div class="acciones"><a class="btn secondary" style="text-decoration:none" href="preferencias.html">✎ Cambiar mis preferencias</a></div></div>`;
     }
 
     // ---------- Apartados y comparador ----------

@@ -38,7 +38,7 @@ export function montarTick(contenedor, botonResultados, onConfirmar, rutaPerfil)
     const base = new URL(rutaPerfil, location.href);
     import(new URL("evaluaciones.js", import.meta.url).href).then(({ sincronizar, modo }) => {
       if (sincronizar() && modo() === "plan") {
-        contenedor.innerHTML = `<div class="confirmado"><span>✓ Evaluación completa: tu plan está listo</span><a href="${new URL("analisis.html", base).href}">Ver mi plan →</a></div>`;
+        contenedor.innerHTML = `<div class="confirmado"><span>✓ Evaluación completa</span><a href="${new URL("preferencias.html", base).href}">Personalizar mi rutina →</a></div>`;
       }
     }).catch(() => { /* sin cambios de modo */ });
   });

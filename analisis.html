@@ -103,6 +103,7 @@
     import { analizar, perfilRutina, guardarPerfilRutina, series, comparar, evolucionPostural, proximaEvaluacion, CORRECTIVOS } from "./shared/analisis.js?v=202611130030";
     import { ACTIVIDAD } from "./shared/plan.js?v=202611130030";
     import { sincronizar, evaluaciones, rondaEnCurso } from "./shared/evaluaciones.js?v=202611130100";
+    import { calcularTodo, leerPreferencias, necesitaPreferencias } from "./shared/motor.js?v=202611130230";
 
     const $ = (s) => document.querySelector(s);
     const fmt = (n, d = 1) => (n == null || !Number.isFinite(n) ? "–" : Number(n).toLocaleString("es-ES", { maximumFractionDigits: d }));
@@ -115,6 +116,8 @@
 
     // El plan se calcula con las evaluaciones completas (apartados del perfil).
     sincronizar();
+    // Tras completar una evaluación, primero se piden días, foco y condiciones de salud.
+    if (necesitaPreferencias()) location.replace("preferencias.html");
     const apartados = evaluaciones();
     const histAntro = apartados.map((e) => e.antro);
     const histPost = apartados.map((e) => e.postural);
@@ -264,7 +267,9 @@
     // ---------- Plan (se recalcula al cambiar la actividad diaria) ----------
     function pintarPlan() {
       const actividad = leer("sportfy.actividad", "ligera");
-      const perfil = guardarPerfilRutina(perfilRutina(histAntro, histPost, { actividad: ACTIVIDAD[actividad] ? actividad : "ligera" }));
+      const prefs = leerPreferencias();
+      const todo = calcularTodo({ apartados, prefs, actividad: ACTIVIDAD[actividad] ? actividad : "ligera", guardar: true });
+      const perfil = todo.perfil, rutina = todo.rutina;
       const p = perfil.plan;
       const opciones = Object.entries(ACTIVIDAD).map(([k, v]) => `<option value="${k}" ${k === actividad ? "selected" : ""}>${esc(v.nombre)}</option>`).join("");
       if (!p) {
@@ -295,12 +300,15 @@
         <div class="kpis">
           <div class="kpi"><span>Fuerza</span><b>${e.diasFuerza} días/sem</b><small>${esc(e.seriesSemanaGrupo)} series por grupo muscular a la semana</small></div>
           <div class="kpi"><span>Repeticiones</span><b>${esc(e.repeticiones)}</b><small>dejando ${esc(e.rir)} en recámara (RIR)</small></div>
-          <div class="kpi"><span>Cardio</span><b>${e.diasCardio} días/sem</b><small>${esc(perfil.cardio)}</small></div>
+          <div class="kpi"><span>Cardio</span><b>${e.diasCardio} días/sem</b><small>${esc(rutina.cardioExtra?.tipo ?? perfil.cardio)}</small></div>
           <div class="kpi"><span>Nivel inicial</span><b style="text-transform:capitalize">${esc(perfil.nivelInicial)}</b><small>descanso ${esc(e.descanso)}</small></div>
         </div>
         <p class="foco" style="margin:10px 0 0"><b>Progresión:</b> ${esc(e.progresion)}</p>
         ${p.ajuste.motivos.length ? `<div class="ajuste"><p><b>Ajuste automático por tu evolución${p.ajuste.kcal ? ` (${p.ajuste.kcal > 0 ? "+" : ""}${p.ajuste.kcal} kcal)` : ""}</b></p>${p.ajuste.motivos.map((m) => `<p>${esc(m)}</p>`).join("")}</div>`
           : `<div class="ajuste"><p>Cuando repitas la evaluación antropométrica (en 4–6 semanas), las calorías se reajustarán solas según cómo haya cambiado tu peso y tu músculo.</p></div>`}
+        <div class="ajuste"><p><b>Tus días:</b> ${rutina.sesiones.map((x) => `${esc(x.diaNombre ?? `Día ${x.dia}`)} (${esc(x.nombre.split(" (")[0])})`).join(", ")}${rutina.cardioExtra?.diasNombre?.length ? `. Cardio: ${esc(rutina.cardioExtra.diasNombre.join(", "))}` : ""}.</p>
+          <p><b>Prioridad:</b> ${rutina.focos.length ? esc(rutina.focos.map((f) => ({ brazo: "brazo", hombro: "hombro", espalda: "espalda", abdomen: "abdomen", pecho: "pecho", gluteo: "glúteo", pierna: "pierna" })[f]).join(", ")) : "ninguna zona en específico"} · <a href="preferencias.html">Cambiar días, zonas o salud</a></p></div>
+        ${rutina.condiciones.length ? `<p class="precaucion"><b>Tu salud:</b> ${rutina.condiciones.map((c) => `<b>${esc(c.nombre)}</b>: ${esc(c.aviso)}`).join(" ")}</p>` : ""}
         ${perfil.precauciones.length ? `<p class="precaucion"><b>Precauciones en el gimnasio:</b> ${perfil.precauciones.map(esc).join(" ")}</p>` : ""}
         <a class="btn" href="rutina.html" style="display:block;text-align:center;text-decoration:none;margin-top:14px">Ver mi rutina de gimnasio →</a>
         <p class="note" style="margin:4px 0 0">Estimaciones con fórmulas validadas (Katch-McArdle, Mifflin-St Jeor). No sustituyen el consejo médico o de un nutricionista.</p>

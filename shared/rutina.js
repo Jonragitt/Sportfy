@@ -115,11 +115,47 @@ export const SESIONES = {
   tiron: { nombre: "Tirón (espalda, bíceps)", huecos: [["tironV"], ["tironH"], ["tironH"], ["hombroPost", true], ["biceps", true], ["core", true]] },
 };
 export const REPARTOS = {
+  1: { nombre: "Cuerpo completo 1 día", dias: ["fullA"] },
   2: { nombre: "Cuerpo completo 2 días", dias: ["fullA", "fullB"] },
   3: { nombre: "Cuerpo completo 3 días", dias: ["fullA", "fullB", "fullC"] },
   4: { nombre: "Torso / Pierna", dias: ["torso", "pierna", "torso", "pierna"] },
   5: { nombre: "Torso / Pierna + Empuje / Tirón / Pierna", dias: ["torso", "pierna", "empuje", "tiron", "pierna"] },
   6: { nombre: "Empuje / Tirón / Pierna ×2", dias: ["empuje", "tiron", "pierna", "empuje", "tiron", "pierna"] },
+};
+
+// Si se entrena 2 días seguidos con 2 días a la semana, mejor torso/pierna que dos cuerpos completos.
+const REPARTO_2_SEGUIDOS = { nombre: "Torso / Pierna 2 días", dias: ["torso", "pierna"] };
+const REGION = { fullA: "full", fullB: "full", fullC: "full", torso: "torso", pierna: "pierna", empuje: "empuje", tiron: "tiron" };
+
+export const DIAS_SEMANA = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
+
+// Zonas del cuerpo a las que dar más atención.
+export const FOCOS = {
+  ninguno: { nombre: "Ninguno en específico" },
+  brazo: { nombre: "Brazo", grupos: ["brazos"], huecos: ["biceps", "triceps"], regiones: ["torso", "empuje", "tiron", "full"] },
+  hombro: { nombre: "Hombro", grupos: ["hombro"], huecos: ["empujeV", "hombroPost"], regiones: ["torso", "empuje", "full"] },
+  espalda: { nombre: "Espalda", grupos: ["espalda"], huecos: ["tironV", "tironH"], regiones: ["torso", "tiron", "full"] },
+  abdomen: { nombre: "Abdomen", grupos: ["core"], huecos: ["core"], regiones: ["torso", "pierna", "empuje", "tiron", "full"] },
+  pecho: { nombre: "Pecho", grupos: ["pecho"], huecos: ["empujeH"], regiones: ["torso", "empuje", "full"] },
+  gluteo: { nombre: "Glúteo", grupos: ["gluteo"], huecos: ["gluteoMedio", "bisagra"], regiones: ["pierna", "full"] },
+  pierna: { nombre: "Pierna", grupos: ["piernas", "isquios", "gemelo"], huecos: ["cuadriceps", "isquio"], regiones: ["pierna", "full"] },
+};
+
+// Condiciones de salud: ejercicios a evitar o preferir, RIR mínimo, cardio y avisos.
+export const CONDICIONES = {
+  ninguna: { nombre: "Ninguna" },
+  lumbar: { nombre: "Dolor lumbar o hernia discal", evita: ["pesoMuerto", "remoBarra", "sentadillaBarra", "ruedaAbdominal", "pmrBarra", "pressMilitar", "hackSquat", "pulloverMancuerna"], prefiere: ["remoPechoApoyado", "hipThrust", "prensa", "deadBug", "birdDog", "sentadillaGoblet", "pallof"], aviso: "Nada de flexión de columna con carga: prioriza la estabilidad del core. Si el dolor baja a la pierna, consulta con un fisioterapeuta." },
+  rodilla: { nombre: "Dolor o lesión de rodilla", evita: ["sissy", "nordico", "bulgara", "stepUp", "sentadillaBarra", "hackSquat", "extensionCuad", "sentadillaPC"], prefiere: ["sentadillaCajonBanda", "hipThrust", "prensa", "puenteGluteo", "curlFemoral"], bajoImpacto: true, aviso: "Trabaja sin dolor (como mucho 3 sobre 10) y en rangos controlados." },
+  hombro: { nombre: "Dolor o lesión de hombro", evita: ["pressMilitar", "pikePushUp", "pressArnold", "fondosBanco", "pressBanca", "dominadas", "pulloverMancuerna"], prefiere: ["landmine", "pressMancuernas", "remoPolea", "facePull", "remoPechoApoyado"], aviso: "Evita empujes por encima de la cabeza y cualquier rango que duela." },
+  cervical: { nombre: "Dolor cervical", evita: ["pressMilitar", "pikePushUp", "pressArnold"], prefiere: ["facePull", "ytw", "remoPechoApoyado"], aviso: "Cuello neutro y sin encoger los hombros al tirar o cargar." },
+  hipertension: { nombre: "Hipertensión", rirMin: 2, sinHIIT: true, aviso: "No bloquees la respiración (exhala al subir el peso) y no llegues al fallo. Mantén el control médico de tu tensión." },
+  diabetes: { nombre: "Diabetes", aviso: "Controla tu glucosa antes y después de entrenar y lleva algo de azúcar rápido. Moverte después de las comidas ayuda a controlarla." },
+  cardiaco: { nombre: "Problema cardíaco", rirMin: 3, sinHIIT: true, medico: true, aviso: "Necesitas el visto bueno de tu cardiólogo antes de empezar. Intensidad moderada y nada de esfuerzos máximos." },
+  asma: { nombre: "Asma", aviso: "Calienta 10 minutos, ten el inhalador a mano y evita el cardio intenso en ambientes fríos." },
+  embarazo: { nombre: "Embarazo", rirMin: 3, sinHIIT: true, medico: true, bajoImpacto: true, sinDeficit: true, evita: ["ruedaAbdominal", "pesoMuerto", "sentadillaBarra", "dominadas", "pressBanca", "pressMancuernas", "tricepsMancuerna", "deadBug", "plancha", "hackSquat"], prefiere: ["pressInclinado", "birdDog", "pallof", "remoPolea", "sentadillaGoblet"], aviso: "Siempre con el visto bueno de tu ginecólogo/a. Evita tumbarte boca arriba a partir del 2.º trimestre, el calor excesivo, los saltos y los ejercicios con riesgo de caída. Tu plan no aplica déficit calórico." },
+  postparto: { nombre: "Postparto (menos de un año)", rirMin: 2, medico: true, evita: ["ruedaAbdominal", "pesoMuerto", "sentadillaBarra", "nordico"], prefiere: ["deadBug", "birdDog", "puenteGluteo", "pallof"], bajoImpacto: true, aviso: "Empieza por suelo pélvico y core profundo, y haz una revisión de suelo pélvico y diástasis antes de cargar peso o correr." },
+  osteoporosis: { nombre: "Osteoporosis u osteopenia", evita: ["ruedaAbdominal", "pesoMuerto", "pulloverMancuerna"], prefiere: ["sentadillaGoblet", "prensa", "hipThrust", "remoPechoApoyado"], aviso: "La fuerza es tu mejor aliada para los huesos: evita doblar la columna con carga y los giros forzados." },
+  artrosis: { nombre: "Artrosis", rirMin: 2, bajoImpacto: true, evita: ["nordico", "sissy"], aviso: "Muévete sin dolor y con rangos cómodos; el cardio, mejor de bajo impacto." },
 };
 
 // Repeticiones por objetivo y tipo de ejercicio.
@@ -151,7 +187,10 @@ const MOVILIDAD_BASE = ["Movilidad de cadera (90/90)", "Rotaciones torácicas en
 export function puntuar(ej, ctx) {
   if (!ej.eq.some((m) => ctx.material.includes(m))) return -Infinity;
   if (ej.nivel > ctx.nivelNum) return -Infinity;
+  if (ctx.evitar?.has(ej.id)) return -Infinity;
   let p = 10;
+  if (ctx.prefiere?.has(ej.id)) p += 3;
+  if (ctx.focoGrupos?.has(ej.grupo)) p += 2;
   for (const c of ej.corrige) if (ctx.patrones.has(c)) p += 4;
   for (const c of ej.evita) if (ctx.patrones.has(c)) p -= 8;
   if (ej.uni && ctx.patrones.has("asimetria")) p += 2;
@@ -188,7 +227,12 @@ export function generarRutina(perfil, prefs = {}) {
   const objetivo = perfil.objetivo?.id ?? "rendimiento";
   const nivel = perfil.nivelInicial === "intermedio" ? "intermedio" : "principiante";
   const nivelNum = nivel === "intermedio" ? 2 : 1;
-  const dias = Math.min(6, Math.max(2, Math.round(prefs.dias ?? perfil.diasFuerza ?? 3)));
+  const diasSemana = [...new Set((prefs.diasSemana ?? []).filter((d) => d >= 0 && d <= 6))].sort((a, b) => a - b);
+  const pedidos = diasSemana.length || Math.round(prefs.dias ?? perfil.diasFuerza ?? 3);
+  const dias = Math.min(6, Math.max(1, pedidos));
+  const focos = (prefs.foco ?? []).filter((f) => FOCOS[f] && f !== "ninguno");
+  const conds = (prefs.condiciones ?? []).filter((c) => CONDICIONES[c] && c !== "ninguna").map((c) => ({ id: c, ...CONDICIONES[c] }));
+  const rirMin = Math.max(0, ...conds.map((c) => c.rirMin ?? 0));
   const minutos = prefs.minutos ?? 60;
   const materialId = MATERIAL[prefs.material] ? prefs.material : "gimnasio";
   const semana = SEMANAS[Math.min(4, Math.max(1, prefs.semana ?? 1)) - 1];
@@ -196,18 +240,32 @@ export function generarRutina(perfil, prefs = {}) {
   const patrones = new Set(correctivos.map((c) => c.patron));
   const ladoDebil = correctivos.find((c) => c.patron === "asimetria" && c.ladoDebil?.length === 1)?.ladoDebil[0]
     ?? correctivos.find((c) => c.ladoDebil?.length === 1)?.ladoDebil[0] ?? null;
-  const ctx = { material: MATERIAL[materialId].incluye, nivelNum, objetivo, patrones };
+  const ctx = {
+    material: MATERIAL[materialId].incluye, nivelNum, objetivo, patrones,
+    evitar: new Set(conds.flatMap((c) => c.evita ?? [])), prefiere: new Set(conds.flatMap((c) => c.prefiere ?? [])),
+    focoGrupos: new Set(focos.flatMap((f) => FOCOS[f].grupos)),
+  };
   const reps = REPS[objetivo] ?? REPS.rendimiento;
-  const reparto = REPARTOS[dias];
+  const seguidos = diasSemana.some((d, i) => i > 0 && d - diasSemana[i - 1] === 1) || (diasSemana[0] === 0 && diasSemana.at(-1) === 6 && diasSemana.length > 1);
+  const reparto = dias === 2 && seguidos ? REPARTO_2_SEGUIDOS : REPARTOS[dias];
 
   // Huecos extra por postura: más tirón que empuje con hombros adelantados, glúteo medio con rodillas hacia dentro.
-  const ajustarHuecos = (huecos) => {
+  const ajustarHuecos = (huecos, tipo) => {
     const h = huecos.map(([x, opt]) => [x, Boolean(opt)]);
     const tiene = (x) => h.some(([y]) => y === x);
+    // Foco elegido: sus huecos dejan de ser opcionales y se añade uno más (máx. 2 extra por sesión).
+    let extra = 0;
+    for (const f of focos) {
+      const F = FOCOS[f];
+      if (!F.regiones.includes(REGION[tipo])) continue;
+      h.forEach((x) => { if (F.huecos.includes(x[0])) x[1] = false; });
+      const nuevo = F.huecos.find((x) => !tiene(x)) ?? (extra < 2 ? F.huecos[0] : null);
+      if (nuevo && extra < 2) { h.splice(Math.max(1, h.length - 1), 0, [nuevo, false]); extra++; }
+    }
     if (patrones.has("cruzadoSuperior") && (tiene("empujeH") || tiene("empujeV")) && !tiene("hombroPost")) h.splice(h.length - 1, 0, ["hombroPost", false]);
     if (patrones.has("cruzadoSuperior")) h.forEach((x) => { if (x[0] === "hombroPost") x[1] = false; });
     if ((patrones.has("rodillasDentro") || patrones.has("gluteoDebil")) && tiene("sentadilla") && !tiene("gluteoMedio")) h.splice(h.length - 1, 0, ["gluteoMedio", true]);
-    if (objetivo === "perdidaGrasa" || objetivo === "recomposicion") return h.filter(([x]) => !(dias <= 3 && (x === "biceps" || x === "triceps")));
+    if ((objetivo === "perdidaGrasa" || objetivo === "recomposicion") && !focos.includes("brazo")) return h.filter(([x]) => !(dias <= 3 && (x === "biceps" || x === "triceps")));
     return h;
   };
 
@@ -217,7 +275,7 @@ export function generarRutina(perfil, prefs = {}) {
     const plantilla = SESIONES[tipo];
     const usadosHoy = new Set();
     const bloques = [];
-    for (const [hueco, opcional] of ajustarHuecos(plantilla.huecos)) {
+    for (const [hueco, opcional] of ajustarHuecos(plantilla.huecos, tipo)) {
       // El primer hueco abre la sesión con un ejercicio principal (el más cargable).
       const prim = (l) => (bloques.length ? l : [...l.filter((e) => e.tipo === "principal"), ...l.filter((e) => e.tipo !== "principal")]);
       let lista = prim(candidatos(hueco, ctx).filter((e) => !usadosHoy.has(e.id)));
@@ -234,12 +292,14 @@ export function generarRutina(perfil, prefs = {}) {
       const tipoEj = ej.tipo === "principal" && bloques.some((b) => b.tipo === "principal") ? "compuesto" : ej.tipo;
       let series = tipoEj === "principal" ? (nivelNum === 2 ? 4 : 3) : tipoEj === "compuesto" ? 3 : tipoEj === "core" ? 2 : objetivo === "ganarMusculo" ? 3 : 2;
       if (semana.series > 0 && tipoEj === "principal") series += semana.series;
+      const enFoco = ctx.focoGrupos.has(ej.grupo);
+      if (enFoco) series += 1;
       if (semana.series < 0) series = Math.max(1, series - 1);
       const motivos = ej.corrige.filter((c) => patrones.has(c)).map((c) => correctivos.find((x) => x.patron === c)?.nombre).filter(Boolean);
       const lado = ej.uni && ladoDebil ? `Empieza por el lado ${ladoDebil === "I" ? "izquierdo" : "derecho"} y haz 1 serie extra con él.` : null;
       bloques.push({
         id: ej.id, nombre: ej.nombre, hueco, tipo: tipoEj, grupo: ej.grupo, opcional,
-        series, reps: reps[tipoEj] ?? reps.compuesto, rir: tipoEj === "core" ? null : semana.rir,
+        series, reps: reps[tipoEj] ?? reps.compuesto, rir: tipoEj === "core" ? null : Math.max(semana.rir, rirMin), foco: enFoco,
         descanso: rangoTxt(DESCANSO[tipoEj]), descansoSeg: (DESCANSO[tipoEj][0] + DESCANSO[tipoEj][1]) / 2,
         tecnica: ej.tecnica, motivo: motivos.length ? `Corrige: ${[...new Set(motivos)].join(", ").toLowerCase()}` : null, lado, uni: ej.uni,
       });
@@ -253,7 +313,9 @@ export function generarRutina(perfil, prefs = {}) {
     // Activación: el correctivo que no esté ya en el entrenamiento del día.
     const yaEsta = (f) => bloques.some((b) => b.nombre.toLowerCase().startsWith(f.toLowerCase().split(" ").slice(0, 2).join(" ")));
     const activacion = correctivos.slice(0, 2).map((c) => ({ nombre: (c.fortalecer ?? []).find((f) => !yaEsta(f)), series: 2, reps: "12–15", motivo: c.nombre })).filter((x) => x.nombre);
-    const sesion = { dia: i + 1, tipo, nombre: plantilla.nombre, calentamiento, activacion, bloques, cardio: cardioSesion(objetivo, perfil) };
+    if (conds.some((c) => c.id === "asma")) calentamiento.general = "10 min de cardio suave y progresivo (bici, elíptica o remo)";
+    const diaSemana = diasSemana[i] ?? null;
+    const sesion = { dia: i + 1, diaSemana, diaNombre: diaSemana != null ? DIAS_SEMANA[diaSemana] : null, tipo, nombre: plantilla.nombre, calentamiento, activacion, bloques, cardio: cardioSesion(objetivo, perfil, conds) };
     ajustarATiempo(sesion, minutos);
     return sesion;
   });
@@ -263,17 +325,40 @@ export function generarRutina(perfil, prefs = {}) {
     generada: new Date().toISOString(),
     objetivo: perfil.objetivo,
     nivel,
-    reparto: { dias, nombre: reparto.nombre },
+    reparto: { dias, nombre: reparto.nombre, pedidos },
+    diasSemana,
+    diasLibres: diasSemana.length ? DIAS_SEMANA.map((n, d) => d).filter((d) => !diasSemana.includes(d)) : [],
+    recuperacionActiva: pedidos > 6 ? "El 7.º día, recuperación activa: 30–40 min de paseo, movilidad y estiramientos suaves." : null,
+    focos,
+    condiciones: conds.map((c) => ({ id: c.id, nombre: c.nombre, aviso: c.aviso, medico: Boolean(c.medico) })),
+    consejos: consejosDias(diasSemana, reparto),
     minutos,
     material: materialId,
     semana,
     sesiones,
-    cardioExtra: cardioExtra(objetivo, perfil, dias),
+    cardioExtra: cardioExtra(objetivo, perfil, dias, conds, diasSemana),
     volumen: volumenSemanal(sesiones),
     progresion: "Doble progresión: cuando hagas todas las series en el tope del rango de repeticiones con el RIR indicado, sube la carga un 2,5–5 % y vuelve al inicio del rango.",
     precauciones: perfil.precauciones ?? [],
     ladoDebil,
   };
+}
+
+/** Consejos de reparto según los días elegidos. */
+function consejosDias(diasSemana, reparto) {
+  const c = [];
+  if (!diasSemana.length) return c;
+  const full = reparto.dias.every((t) => REGION[t] === "full");
+  for (let i = 1; i < diasSemana.length; i++) {
+    if (diasSemana[i] - diasSemana[i - 1] === 1 && full) {
+      c.push(`${DIAS_SEMANA[diasSemana[i - 1]]} y ${DIAS_SEMANA[diasSemana[i]]} son seguidos: las sesiones alternan ejercicios (A/B/C), pero baja un poco la carga del segundo día si notas las piernas cargadas.`);
+      break;
+    }
+  }
+  let racha = 1, max = 1;
+  for (let i = 1; i < diasSemana.length; i++) { racha = diasSemana[i] - diasSemana[i - 1] === 1 ? racha + 1 : 1; max = Math.max(max, racha); }
+  if (max >= 4) c.push("Entrenas 4 o más días seguidos: duerme 7–8 horas y respeta el RIR para recuperarte bien.");
+  return c;
 }
 
 function calentar(correctivos) {
@@ -285,23 +370,31 @@ function calentar(correctivos) {
   };
 }
 
-function cardioSesion(objetivo) {
+function cardioSesion(objetivo, perfil, conds = []) {
+  const bajo = conds.some((c) => c.bajoImpacto) ? " en bici o elíptica (sin impacto)" : "";
+  if (objetivo === "perdidaGrasa" && bajo) return `15–20 min de cardio en zona 2${bajo} al terminar`;
   if (objetivo === "perdidaGrasa") return "15–20 min de cardio en zona 2 al terminar (puedes hablar pero con esfuerzo)";
   if (objetivo === "recomposicion") return "10–15 min de cardio suave al terminar (opcional)";
   return null;
 }
 
-function cardioExtra(objetivo, perfil, diasFuerza) {
+function cardioExtra(objetivo, perfil, diasFuerza, conds = [], diasSemana = []) {
   const dias = perfil.plan?.entrenamiento?.diasCardio ?? perfil.diasCardio ?? 2;
   const libres = Math.max(0, 7 - diasFuerza);
   const n = Math.min(dias, libres);
-  const tipo = {
+  const sinHIIT = conds.some((c) => c.sinHIIT), bajo = conds.some((c) => c.bajoImpacto);
+  let tipo = {
     perdidaGrasa: "30–45 min en zona 2 (caminar en cuesta, bici o elíptica)",
     recomposicion: "25–35 min en zona 2",
     ganarMusculo: "20–30 min suave (caminar rápido o bici)",
     rendimiento: "1 día de intervalos (8×30 s fuerte / 90 s suave) y 1 día de 30 min en zona 2",
   }[objetivo];
-  return n ? { dias: n, tipo, pasos: perfil.plan ? "8.000–10.000 pasos al día" : null } : null;
+  if (sinHIIT && objetivo === "rendimiento") tipo = "30–40 min en zona 2 (sin intervalos intensos)";
+  if (bajo) tipo += ", siempre de bajo impacto: bici, elíptica, remo o piscina";
+  // Días de cardio: los libres más separados de las sesiones de fuerza (empezando por los no consecutivos).
+  const libresSemana = diasSemana.length ? [0, 1, 2, 3, 4, 5, 6].filter((d) => !diasSemana.includes(d)) : [];
+  const elegidos = libresSemana.slice(0, n);
+  return n ? { dias: n, tipo, pasos: perfil.plan ? "8.000–10.000 pasos al día" : null, diasSemana: elegidos, diasNombre: elegidos.map((d) => DIAS_SEMANA[d]) } : null;
 }
 
 // Tiempo estimado: ~45 s por serie de trabajo + descanso; los unilaterales cuentan doble.
