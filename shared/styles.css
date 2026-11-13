@@ -233,6 +233,16 @@ main.entrando > :not(.cabecera) { animation: pestana-entra .22s ease-out both; }
 }
 .cabecera > * { pointer-events: auto; }
 .cabecera > * { max-width: 1100px; margin-inline: auto; }
+/* La cabecera no hereda tamaños de la pestaña: así no cambia nada al pasar de una a otra. */
+.cabecera { font-size: 16px; line-height: 1.4; }
+.cabecera .tabs a { font-size: 1rem; padding: 10px 18px; white-space: nowrap; }
+
+/* Misma escala de letra en Rutina, Mi plan y Dieta. */
+body.con-cabecera main.wrap { font-size: 1rem; line-height: 1.55; }
+body.con-cabecera main.wrap h2 { font-size: 1.3rem; line-height: 1.25; }
+body.con-cabecera main.wrap .card h3 { font-size: 1.1rem; }
+body.con-cabecera main.wrap .lead { font-size: 1rem; }
+body.con-cabecera main.wrap .note, body.con-cabecera main.wrap .foco { font-size: .9rem; line-height: 1.5; }
 /* Debajo de la fila de iconos fijos (casa, hora, perfil, racha), el logo más grande. */
 body.con-esquinas .cabecera .topbar { margin: 54px auto 0; }
 .cabecera .topbar-logo .logo-img { width: min(300px, 74vw); }
