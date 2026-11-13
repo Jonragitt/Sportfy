@@ -99,13 +99,21 @@ export const SECTIONS = [
     zones: [
       {
         id: "acromion",
+        exclusive: true, // un solo hombro puede quedar más bajo
         name: "Hombros (acromion)",
         how: "Coloca los dedos en la punta de ambos hombros y compara su altura.",
         options: [
           {
-            id: "acromionAsimetrico",
-            name: "Acromios asimétricos",
-            hint: "Un hombro queda más alto que el otro.",
+            id: "acromionIzqBajo",
+            demo: "acromionAsimetrico",
+            name: "Izquierdo bajo",
+            hint: "El hombro izquierdo queda más bajo que el derecho.",
+          },
+          {
+            id: "acromionDerBajo",
+            demo: "acromionAsimetrico",
+            name: "Derecho bajo",
+            hint: "El hombro derecho queda más bajo que el izquierdo.",
           },
         ],
       },
@@ -129,13 +137,21 @@ export const SECTIONS = [
       },
       {
         id: "crestas",
+        exclusive: true, // un solo lado de la pelvis puede quedar más alto
         name: "Pelvis (crestas ilíacas)",
         how: "Coloca las manos sobre la parte alta de la cadera y compara la altura de ambas crestas ilíacas.",
         options: [
           {
-            id: "crestasAsimetricas",
-            name: "Crestas ilíacas asimétricas",
-            hint: "Un lado de la cadera queda más alto que el otro.",
+            id: "crestaIzqAlta",
+            demo: "crestasAsimetricas",
+            name: "Izquierdo alto",
+            hint: "La cresta ilíaca izquierda queda más alta que la derecha.",
+          },
+          {
+            id: "crestaDerAlta",
+            demo: "crestasAsimetricas",
+            name: "Derecho alto",
+            hint: "La cresta ilíaca derecha queda más alta que la izquierda.",
           },
         ],
       },

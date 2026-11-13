@@ -1,4 +1,4 @@
-import { SECTIONS, SIDES, ALL_ZONES, MAX_POINTS, computeScore, selectedOptions, optionLabel, alteredZoneCount } from "./tests.js?v=202611130200";
+import { SECTIONS, SIDES, ALL_ZONES, MAX_POINTS, computeScore, selectedOptions, optionLabel, alteredZoneCount } from "./tests.js?v=202611130300";
 import { saveScore, getScores, scoreLabel } from "../../shared/scores.js?v=202611052135";
 import { marcarPendiente, quitarPendiente, montarTick } from "../../shared/perfil.js";
 
@@ -56,7 +56,7 @@ function demo(opt, sides) {
       // Por cada lado: el GIF animado y, debajo, el PNG explicativo (correcto frente a alteración).
       const pngs = [];
       for (const k of sides || [null]) {
-        const base = `gifs/${opt.id}${k ? "-" + k : ""}`;
+        const base = `gifs/${opt.demo || opt.id}${k ? "-" + k : ""}`;
         const lado = k ? ", lado " + SIDES[k].toLowerCase() : "";
         panel.append(el("figure", {}, el("img", { src: `${base}.gif?v=${GIF_V}`, alt: `${opt.name}${lado}: de postura correcta a alteración`, width: "380", height: "508", loading: "lazy" }), el("figcaption", {}, k ? SIDES[k] : "")));
         pngs.push(el("figure", { class: "explica" }, el("img", { src: `${base}.png?v=${GIF_V}`, alt: `${opt.name}${lado}: comparación entre la postura correcta y la alteración, con lo que hay que mirar`, loading: "lazy" })));

@@ -151,7 +151,7 @@ export const PATRONES = [
   {
     id: "asimetria",
     nombre: "Asimetrías entre lados",
-    alteraciones: ["acromionAsimetrico", "crestasAsimetricas", "sohCargaAsimetrica", "slbCaidaPelvis", "slbRotacion"],
+    alteraciones: ["acromionAsimetrico", "acromionIzqBajo", "acromionDerBajo", "crestasAsimetricas", "crestaIzqAlta", "crestaDerAlta", "sohCargaAsimetrica", "slbCaidaPelvis", "slbRotacion"],
     texto: "Hay diferencias entre tu lado izquierdo y el derecho (altura de hombros o pelvis, reparto de la carga o control de la pelvis). A la larga sobrecargan siempre el mismo lado.",
     fortalecer: "Trabajo unilateral empezando por el lado débil: zancadas, sentadilla búlgara, puente a una pierna y paseo del granjero con una mano.",
     movilizar: "Cuadrado lumbar y cadera del lado más cargado; revisa también hábitos como cargar la mochila siempre del mismo lado.",
