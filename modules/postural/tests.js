@@ -330,6 +330,11 @@ export const SECTIONS = [
     id: "wallAngel",
     title: "Wall angel test",
     bilateral: true,
+    ejemplos: true, // además del cómo se hace, cada opción mantiene su "Ver ejemplo"
+    media: [
+      { src: "ejercicios/wa-lateral.gif", alt: "Wall angel visto de perfil: los brazos se deslizan por la pared de W a arriba, en bucle", caption: "Vista lateral", w: 380, h: 508 },
+      { src: "ejercicios/wa-fases.png", alt: "Fases del wall angel: posición inicial, inicio del deslizamiento, subida progresiva, brazos arriba y bajada controlada", caption: "Fases del movimiento", w: 900, h: 1814, wide: true },
+    ],
     intro:
       "¿Por qué te pedimos el wall angel? Con la espalda contra la pared no puedes hacer trampas: si tus hombros, tu espalda alta o tus escápulas están rígidos, los brazos se despegan o la zona lumbar se arquea. Así puedes comprobar por ti mismo si los hombros adelantados o la espalda encorvada que viste de pie te limitan al levantar los brazos. Marca el lado en que aparece cada compensación.",
     zones: [
@@ -358,6 +363,11 @@ export const SECTIONS = [
     id: "lunge",
     title: "Lunge test / dorsiflexión (10 cm)",
     bilateral: true,
+    ejemplos: true, // además del cómo se hace, cada opción mantiene su "Ver ejemplo"
+    media: [
+      { src: "ejercicios/lunge-lateral.gif", alt: "Lunge test visto de perfil: la rodilla avanza hasta tocar la pared sin despegar el talón, en bucle", caption: "Vista lateral", w: 380, h: 508 },
+      { src: "ejercicios/lunge-fases.png", alt: "Fases del lunge test: posición inicial, rodilla hacia delante, talón apoyado, rodilla toca la pared y cambio de pierna", caption: "Fases del movimiento", w: 900, h: 1364, wide: true },
+    ],
     intro:
       "¿Por qué te pedimos este test? Mide cuánto se dobla tu tobillo, y un tobillo rígido es una de las causas más frecuentes de que las rodillas se vayan hacia dentro, los talones se levanten o el tronco se incline al hacer sentadillas. Así puedes comprobar por ti mismo si el origen de esas compensaciones está en tus tobillos y si un lado está peor que el otro. Marca el resultado de cada lado.",
     zones: [
