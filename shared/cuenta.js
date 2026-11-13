@@ -186,7 +186,7 @@ export function mostrarInicioSesion({ cerrable = false } = {}) {
     <p class="login-sub">Inicia sesión para no perder tus evaluaciones, tu rutina, tu dieta y tu racha, y tenerlas en cualquier dispositivo.</p>
     <div class="login-btns">
       <button type="button" class="login-btn google" data-via="google" ${listos ? "" : "disabled"}>${ICONO_GOOGLE}<span>Continuar con Google</span>${listos ? "" : "<small>Muy pronto</small>"}</button>
-      <button type="button" class="login-btn apple" data-via="apple" ${apple ? "" : "disabled"}>${ICONO_APPLE}<span>Continuar con Apple</span>${apple ? "" : "<small>Muy pronto</small>"}</button>
+      ${apple ? `<button type="button" class="login-btn apple" data-via="apple" >${ICONO_APPLE}<span>Continuar con Apple</span></button>` : ""}
     </div>
     <p class="login-error" hidden></p>
     <button type="button" class="login-sin" data-via="local">${cerrable ? "Cancelar" : "Seguir sin cuenta (solo en este dispositivo)"}</button>
