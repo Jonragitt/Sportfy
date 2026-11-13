@@ -193,6 +193,7 @@ export const SECTIONS = [
     id: "soh",
     title: "Sentadilla profunda (SOH)",
     bilateral: true,
+    ejemplos: true, // además del cómo se hace, cada opción mantiene su "Ver ejemplo"
     // Cómo se hace el test: imágenes propias que sustituyen a los ejemplos por opción.
     media: [
       { src: "ejercicios/soh-lateral.gif", alt: "Sentadilla profunda con brazos arriba vista de perfil, en bucle", caption: "Vista lateral", w: 380, h: 508 },
@@ -285,6 +286,7 @@ export const SECTIONS = [
     id: "slb",
     title: "Puente de cadera a una pierna (SLB)",
     bilateral: true,
+    ejemplos: true, // además del cómo se hace, cada opción mantiene su "Ver ejemplo"
     // Cómo se hace el test: imágenes propias que sustituyen a los ejemplos por opción.
     media: [
       { src: "ejercicios/slb-lateral.gif", alt: "Puente de cadera a una pierna visto de perfil, en bucle", caption: "Vista lateral", w: 380, h: 508 },
