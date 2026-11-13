@@ -10,7 +10,7 @@ import { FIREBASE_CONFIG, APPLE_ACTIVO } from "./firebase-config.js?v=2026111306
 
 const CUENTA = "forty5.cuenta";   // { tipo: "google" | "apple" | "local", nombre, desde }
 const NUBE = "forty5.nube";       // { version, hashes: { clave: hash } }
-const SOLO_AQUI = new Set(["sportfy.fechaVista"]);
+const SOLO_AQUI = new Set(["sportfy.fechaVista", "sportfy.fondoUltima"]); // cosas de este dispositivo
 const PREFIJO = "sportfy.";
 const META = "_meta";
 
