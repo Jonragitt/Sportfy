@@ -44,3 +44,25 @@ test("las condiciones de salud recalculan kcal y macros", async () => {
   assert.ok(osteo.plan.macros.proteina >= 110 && osteo.plan.kcal >= plan.mantenimiento - 410);
   assert.equal(ajustarPorSalud(plan, ["lumbar"], 92).cambios.length, 0);
 });
+
+test("cada opción de comida da raciones que cuadran con sus macros y se puede elegir", async () => {
+  const { OPCIONES, ALIMENTOS, opcionesDe } = await import("../dieta.js");
+  const m = { proteina: 40, hidratos: 60, grasa: 18 };
+  for (const ops of Object.values(OPCIONES)) for (const o of ops) {
+    const t = { p: 0, h: 0, g: 0 };
+    for (const x of ejemplo(o, m)) for (const k of "phg") t[k] += x.gramos * ALIMENTOS[x.id][k] / 100;
+    const kcal = t.p * 4 + t.h * 4 + t.g * 9;
+    assert.ok(Math.abs(kcal - (40 * 4 + 60 * 4 + 18 * 9)) < 120, `${o.id}: ${Math.round(kcal)} kcal`);
+  }
+  const d = calcularDieta(plan, { eleccion: { Desayuno: "porridge" }, dia: 2 });
+  const des = d.diaDescanso.comidas[0];
+  assert.equal(des.opcion, "porridge");
+  assert.equal(des.auto, false);
+  assert.ok(des.opciones.length >= 3);
+  // Sin elección, la opción rota según el día.
+  const lunes = calcularDieta(plan, { dia: 0 }).diaDescanso.comidas[2].opcion;
+  const martes = calcularDieta(plan, { dia: 1 }).diaDescanso.comidas[2].opcion;
+  assert.notEqual(lunes, martes);
+  // Con hipertensión no se proponen fiambres.
+  assert.ok(opcionesDe("Media mañana", ["hipertension"]).every((o) => o.id !== "bocadillo"));
+});

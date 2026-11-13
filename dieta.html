@@ -34,6 +34,9 @@
     .comida-head span { font-weight: 800; white-space: nowrap; }
     .comida .macros { font-size: .82rem; color: var(--muted); margin: 2px 0 6px; }
     .comida ul { margin: 0; padding-left: 18px; }
+    .comida .opcion { display: flex; align-items: center; gap: 8px; font-size: .85rem; color: var(--muted); margin: 0 0 6px; }
+    .comida .opcion select { flex: 1; min-width: 0; max-width: 100%; font: inherit; color: var(--text); padding: 6px 8px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); }
+    .comida .plato { font-weight: 700; margin: 0 0 4px; }
     .comida li b { white-space: nowrap; }
     .aviso { margin: 10px 0 0; padding: 10px 12px; border-radius: 10px; font-size: .9rem; background: color-mix(in srgb, var(--mid) 15%, transparent); }
     .info { margin: 10px 0 0; padding: 10px 12px; border-radius: 10px; font-size: .9rem; background: color-mix(in srgb, var(--accent) 10%, transparent); }
@@ -66,7 +69,7 @@
   <script type="module">
     import { sincronizar, evaluaciones } from "./shared/evaluaciones.js?v=202611130100";
     import { calcularTodo, leerPreferencias, necesitaPreferencias } from "./shared/motor.js?v=202611130900";
-    import { calcularDieta } from "./shared/dieta.js?v=202611131100";
+    import { calcularDieta } from "./shared/dieta.js?v=202611131300";
     import { DIAS_SEMANA } from "./shared/rutina.js?v=202611130230";
 
     const $ = (s) => document.querySelector(s);
@@ -93,6 +96,7 @@
       const diasEntreno = [...new Set([...(rutina.diasSemana ?? []), ...(rutina.cardioExtra?.diasSemana ?? [])])];
       let tipo = (rutina.diasSemana ?? []).includes(hoy) ? "entreno" : "descanso";
       let comidas = leer("sportfy.dieta.comidas", 5);
+      let eleccion = leer("sportfy.dieta.opciones", {});
 
       function pintar() {
         if (!p) {
@@ -100,7 +104,7 @@
           return;
         }
         const peso = apartados.at(-1)?.antro?.datos?.peso ?? null;
-        const d = calcularDieta(p, { diasEntreno: rutina.diasSemana ?? [], comidas, peso, condiciones: (rutina.condiciones ?? []).map((c) => c.id) });
+        const d = calcularDieta(p, { diasEntreno: rutina.diasSemana ?? [], comidas, peso, eleccion, dia: hoy, condiciones: (rutina.condiciones ?? []).map((c) => c.id) });
         const ETIQ = { sodio: "Sodio", potasio: "Potasio", fibra: "Fibra", saturadas: "Grasas saturadas", calcio: "Calcio", vitaminaD: "Vitamina D", hierro: "Hierro", acidoFolico: "Ácido fólico", omega3: "Omega-3" };
         const objetivos = Object.entries(d.objetivosSalud).map(([k, v]) => `<li><b>${ETIQ[k] ?? k}:</b> ${esc(typeof v === "number" ? `${v} g/día` : v)}</li>`).join("");
         const dia = tipo === "entreno" ? d.diaEntreno : d.diaDescanso;
@@ -137,10 +141,15 @@
             ${dia.comidas.map((c) => `<div class="comida">
               <div class="comida-head"><h3>${esc(c.nombre)}</h3><span>${fmt(c.kcal)} kcal</span></div>
               <p class="macros">P ${c.proteina} g · H ${c.hidratos} g · G ${c.grasa} g</p>
+              <label class="opcion">Opción <select data-comida="${esc(c.nombre)}">
+                <option value="" ${c.auto ? "selected" : ""}>Variar cada día</option>
+                ${c.opciones.map((o) => `<option value="${esc(o.id)}" ${!c.auto && o.id === c.opcion ? "selected" : ""}>${esc(o.nombre)}</option>`).join("")}
+              </select></label>
+              <p class="plato">${esc(c.plato)}${c.auto ? ` <span class="note">· hoy</span>` : ""}</p>
               <ul>${c.ejemplo.map((e) => `<li>${esc(e.nombre)}: <b>${esc(e.texto)}</b></li>`).join("")}${["Comida", "Cena"].includes(c.nombre) ? "<li>Verdura al gusto, fresca o congelada (medio plato)</li>" : ""}</ul>
               ${c.preparacion ? `<p class="note" style="margin:4px 0 0">🍳 ${esc(c.preparacion)}</p>` : ""}
             </div>`).join("")}
-            <p class="note" style="margin:10px 0 0">Comidas sencillas con alimentos básicos y baratos. Puedes cambiar cada alimento por otro del mismo grupo (pollo por huevos o atún, arroz por patata o pasta…) manteniendo cantidades parecidas.</p>
+            <p class="note" style="margin:10px 0 0">Cada comida tiene varias opciones sencillas y baratas: elige la que te apetezca o deja «Variar cada día» y el menú irá cambiando solo. Las cantidades se recalculan para que cuadren con tus macros.</p>
           </div>
 
           ${tipo === "entreno" ? `<div class="card"><h2 style="margin:0 0 6px">Alrededor del entreno</h2>
@@ -157,6 +166,10 @@
             <p class="note" style="margin:10px 0 0">Estimaciones a partir de tu evaluación. No sustituyen el consejo de un médico o nutricionista.</p></div>`;
 
         document.querySelectorAll("[data-tipo]").forEach((b) => b.addEventListener("click", () => { tipo = b.dataset.tipo; pintar(); }));
+        document.querySelectorAll("[data-comida]").forEach((sel) => sel.addEventListener("change", () => {
+          if (sel.value) eleccion[sel.dataset.comida] = sel.value; else delete eleccion[sel.dataset.comida];
+          escribir("sportfy.dieta.opciones", eleccion); pintar();
+        }));
         $("#comidas").addEventListener("change", (e) => { comidas = Number(e.target.value); escribir("sportfy.dieta.comidas", comidas); pintar(); });
       }
       pintar();

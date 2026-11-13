@@ -9,15 +9,23 @@ const r10 = (n) => Math.round(n / 10) * 10;
 // supermercado, baratos y fáciles de preparar (nada de recetas complejas).
 export const ALIMENTOS = {
   pollo: { nombre: "Pechuga de pollo o pavo", p: 23, h: 0, g: 2, tipo: "proteina" },
-  pescado: { nombre: "Merluza congelada o atún en lata al natural", p: 21, h: 0, g: 1.5, tipo: "proteina" },
-  huevos: { nombre: "Huevos", p: 13, h: 1, g: 10, tipo: "proteina", unidad: { nombre: "huevo", g: 60 } },
-  yogur: { nombre: "Queso fresco batido o yogur natural", p: 8, h: 4, g: 0.5, tipo: "proteina" },
+  pescado: { nombre: "Merluza o abadejo congelado", p: 18, h: 0, g: 1, tipo: "proteina" },
+  atun: { nombre: "Atún en lata al natural", p: 24, h: 0, g: 1, tipo: "proteina" },
+  picada: { nombre: "Carne picada de pollo o pavo", p: 20, h: 0, g: 5, tipo: "proteina" },
+  lomo: { nombre: "Lomo de cerdo o pechuga en filetes", p: 22, h: 0, g: 5, tipo: "proteina" },
+  huevos: { nombre: "Huevos", p: 13, h: 1, g: 10, tipo: "proteina", unidad: { nombre: "huevo", g: 60 }, max: 240 },
+  yogur: { nombre: "Queso fresco batido o yogur natural", p: 8, h: 4, g: 0.5, tipo: "proteina", max: 350 },
+  quesoFresco: { nombre: "Queso fresco tipo Burgos", p: 12, h: 3, g: 8, tipo: "proteina", max: 150 },
+  pavo: { nombre: "Pechuga de pavo en lonchas", p: 20, h: 2, g: 2, tipo: "proteina", max: 120 },
+  leche: { nombre: "Leche semidesnatada o bebida de soja", p: 3.3, h: 4.8, g: 1.5, tipo: "proteina", ml: true },
   legumbre: { nombre: "Legumbres cocidas de bote (garbanzos, lentejas)", p: 8, h: 18, g: 1, tipo: "hidratos" },
-  arroz: { nombre: "Arroz o pasta (cocidos)", p: 3, h: 28, g: 0.5, tipo: "hidratos" },
+  arroz: { nombre: "Arroz (cocido)", p: 3, h: 28, g: 0.5, tipo: "hidratos" },
+  pasta: { nombre: "Pasta (cocida)", p: 5, h: 30, g: 1, tipo: "hidratos" },
   patata: { nombre: "Patata o boniato (cocidos)", p: 2, h: 18, g: 0.1, tipo: "hidratos" },
   avena: { nombre: "Copos de avena", p: 13, h: 60, g: 7, tipo: "hidratos" },
   pan: { nombre: "Pan integral", p: 9, h: 43, g: 3, tipo: "hidratos" },
-  fruta: { nombre: "Fruta de temporada (plátano, manzana, naranja)", p: 1, h: 14, g: 0.2, tipo: "hidratos" },
+  tortilla: { nombre: "Tortillas de trigo (wrap)", p: 8, h: 50, g: 7, tipo: "hidratos", unidad: { nombre: "tortilla", g: 40 } },
+  fruta: { nombre: "Fruta de temporada (plátano, manzana, naranja)", p: 1, h: 14, g: 0.2, tipo: "hidratos", max: 300 },
   aceite: { nombre: "Aceite de oliva virgen extra", p: 0, h: 0, g: 100, tipo: "grasa", unidad: { nombre: "cucharada", g: 10 } },
   frutosSecos: { nombre: "Cacahuetes naturales o crema de cacahuete", p: 26, h: 12, g: 49, tipo: "grasa" },
   };
@@ -28,21 +36,68 @@ const COMIDAS = {
   5: [["Desayuno", 0.22], ["Media mañana", 0.1], ["Comida", 0.3], ["Merienda", 0.13], ["Cena", 0.25]],
 };
 
-// Alimentos del ejemplo de cada comida: [proteína, hidrato, grasa] y cómo prepararlo en pocos minutos.
-const MENU = {
-  Desayuno: ["yogur", "avena", "frutosSecos"],
-  "Media mañana": ["huevos", "pan", "aceite"],
-  Comida: ["pollo", "arroz", "aceite"],
-  Merienda: ["yogur", "fruta", "frutosSecos"],
-  Cena: ["pescado", "patata", "aceite"],
+// Opciones de cada comida, todas sencillas y baratas. Cada alimento tiene un papel: cubre la
+// proteína (p), los hidratos (h) o la grasa (g) que faltan, repartida según `parte`; `fijo` son
+// gramos o ml fijos. `evitar`: condiciones de salud en las que no se propone esa opción.
+const A = (id, rol, parte = 1) => ({ id, rol, parte });
+const F = (id, fijo) => ({ id, fijo });
+const SIN_FIAMBRE = ["hipertension", "cardiaco", "embarazo"];
+export const OPCIONES = {
+  Desayuno: [
+    { id: "bol", nombre: "Bol de queso batido con avena y cacahuetes", alimentos: [A("yogur", "p"), A("avena", "h", 0.8), A("fruta", "h", 0.2), A("frutosSecos", "g")],
+      prep: "Mezcla en un bol el queso batido con la avena, la fruta troceada y los cacahuetes. 2 minutos." },
+    { id: "tostadasHuevo", nombre: "Tostadas con huevos revueltos", alimentos: [A("huevos", "p", 0.6), A("yogur", "p", 0.4), A("pan", "h"), A("aceite", "g")],
+      prep: "Revuelve los huevos en la sartén con un poco del aceite y ponlos sobre el pan tostado; el yogur, de postre. 5 minutos." },
+    { id: "porridge", nombre: "Porridge de avena con leche y plátano", alimentos: [F("leche", 250), A("yogur", "p"), A("avena", "h", 0.7), A("fruta", "h", 0.3), A("frutosSecos", "g")],
+      prep: "Calienta la avena con la leche 2 minutos en el microondas, añade el plátano en rodajas, el queso batido y los cacahuetes. 4 minutos." },
+    { id: "tostadaQueso", nombre: "Tostadas de queso fresco y pavo con fruta", evitar: SIN_FIAMBRE, alimentos: [A("quesoFresco", "p", 0.5), A("pavo", "p", 0.5), A("pan", "h", 0.7), A("fruta", "h", 0.3), A("aceite", "g")],
+      prep: "Pan tostado con un chorrito de aceite, tomate rallado si quieres, el queso fresco y el pavo; la fruta, de postre. 3 minutos." },
+  ],
+  "Media mañana": [
+    { id: "huevosPan", nombre: "Huevos cocidos con pan", alimentos: [A("huevos", "p"), A("pan", "h"), A("aceite", "g")],
+      prep: "Huevos cocidos (déjalos hechos para varios días) o en tortilla, con el pan. 5 minutos." },
+    { id: "bocadillo", nombre: "Bocadillo de pavo y queso fresco", evitar: SIN_FIAMBRE, alimentos: [A("pavo", "p", 0.6), A("quesoFresco", "p", 0.4), A("pan", "h"), A("aceite", "g")],
+      prep: "Bocadillo con un chorrito de aceite, el pavo y el queso fresco. Se lleva fácil al trabajo. 2 minutos." },
+    { id: "yogurFruta", nombre: "Yogur con fruta y cacahuetes", alimentos: [A("yogur", "p"), A("fruta", "h"), A("frutosSecos", "g")],
+      prep: "Yogur o queso batido con la fruta troceada y unos cacahuetes. 2 minutos." },
+  ],
+  Comida: [
+    { id: "polloArroz", nombre: "Pollo con arroz y verdura", alimentos: [A("pollo", "p"), A("arroz", "h"), A("aceite", "g")],
+      prep: "Pollo a la plancha y arroz cocido (o de vaso de microondas), con verdura congelada salteada. 15 minutos." },
+    { id: "legumbreAtun", nombre: "Lentejas o garbanzos con atún", alimentos: [A("atun", "p"), A("legumbre", "h"), A("aceite", "g")],
+      prep: "Legumbre de bote enjuagada, salteada 3 minutos con verdura congelada y el atún, con el aceite en crudo. 8 minutos." },
+    { id: "pastaPicada", nombre: "Pasta con carne picada y tomate", alimentos: [A("picada", "p"), A("pasta", "h"), A("aceite", "g")],
+      prep: "Cuece la pasta y, mientras, dora la picada con el aceite y tomate triturado de bote (sin azúcar). 15 minutos." },
+    { id: "lomoPatata", nombre: "Lomo a la plancha con patata", alimentos: [A("lomo", "p"), A("patata", "h"), A("aceite", "g")],
+      prep: "Patata troceada 8 minutos al microondas con un poco de agua y el lomo a la plancha, con ensalada. 12 minutos." },
+  ],
+  Merienda: [
+    { id: "yogurFruta", nombre: "Yogur con fruta y cacahuetes", alimentos: [A("yogur", "p"), A("fruta", "h"), A("frutosSecos", "g")],
+      prep: "Queso batido o yogur con la fruta troceada y unos cacahuetes. 2 minutos." },
+    { id: "batido", nombre: "Batido de leche, plátano y avena", alimentos: [F("leche", 250), A("yogur", "p"), A("fruta", "h", 0.6), A("avena", "h", 0.4), A("frutosSecos", "g")],
+      prep: "Todo a la batidora: leche, queso batido, plátano, avena y una cucharadita de crema de cacahuete. 3 minutos." },
+    { id: "tostadaPavo", nombre: "Tostada de pavo con fruta", evitar: SIN_FIAMBRE, alimentos: [A("pavo", "p"), A("pan", "h", 0.6), A("fruta", "h", 0.4), A("aceite", "g")],
+      prep: "Tostada con un chorrito de aceite y el pavo; la fruta, aparte. 2 minutos." },
+    { id: "huevosFruta", nombre: "Huevo cocido, yogur y fruta", alimentos: [A("huevos", "p", 0.4), A("yogur", "p", 0.6), A("fruta", "h"), A("frutosSecos", "g")],
+      prep: "Un huevo cocido que tengas hecho, un yogur o queso batido y una pieza de fruta. 1 minuto." },
+  ],
+  Cena: [
+    { id: "merluzaPatata", nombre: "Merluza con patata y verdura", alimentos: [A("pescado", "p"), A("patata", "h"), A("aceite", "g")],
+      prep: "Merluza, patata y verdura cocidas al microondas o al vapor, aliñadas con el aceite. 10 minutos." },
+    { id: "tortillaFrancesa", nombre: "Tortilla de atún con pan", alimentos: [A("huevos", "p", 0.5), A("atun", "p", 0.5), A("pan", "h"), A("aceite", "g")],
+      prep: "Tortilla francesa con el atún escurrido y una cucharadita del aceite, con el pan y ensalada o verdura al lado. 7 minutos." },
+    { id: "wrap", nombre: "Wraps de pollo y verdura", alimentos: [A("pollo", "p"), A("tortilla", "h"), A("aceite", "g")],
+      prep: "Pollo en tiras a la plancha con pimiento y cebolla (valen congelados), dentro de las tortillas con lechuga. 12 minutos." },
+    { id: "ensaladaGarbanzos", nombre: "Ensalada de garbanzos, atún y huevo", alimentos: [A("atun", "p", 0.7), A("huevos", "p", 0.3), A("legumbre", "h"), A("aceite", "g")],
+      prep: "Garbanzos de bote enjuagados con atún, huevo cocido, tomate, cebolla y el aceite. 5 minutos." },
+  ],
 };
-export const PREPARACION = {
-  Desayuno: "Mezcla en un bol el queso batido con la avena y los cacahuetes. 2 minutos.",
-  "Media mañana": "Huevos cocidos (puedes dejarlos hechos para varios días) o en tortilla, con el pan. 5 minutos.",
-  Comida: "Pollo a la plancha y arroz cocido (o de vaso de microondas), con verdura congelada salteada. 15 minutos.",
-  Merienda: "Queso batido o yogur con la fruta troceada y unos cacahuetes. 2 minutos.",
-  Cena: "Merluza o atún con patata y verdura cocidas al microondas, aliñadas con el aceite. 10 minutos.",
-};
+/** Opciones de una comida que encajan con las condiciones de salud. */
+export function opcionesDe(nombre, condiciones = []) {
+  const todas = OPCIONES[nombre] ?? OPCIONES.Comida;
+  const ok = todas.filter((o) => !o.evitar?.some((c) => condiciones.includes(c)));
+  return ok.length ? ok : todas;
+}
 export const AHORRO = [
   "Compra pollo, merluza y verdura congelados: cuestan menos, no se estropean y se cocinan igual.",
   "Huevos, legumbre de bote, arroz, avena y patata son de lo más barato por gramo de proteína o hidrato.",
@@ -138,9 +193,10 @@ export function ajustarPorSalud(plan, condiciones = [], peso = null) {
 /**
  * Plan de dieta a partir del plan calórico y la rutina.
  * plan: resultado de calcularPlan (kcal, macros, agua, objetivo).
- * opciones: { diasEntreno: [0..6], comidas: 4|5, condiciones: [ids] }.
+ * opciones: { diasEntreno: [0..6], comidas: 4|5, condiciones: [ids], eleccion: {comida: idOpción},
+ *   dia: 0 (lunes)..6 }. Sin elección, la opción de cada comida rota sola según el día.
  */
-export function calcularDieta(planBase, { diasEntreno = [], comidas = 5, condiciones = [], peso = null } = {}) {
+export function calcularDieta(planBase, { diasEntreno = [], comidas = 5, condiciones = [], peso = null, eleccion = {}, dia = (new Date().getDay() + 6) % 7 } = {}) {
   if (!planBase) return null;
   const salud = ajustarPorSalud(planBase, condiciones, peso);
   const plan = salud.plan;
@@ -154,19 +210,25 @@ export function calcularDieta(planBase, { diasEntreno = [], comidas = 5, condici
   const ciclo = nEntreno && nDescanso && !salud.sinCiclado ? 0.15 : 0;
   const hEntreno = macros.hidratos * (1 + ciclo * nDescanso / 7);
   const hDescanso = macros.hidratos * (1 - ciclo * nEntreno / 7);
-  const dia = (h) => {
+  const delDia = (h) => {
     const g = Math.max(0, (kcal - macros.proteina * 4 - h * 4) / 9);
     return { kcal: r10(macros.proteina * 4 + h * 4 + g * 9), proteina: macros.proteina, hidratos: r5(h), grasa: r5(g) };
   };
-  const entreno = dia(hEntreno), descanso = dia(hDescanso);
+  const entreno = delDia(hEntreno), descanso = delDia(hDescanso);
 
   const reparto = COMIDAS[comidas] ?? COMIDAS[5];
-  const porComida = (d) => reparto.map(([nombre, f]) => ({
-    nombre, kcal: r10(d.kcal * f),
-    proteina: r5(d.proteina * f), hidratos: r5(d.hidratos * f), grasa: r5(d.grasa * f),
-    ejemplo: ejemplo(nombre, { proteina: d.proteina * f, hidratos: d.hidratos * f, grasa: d.grasa * f }),
-    preparacion: PREPARACION[nombre] ?? null,
-  }));
+  const porComida = (d) => reparto.map(([nombre, f], i) => {
+    const ops = opcionesDe(nombre, condiciones);
+    const elegida = ops.find((o) => o.id === eleccion[nombre]);
+    const op = elegida ?? ops[(dia + i) % ops.length];
+    return {
+      nombre, kcal: r10(d.kcal * f),
+      proteina: r5(d.proteina * f), hidratos: r5(d.hidratos * f), grasa: r5(d.grasa * f),
+      opciones: ops.map((o) => ({ id: o.id, nombre: o.nombre })), opcion: op.id, plato: op.nombre, auto: !elegida,
+      ejemplo: ejemplo(op, { proteina: d.proteina * f, hidratos: d.hidratos * f, grasa: d.grasa * f }),
+      preparacion: op.prep,
+    };
+  });
 
   const conds = condiciones.filter((c) => DIETA_CONDICIONES[c]);
   return {
@@ -189,24 +251,35 @@ export function calcularDieta(planBase, { diasEntreno = [], comidas = 5, condici
   };
 }
 
-/** Raciones aproximadas (en gramos) de un ejemplo de comida que cuadran con sus macros. */
-export function ejemplo(nombre, m) {
-  const [ip, ih, ig] = MENU[nombre] ?? MENU.Comida;
-  const P = ALIMENTOS[ip], H = ALIMENTOS[ih], G = ALIMENTOS[ig];
-  // Primero la proteína, después los hidratos y por último la grasa que falte.
-  const gP = Math.max(0, m.proteina / P.p * 100);
-  const gH = Math.max(0, (m.hidratos - gP * P.h / 100) / H.h * 100);
-  const gG = Math.max(0, (m.grasa - gP * P.g / 100 - gH * H.g / 100) / G.g * 100);
-  return [[ip, gP], [ih, gH], [ig, gG]].filter(([, g]) => g >= 5).map(([id, g]) => racion(id, g));
+/**
+ * Raciones aproximadas de una opción (o del nombre de una comida: su primera opción) que cuadran
+ * con sus macros. Cada alimento cubre lo que falta de su macro descontando lo que aportan los
+ * demás; se repite unas vueltas hasta que se estabiliza.
+ */
+export function ejemplo(opcion, m) {
+  const op = typeof opcion === "string" ? (OPCIONES[opcion] ?? OPCIONES.Comida)[0] : opcion;
+  const items = op.alimentos.map((x) => ({ ...x, a: ALIMENTOS[x.id], gr: x.fijo ?? 0 }));
+  const objetivo = { p: m.proteina, h: m.hidratos, g: m.grasa };
+  for (let vuelta = 0; vuelta < 6; vuelta++) {
+    for (const rol of ["p", "h", "g"]) {
+      const suyos = items.filter((x) => x.rol === rol);
+      if (!suyos.length) continue;
+      const ajeno = items.filter((x) => x.rol !== rol).reduce((s, x) => s + x.gr * x.a[rol] / 100, 0);
+      const falta = Math.max(0, objetivo[rol] - ajeno);
+      const partes = suyos.reduce((s, x) => s + x.parte, 0);
+      for (const x of suyos) x.gr = Math.min(x.a.max ?? Infinity, falta * x.parte / partes / x.a[rol] * 100);
+    }
+  }
+  return items.filter((x) => x.gr >= 5).map((x) => racion(x.id, x.gr));
 }
 
 function racion(id, gramos) {
   const a = ALIMENTOS[id];
   if (a.unidad) {
     const n = Math.max(1, Math.round(gramos / a.unidad.g * 2) / 2);
-    return { id, nombre: a.nombre, texto: `${n.toLocaleString("es-ES")} ${a.unidad.nombre}${n > 1 ? "s" : ""}` };
+    return { id, nombre: a.nombre, texto: `${n.toLocaleString("es-ES")} ${a.unidad.nombre}${n > 1 ? "s" : ""}`, gramos: n * a.unidad.g };
   }
-  return { id, nombre: a.nombre, texto: `${r5(gramos)} g` };
+  return { id, nombre: a.nombre, texto: `${r5(gramos)} ${a.ml ? "ml" : "g"}`, gramos: r5(gramos) };
 }
 
 function consejos(plan) {
