@@ -66,7 +66,7 @@
   <script type="module">
     import { sincronizar, evaluaciones } from "./shared/evaluaciones.js?v=202611130100";
     import { calcularTodo, leerPreferencias, necesitaPreferencias } from "./shared/motor.js?v=202611130900";
-    import { calcularDieta } from "./shared/dieta.js?v=202611131030";
+    import { calcularDieta } from "./shared/dieta.js?v=202611131100";
     import { DIAS_SEMANA } from "./shared/rutina.js?v=202611130230";
 
     const $ = (s) => document.querySelector(s);
@@ -124,7 +124,7 @@
               <button type="button" data-tipo="entreno" aria-pressed="${tipo === "entreno"}">Día de entreno</button>
               <button type="button" data-tipo="descanso" aria-pressed="${tipo === "descanso"}">Día de descanso</button>
             </div>
-            <p class="note" style="margin:8px 0 0">${d.ciclado ? `Los días de fuerza (${esc(nombresEntreno.join(", "))}) llevan más hidratos y los de descanso menos; la proteína es la misma todos los días y la media semanal cuadra con tu plan.` : "Todos los días comes lo mismo: tu plan no tiene días de fuerza definidos."}</p>
+            <p class="note" style="margin:8px 0 0">${d.ciclado ? `Los días de fuerza (${esc(nombresEntreno.join(", "))}) llevan más hidratos y los de descanso menos; la proteína es la misma todos los días y la media semanal cuadra con tu plan.` : d.cambios.length && (rutina.diasSemana ?? []).length ? "Por tu salud, los hidratos se reparten igual todos los días, entrenes o no." : "Todos los días comes lo mismo: tu plan no tiene días de fuerza definidos."}</p>
             <div class="macro-bar" aria-hidden="true"><i style="width:${pct(dia.proteina, 4)}%"></i><i style="width:${pct(dia.grasa, 9)}%"></i><i style="width:${pct(dia.hidratos, 4)}%"></i></div>
             <div class="leyenda">
               <span><b>${fmt(dia.kcal)} kcal</b></span>
@@ -137,9 +137,10 @@
             ${dia.comidas.map((c) => `<div class="comida">
               <div class="comida-head"><h3>${esc(c.nombre)}</h3><span>${fmt(c.kcal)} kcal</span></div>
               <p class="macros">P ${c.proteina} g · H ${c.hidratos} g · G ${c.grasa} g</p>
-              <ul>${c.ejemplo.map((e) => `<li>${esc(e.nombre)}: <b>${esc(e.texto)}</b></li>`).join("")}${["Comida", "Cena"].includes(c.nombre) ? "<li>Verdura al gusto (medio plato)</li>" : ""}</ul>
+              <ul>${c.ejemplo.map((e) => `<li>${esc(e.nombre)}: <b>${esc(e.texto)}</b></li>`).join("")}${["Comida", "Cena"].includes(c.nombre) ? "<li>Verdura al gusto, fresca o congelada (medio plato)</li>" : ""}</ul>
+              ${c.preparacion ? `<p class="note" style="margin:4px 0 0">🍳 ${esc(c.preparacion)}</p>` : ""}
             </div>`).join("")}
-            <p class="note" style="margin:10px 0 0">Es un ejemplo: puedes cambiar cada alimento por otro del mismo grupo (pollo por pescado, arroz por patata o pasta…) manteniendo cantidades parecidas.</p>
+            <p class="note" style="margin:10px 0 0">Comidas sencillas con alimentos básicos y baratos. Puedes cambiar cada alimento por otro del mismo grupo (pollo por huevos o atún, arroz por patata o pasta…) manteniendo cantidades parecidas.</p>
           </div>
 
           ${tipo === "entreno" ? `<div class="card"><h2 style="margin:0 0 6px">Alrededor del entreno</h2>
@@ -149,6 +150,8 @@
             ${d.cambios.length ? `<div class="info">${d.cambios.map((c) => `<p>${esc(c)}</p>`).join("")}<p class="note" style="margin-top:6px">Sin tus condiciones serían ${fmt(d.base.kcal)} kcal · P ${d.base.macros.proteina} g · H ${d.base.macros.hidratos} g · G ${d.base.macros.grasa} g.</p></div>` : ""}
             ${objetivos ? `<ul style="margin:10px 0 0;padding-left:18px">${objetivos}</ul>` : ""}
             ${d.salud.map((s) => `<p class="aviso">${esc(s.texto)}</p>`).join("")}</div>` : ""}
+
+          <div class="card"><h2 style="margin:0 0 6px">Comer bien sin gastar mucho</h2><ul style="margin:0;padding-left:18px">${d.ahorro.map((c) => `<li>${esc(c)}</li>`).join("")}</ul></div>
 
           <div class="card"><h2 style="margin:0 0 6px">Consejos</h2><ul style="margin:0;padding-left:18px">${d.consejos.map((c) => `<li>${esc(c)}</li>`).join("")}</ul>
             <p class="note" style="margin:10px 0 0">Estimaciones a partir de tu evaluación. No sustituyen el consejo de un médico o nutricionista.</p></div>`;

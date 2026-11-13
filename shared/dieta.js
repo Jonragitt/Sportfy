@@ -5,22 +5,22 @@
 const r5 = (n) => Math.round(n / 5) * 5;
 const r10 = (n) => Math.round(n / 10) * 10;
 
-// Alimentos de referencia por 100 g (o por unidad indicada en `unidad`).
+// Alimentos de referencia por 100 g (o por unidad indicada en `unidad`): básicos de
+// supermercado, baratos y fáciles de preparar (nada de recetas complejas).
 export const ALIMENTOS = {
   pollo: { nombre: "Pechuga de pollo o pavo", p: 23, h: 0, g: 2, tipo: "proteina" },
-  pescado: { nombre: "Pescado blanco o salmón", p: 21, h: 0, g: 5, tipo: "proteina" },
+  pescado: { nombre: "Merluza congelada o atún en lata al natural", p: 21, h: 0, g: 1.5, tipo: "proteina" },
   huevos: { nombre: "Huevos", p: 13, h: 1, g: 10, tipo: "proteina", unidad: { nombre: "huevo", g: 60 } },
-  yogur: { nombre: "Yogur griego natural o skyr", p: 10, h: 4, g: 2, tipo: "proteina" },
-  legumbre: { nombre: "Legumbres cocidas", p: 8, h: 18, g: 1, tipo: "hidratos" },
+  yogur: { nombre: "Queso fresco batido o yogur natural", p: 8, h: 4, g: 0.5, tipo: "proteina" },
+  legumbre: { nombre: "Legumbres cocidas de bote (garbanzos, lentejas)", p: 8, h: 18, g: 1, tipo: "hidratos" },
   arroz: { nombre: "Arroz o pasta (cocidos)", p: 3, h: 28, g: 0.5, tipo: "hidratos" },
   patata: { nombre: "Patata o boniato (cocidos)", p: 2, h: 18, g: 0.1, tipo: "hidratos" },
   avena: { nombre: "Copos de avena", p: 13, h: 60, g: 7, tipo: "hidratos" },
   pan: { nombre: "Pan integral", p: 9, h: 43, g: 3, tipo: "hidratos" },
-  fruta: { nombre: "Fruta", p: 1, h: 12, g: 0.2, tipo: "hidratos" },
+  fruta: { nombre: "Fruta de temporada (plátano, manzana, naranja)", p: 1, h: 14, g: 0.2, tipo: "hidratos" },
   aceite: { nombre: "Aceite de oliva virgen extra", p: 0, h: 0, g: 100, tipo: "grasa", unidad: { nombre: "cucharada", g: 10 } },
-  frutosSecos: { nombre: "Frutos secos naturales", p: 20, h: 10, g: 50, tipo: "grasa" },
-  aguacate: { nombre: "Aguacate", p: 2, h: 2, g: 15, tipo: "grasa" },
-};
+  frutosSecos: { nombre: "Cacahuetes naturales o crema de cacahuete", p: 26, h: 12, g: 49, tipo: "grasa" },
+  };
 
 // Reparto de las comidas del día (fracción de las kcal). Con 5 comidas cabe pre y post entreno.
 const COMIDAS = {
@@ -28,7 +28,7 @@ const COMIDAS = {
   5: [["Desayuno", 0.22], ["Media mañana", 0.1], ["Comida", 0.3], ["Merienda", 0.13], ["Cena", 0.25]],
 };
 
-// Alimentos del ejemplo de cada comida: [proteína, hidrato, grasa].
+// Alimentos del ejemplo de cada comida: [proteína, hidrato, grasa] y cómo prepararlo en pocos minutos.
 const MENU = {
   Desayuno: ["yogur", "avena", "frutosSecos"],
   "Media mañana": ["huevos", "pan", "aceite"],
@@ -36,6 +36,19 @@ const MENU = {
   Merienda: ["yogur", "fruta", "frutosSecos"],
   Cena: ["pescado", "patata", "aceite"],
 };
+export const PREPARACION = {
+  Desayuno: "Mezcla en un bol el queso batido con la avena y los cacahuetes. 2 minutos.",
+  "Media mañana": "Huevos cocidos (puedes dejarlos hechos para varios días) o en tortilla, con el pan. 5 minutos.",
+  Comida: "Pollo a la plancha y arroz cocido (o de vaso de microondas), con verdura congelada salteada. 15 minutos.",
+  Merienda: "Queso batido o yogur con la fruta troceada y unos cacahuetes. 2 minutos.",
+  Cena: "Merluza o atún con patata y verdura cocidas al microondas, aliñadas con el aceite. 10 minutos.",
+};
+export const AHORRO = [
+  "Compra pollo, merluza y verdura congelados: cuestan menos, no se estropean y se cocinan igual.",
+  "Huevos, legumbre de bote, arroz, avena y patata son de lo más barato por gramo de proteína o hidrato.",
+  "Cocina el arroz, la legumbre o el pollo para 2–3 días y guárdalo en táperes.",
+  "Marcas blancas del supermercado: mismo valor nutricional por mucho menos.",
+];
 
 // Ajustes de la dieta por condición de salud (ids de CONDICIONES en shared/rutina.js).
 export const DIETA_CONDICIONES = {
@@ -152,6 +165,7 @@ export function calcularDieta(planBase, { diasEntreno = [], comidas = 5, condici
     nombre, kcal: r10(d.kcal * f),
     proteina: r5(d.proteina * f), hidratos: r5(d.hidratos * f), grasa: r5(d.grasa * f),
     ejemplo: ejemplo(nombre, { proteina: d.proteina * f, hidratos: d.hidratos * f, grasa: d.grasa * f }),
+    preparacion: PREPARACION[nombre] ?? null,
   }));
 
   const conds = condiciones.filter((c) => DIETA_CONDICIONES[c]);
@@ -166,11 +180,12 @@ export function calcularDieta(planBase, { diasEntreno = [], comidas = 5, condici
     diaDescanso: { ...descanso, comidas: porComida(descanso) },
     ciclado: ciclo > 0,
     entrenamiento: {
-      antes: `1–3 h antes: unos ${r5(macros.proteina * 0.2)} g de proteína y ${r5(entreno.hidratos * 0.25)} g de hidratos fáciles de digerir (por ejemplo, yogur con avena y fruta).`,
+      antes: `1–3 h antes: unos ${r5(macros.proteina * 0.2)} g de proteína y ${r5(entreno.hidratos * 0.25)} g de hidratos fáciles de digerir (por ejemplo, queso batido con avena y un plátano).`,
       despues: `En las 2 h siguientes: unos ${r5(macros.proteina * 0.25)} g de proteína y ${r5(entreno.hidratos * 0.3)} g de hidratos para recuperar.`,
     },
     salud: conds.map((c) => ({ id: c, texto: DIETA_CONDICIONES[c] })),
     consejos: consejos(planBase),
+    ahorro: AHORRO,
   };
 }
 
