@@ -171,7 +171,36 @@ const PATRON_DE = Object.fromEntries(PATRONES.flatMap((p) => p.alteraciones.map(
 /** Id base de una desviación guardada: "sohValgo:ID" → "sohValgo". */
 export const idBase = (id) => String(id).split(":")[0];
 /** Lados de una desviación guardada: "sohValgo:ID" → ["I","D"]; null si no es bilateral. */
-export const ladosDe = (id) => (String(id).includes(":") ? String(id).split(":")[1].split("") : null);
+export const ladosDe = (id) => (String(id).includes(":") ? String(id).split(":")[1].split("") : LADO_FIJO[String(id)] ? [LADO_FIJO[String(id)]] : null);
+
+/**
+ * Opciones del plano frontal que ya dicen el lado. En ambas, el lado nombrado es el
+ * que hay que reforzar: el hombro bajo (trapecio superior y serrato inhibidos) y la
+ * cresta alta (glúteo medio alargado y débil, cuadrado lumbar acortado).
+ */
+const LADO_FIJO = { acromionIzqBajo: "I", acromionDerBajo: "D", crestaIzqAlta: "I", crestaDerAlta: "D" };
+const NOMBRE_LADO = { I: "izquierdo", D: "derecho" };
+const CONTRARIO = { I: "D", D: "I" };
+
+/** Correctivos concretos por lado para hombro bajo y cresta alta (van delante de los generales). */
+export function correctivosPorLado(ids = []) {
+  const fortalecer = [], movilizar = [], notas = [];
+  for (const id of ids.map(idBase)) {
+    const l = LADO_FIJO[id];
+    if (!l) continue;
+    const lado = NOMBRE_LADO[l], otro = NOMBRE_LADO[CONTRARIO[l]];
+    if (id.startsWith("acromion")) {
+      fortalecer.push(`Encogimiento de hombro a una mano (lado ${lado})`, `Remo a una mano empezando por el lado ${lado}`);
+      movilizar.push(`Estiramiento de trapecio superior y elevador de la escápula (lado ${otro})`);
+      notas.push(`Tu hombro ${lado} está más bajo: refuerza ese lado y estira el trapecio del lado ${otro}. Evita cargar bolsas o mochila siempre con el hombro ${lado}.`);
+    } else {
+      fortalecer.push(`Abducción de cadera tumbado de lado (pierna ${lado})`, `Puente a una pierna empezando por la ${lado === "izquierdo" ? "izquierda" : "derecha"}`);
+      movilizar.push(`Estiramiento de cuadrado lumbar (lado ${lado})`);
+      notas.push(`Tu cresta ilíaca ${lado === "izquierdo" ? "izquierda" : "derecha"} está más alta: estira el cuadrado lumbar de ese lado y refuerza su glúteo medio. Evita apoyar el peso siempre sobre la pierna ${lado === "izquierdo" ? "derecha" : "izquierda"}.`);
+    }
+  }
+  return { fortalecer, movilizar, notas };
+}
 
 /** Agrupa las desviaciones posturales de un registro del historial por patrones. */
 export function analizarPostural(registro, totalZonas = 16) {
@@ -420,12 +449,17 @@ export function perfilRutina(histAntro = [], histPostural = [], { actividad = "l
   const nivelInicial = a.total.completa
     ? (a.total.puntos / 25 >= 0.7 ? "intermedio" : "principiante")
     : "principiante";
-  const correctivos = (a.postural?.patrones ?? []).map((p) => ({
-    patron: p.id,
-    nombre: p.nombre,
-    ...CORRECTIVOS[p.id],
-    ladoDebil: p.unLado.length ? [...new Set(p.unLado)] : null,
-  }));
+  const correctivos = (a.postural?.patrones ?? []).map((p) => {
+    const c = { patron: p.id, nombre: p.nombre, ...CORRECTIVOS[p.id], ladoDebil: p.unLado.length ? [...new Set(p.unLado)] : null };
+    const porLado = correctivosPorLado(p.items.map((i) => i.id));
+    if (!porLado.notas.length) return c;
+    return {
+      ...c,
+      fortalecer: [...new Set([...porLado.fortalecer, ...(c.fortalecer ?? [])])],
+      movilizar: [...new Set([...porLado.movilizar, ...(c.movilizar ?? [])])],
+      notasLado: porLado.notas,
+    };
+  });
   const ultimo = ordenar([...histAntro, ...histPostural]).at(-1);
   const ultAntro = ordenar(histAntro).at(-1);
   const plan = ultAntro?.datos ? calcularPlan(ultAntro.datos, objetivo.id, { actividad, nivel: nivelInicial, historial: histAntro }) : null;
@@ -441,7 +475,7 @@ export function perfilRutina(histAntro = [], histPostural = [], { actividad = "l
     datos: a.antro ? Object.fromEntries(a.antro.pruebas.map((p) => [p.id, { valor: p.valor, puntos: p.puntos, categoria: p.categoria }])) : {},
     peso: ordenar(histAntro).at(-1)?.datos?.peso ?? null,
     correctivos,
-    precauciones: correctivos.map((c) => c.precaucion).filter(Boolean),
+    precauciones: [...correctivos.flatMap((c) => c.notasLado ?? []), ...correctivos.map((c) => c.precaucion).filter(Boolean)],
     prioridades: a.prioridades.map(({ tipo, id, titulo, foco }) => ({ tipo, id, titulo, foco })),
     proximaEvaluacion: proximaEvaluacion(histAntro, histPostural),
   };

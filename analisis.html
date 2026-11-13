@@ -100,10 +100,10 @@
   </nav>
 
   <script type="module">
-    import { analizar, perfilRutina, guardarPerfilRutina, series, comparar, evolucionPostural, proximaEvaluacion, CORRECTIVOS } from "./shared/analisis.js?v=202611130450";
+    import { analizar, perfilRutina, guardarPerfilRutina, series, comparar, evolucionPostural, proximaEvaluacion, CORRECTIVOS, correctivosPorLado } from "./shared/analisis.js?v=202611130500";
     import { ACTIVIDAD } from "./shared/plan.js?v=202611130030";
     import { sincronizar, evaluaciones, rondaEnCurso } from "./shared/evaluaciones.js?v=202611130100";
-    import { calcularTodo, leerPreferencias, necesitaPreferencias } from "./shared/motor.js?v=202611130230";
+    import { calcularTodo, leerPreferencias, necesitaPreferencias } from "./shared/motor.js?v=202611130500";
 
     const $ = (s) => document.querySelector(s);
     const fmt = (n, d = 1) => (n == null || !Number.isFinite(n) ? "–" : Number(n).toLocaleString("es-ES", { maximumFractionDigits: d }));
@@ -219,7 +219,9 @@
         else if (pz.sinAlteraciones) cuerpo = `<div class="card"><p style="margin:0">No se marcó ninguna alteración: postura excelente. Mantén el trabajo de movilidad en tus calentamientos.</p></div>`;
         else cuerpo = pz.patrones.map((p) => {
           const c = CORRECTIVOS[p.id] || {};
-          const lado = p.unLado.length ? `<p class="note" style="margin:6px 0 0">Más marcado en el lado ${[...new Set(p.unLado)].map((l) => (l === "I" ? "izquierdo" : "derecho")).join(" y ")}: empieza los ejercicios unilaterales por ese lado.</p>` : "";
+          const notasLado = correctivosPorLado(p.items.map((i) => i.id)).notas;
+          const lado = notasLado.length ? notasLado.map((n) => `<p class="note" style="margin:6px 0 0">${esc(n)}</p>`).join("")
+            : p.unLado.length ? `<p class="note" style="margin:6px 0 0">Más marcado en el lado ${[...new Set(p.unLado)].map((l) => (l === "I" ? "izquierdo" : "derecho")).join(" y ")}: empieza los ejercicios unilaterales por ese lado.</p>` : "";
           return `<div class="card">
             <div class="prueba-head"><h3>${esc(p.nombre)}</h3><span class="tag l${p.items.length >= 3 ? 0 : 1}">${p.items.length} ${p.items.length === 1 ? "alteración" : "alteraciones"}</span></div>
             <ul class="chips">${p.items.map((i) => `<li class="tag l1">${esc(i.nombre)}</li>`).join("")}</ul>

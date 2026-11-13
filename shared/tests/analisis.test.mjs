@@ -83,3 +83,14 @@ test("perfil para la rutina se guarda en localStorage", () => {
   assert.deepEqual(g.correctivos[0].ladoDebil, ["I"]);
   assert.equal(perfilRutina([], []), null);
 });
+
+test("hombro bajo y cresta alta: lado y correctivos concretos", async () => {
+  const { analizarPostural, correctivosPorLado } = await import("../analisis.js");
+  const r = analizarPostural({ fecha: "2026-11-01T10:00:00Z", nota: 8, max: 10, desviaciones: [{ id: "acromionDerBajo", nombre: "x", nivel: 1 }, { id: "crestaDerAlta", nombre: "y", nivel: 1 }] });
+  assert.deepEqual(r.patrones.find((p) => p.id === "asimetria").unLado, ["D", "D"]);
+  const c = correctivosPorLado(["acromionIzqBajo", "crestaDerAlta"]);
+  assert.match(c.fortalecer[0], /lado izquierdo/);
+  assert.match(c.movilizar[0], /lado derecho/);
+  assert.match(c.movilizar[1], /cuadrado lumbar \(lado derecho\)/);
+  assert.equal(c.notas.length, 2);
+});

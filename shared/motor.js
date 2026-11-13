@@ -3,7 +3,7 @@
 // preferencias de la persona (días de la semana, zonas a priorizar, tiempo,
 // material) y sus condiciones de salud.
 
-import { perfilRutina, guardarPerfilRutina } from "./analisis.js";
+import { perfilRutina, guardarPerfilRutina } from "./analisis.js?v=202611130500";
 import { calcularPlan } from "./plan.js";
 import { generarRutina, semanaDelCiclo, CONDICIONES, DIAS_SEMANA } from "./rutina.js";
 import { evaluaciones } from "./evaluaciones.js";
