@@ -3,7 +3,7 @@
 // trackpad y con las flechas ← → del teclado.
 const ORDEN = ["rutina.html", "analisis.html", "dieta.html"];
 // Con shared/pestanas.js la pestaña cambia sin recargar, así que se pregunta cuál se ve ahora.
-const actualAhora = () => ORDEN.indexOf(window.forty5PestanaActual?.() ?? (location.pathname.split("/").pop() || "analisis.html"));
+const actualAhora = () => ORDEN.indexOf(window.forty5PestanaActual?.() ?? ((location.pathname.split("/").pop() || "analisis.html").replace(/^([^.]+)$/, "$1.html")));
 const enControl = (el) => el?.closest?.("input, select, textarea, button, a, label, .no-deslizar, .dias, .comparar, table, [contenteditable]");
 const sinPlan = () => document.querySelector(".tabs a[href='index.html']");
 let yendo = false;

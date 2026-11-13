@@ -6,7 +6,8 @@
 // escuchas e intervalos pone cada pestaña y quitarlos al salir de ella.
 (() => {
   const PAGINAS = ["rutina.html", "analisis.html", "dieta.html"];
-  const nombre = (u) => new URL(u, location.href).pathname.split("/").pop() || "index.html";
+  // Netlify sirve las páginas sin ".html" (/rutina): se normaliza para reconocerlas igual.
+  const nombre = (u) => { const n = new URL(u, location.href).pathname.split("/").pop() || "index.html"; return n.includes(".") ? n : n + ".html"; };
   let actual = nombre(location.href);
   if (!PAGINAS.includes(actual)) return;
 
@@ -92,13 +93,13 @@
     return montando; // la transición espera a que la pestaña pinte su contenido
   }
 
-  async function ir(p, { historial = true } = {}) {
+  // Menú principal: la dirección no cambia al pasar de una pestaña a otra.
+  async function ir(p) {
     if (!PAGINAS.includes(p) || p === actual || ocupado) return;
     ocupado = true;
     let doc;
     try { doc = await traer(p); } catch { location.href = p; return; }
     try {
-      if (historial) { try { history.pushState({ pestana: p }, "", p); } catch { /* sin historial */ } }
       await cambiar(doc, p);
     } catch { location.href = p; return; } finally { ocupado = false; }
     dispatchEvent(new CustomEvent("forty5:pestana", { detail: p }));
@@ -177,7 +178,6 @@
     e.preventDefault();
     ir(p);
   });
-  addEventListener("popstate", () => { const p = nombre(location.href); if (PAGINAS.includes(p)) ir(p, { historial: false }); else location.reload(); });
 
   // Alto de la cabecera fija, para que el contenido empiece justo debajo.
   const medir = () => { const c = document.querySelector(".cabecera"); if (c) document.documentElement.style.setProperty("--alto-cabecera", `${Math.ceil(c.getBoundingClientRect().height)}px`); };
@@ -188,7 +188,9 @@
     document.fonts?.ready.then(() => colocarLente(true));
     if (window.ResizeObserver) { const c = document.querySelector(".cabecera"); if (c) new ResizeObserver(medir).observe(c); }
     document.querySelectorAll("body script:not([src])").forEach((s) => { s.dataset.pestana = ""; });
-    try { history.replaceState({ pestana: actual }, "", location.href); } catch { /* sin historial */ }
+    // En la web propia la dirección se queda en la raíz (forty5.netlify.app/), que vuelve a abrir el
+    // plan; dentro del visor de claude.ai (un marco) no se toca.
+    if (window.top === window) { try { history.replaceState(null, "", new URL("./", location.href).href); } catch { /* sin historial */ } }
     for (const p of PAGINAS) if (p !== actual) traer(p).catch(() => {});
   });
 })();
