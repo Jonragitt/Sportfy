@@ -68,6 +68,7 @@
     main.classList.add("entrando");
     main.addEventListener("animationend", () => main.classList.remove("entrando"), { once: true });
     document.querySelector("main").replaceWith(main);
+    colocarLente(); // la píldora se desliza hasta la pestaña nueva
     actual = p;
     // Scripts: los compartidos ya están cargados; los de la pestaña se ejecutan de nuevo.
     document.querySelectorAll("script[data-pestana]").forEach((s) => s.remove());
@@ -102,7 +103,67 @@
   window.forty5IrPestana = (p) => { if (PAGINAS.includes(actual) && PAGINAS.includes(p)) { ir(p); return true; } return false; };
   window.forty5PestanaActual = () => actual;
 
+  // ---------- Píldora arrastrable (como en Apunty) ----------
+  const barra = () => document.querySelector(".tabs.arriba");
+  function colocarLente(sinAnim = false) {
+    const t = barra(), l = t?.querySelector(".lente"), a = t?.querySelector("a[aria-current='page']");
+    if (!l || !a) return;
+    if (sinAnim) t.classList.add("sin-anim");
+    t.style.setProperty("--lx", `${a.offsetLeft}px`); t.style.setProperty("--lw", `${a.offsetWidth}px`);
+    t.style.setProperty("--ly", `${a.offsetTop}px`); t.style.setProperty("--lh", `${a.offsetHeight}px`);
+    if (sinAnim) requestAnimationFrame(() => requestAnimationFrame(() => t.classList.remove("sin-anim")));
+  }
+  function montarLente() {
+    const t = barra();
+    if (!t || t.querySelector(".lente") || !t.querySelector("a[href='analisis.html']")) return;
+    const l = document.createElement("i"); l.className = "lente"; l.setAttribute("aria-hidden", "true");
+    t.prepend(l); t.classList.add("con-lente");
+    // Que el navegador no empiece a "arrastrar el enlace" (eso cancela el gesto).
+    t.querySelectorAll("a").forEach((a) => a.setAttribute("draggable", "false"));
+    t.addEventListener("dragstart", (e) => e.preventDefault());
+    colocarLente(true);
+  }
+  let arrastre = null;
+  document.addEventListener("pointerdown", (e) => {
+    if (e.button !== 0) return;
+    const a = e.target.closest?.(".tabs.con-lente a[aria-current='page']"); if (!a) return;
+    const t = a.closest(".tabs"), enlaces = [...t.querySelectorAll("a")], l = t.querySelector(".lente");
+    arrastre = { t, l, enlaces, id: e.pointerId, x0: e.clientX, lx0: a.offsetLeft, lx: a.offsetLeft, lw: l.offsetWidth, on: false, v: 0, tt: e.timeStamp,
+      min: enlaces[0].offsetLeft, max: enlaces.at(-1).offsetLeft + enlaces.at(-1).offsetWidth - l.offsetWidth };
+    t.classList.add("agarrada");
+  }, true);
+  const masCerca = (d, c) => { let mejor = 0, md = 1e9; d.enlaces.forEach((a, i) => { const dd = Math.abs(a.offsetLeft + a.offsetWidth / 2 - c); if (dd < md) { md = dd; mejor = i; } }); return mejor; };
+  document.addEventListener("pointermove", (e) => {
+    const d = arrastre; if (!d || e.pointerId !== d.id) return;
+    const dx = e.clientX - d.x0;
+    if (!d.on) { if (Math.abs(dx) < 4) return; d.on = true; d.t.classList.add("arrastrando"); try { d.t.setPointerCapture(d.id); } catch { /* sin captura */ } }
+    let lx = d.lx0 + dx;
+    if (lx < d.min) lx = d.min - (d.min - lx) * 0.3; else if (lx > d.max) lx = d.max + (lx - d.max) * 0.3; // tope elástico
+    const dt = Math.max(1, e.timeStamp - d.tt); d.v = d.v * 0.6 + ((lx - d.lx) / dt) * 0.4; d.tt = e.timeStamp; d.lx = lx;
+    d.t.style.setProperty("--lx", `${lx}px`);
+    const i = masCerca(d, lx + d.lw / 2);
+    d.enlaces.forEach((a, k) => a.classList.toggle("cerca", k === i));
+    e.preventDefault();
+  }, { passive: false });
+  const soltar = (e) => {
+    const d = arrastre; if (!d || (e && e.pointerId !== d.id)) return;
+    arrastre = null; d.t.classList.remove("agarrada");
+    if (!d.on) return;
+    d.t.classList.remove("arrastrando"); d.enlaces.forEach((a) => a.classList.remove("cerca"));
+    d.t.dataset.arrastrada = "1"; setTimeout(() => delete d.t.dataset.arrastrada, 80);
+    const i = masCerca(d, d.lx + Math.max(-d.lw * 0.45, Math.min(d.lw * 0.45, d.v * 90)) + d.lw / 2);
+    const p = nombre(d.enlaces[i].href);
+    if (p === actual) colocarLente(); else {
+      // La píldora va ya a su sitio mientras cambia el contenido.
+      d.t.style.setProperty("--lx", `${d.enlaces[i].offsetLeft}px`); d.t.style.setProperty("--lw", `${d.enlaces[i].offsetWidth}px`);
+      ir(p).finally(() => colocarLente());
+    }
+  };
+  document.addEventListener("pointerup", soltar);
+  document.addEventListener("pointercancel", soltar);
+
   document.addEventListener("click", (e) => {
+    if (e.target.closest?.(".tabs[data-arrastrada]")) { e.preventDefault(); return; }
     if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
     const a = e.target.closest?.("a[href]");
     if (!a || (a.target && a.target !== "_self") || a.hasAttribute("download")) return;
@@ -117,9 +178,11 @@
 
   // Alto de la cabecera fija, para que el contenido empiece justo debajo.
   const medir = () => { const c = document.querySelector(".cabecera"); if (c) document.documentElement.style.setProperty("--alto-cabecera", `${Math.ceil(c.getBoundingClientRect().height)}px`); };
-  addEventListener("resize", medir);
+  addEventListener("resize", () => { medir(); colocarLente(true); });
   document.addEventListener("DOMContentLoaded", () => {
     medir();
+    montarLente();
+    document.fonts?.ready.then(() => colocarLente(true));
     if (window.ResizeObserver) { const c = document.querySelector(".cabecera"); if (c) new ResizeObserver(medir).observe(c); }
     document.querySelectorAll("body script:not([src])").forEach((s) => { s.dataset.pestana = ""; });
     try { history.replaceState({ pestana: actual }, "", location.href); } catch { /* sin historial */ }

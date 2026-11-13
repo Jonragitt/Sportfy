@@ -235,3 +235,23 @@ body.con-cabecera main.wrap { padding-top: calc(var(--alto-cabecera, 200px) + 14
 html:has(body.con-cabecera) { scroll-padding-top: calc(var(--alto-cabecera, 200px) + 10px); }
 @keyframes pestana-entra { from { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { main.entrando > * { animation: none !important; } }
+
+/* Píldora que se puede arrastrar entre Rutina · Mi plan · Dieta (shared/pestanas.js). Se suelta y
+   va como un imán a la pestaña más cercana. */
+.tabs.con-lente { position: relative; touch-action: pan-y; -webkit-user-select: none; user-select: none; }
+.tabs.con-lente a { position: relative; z-index: 1; transition: color .25s ease; -webkit-touch-callout: none; -webkit-user-drag: none; }
+.tabs.con-lente a[aria-current="page"] { background: transparent; color: #fff; }
+.tabs .lente {
+  position: absolute; z-index: 0; left: 0; top: var(--ly, 5px); height: var(--lh, 40px); width: var(--lw, 90px);
+  transform: translateX(var(--lx, 5px)); border-radius: 99px; background: var(--accent);
+  box-shadow: 0 4px 14px rgba(228,87,46,.45), inset 0 1px 0 rgba(255,255,255,.25);
+  transition: transform .5s cubic-bezier(.45,.05,.25,1), width .4s cubic-bezier(.45,.05,.25,1), scale .3s cubic-bezier(.3,1.5,.45,1);
+}
+.tabs.sin-anim .lente { transition: none; }
+.tabs.agarrada .lente { scale: 1.06 1.1; }
+.tabs.arrastrando .lente { transition: scale .3s cubic-bezier(.3,1.5,.45,1); }
+.tabs.arrastrando a[aria-current="page"]:not(.cerca) { color: inherit; }
+.tabs.arrastrando a.cerca { color: #fff; }
+.tabs.agarrada a[aria-current="page"] { cursor: grab; }
+.tabs.arrastrando, .tabs.arrastrando a { cursor: grabbing; }
+@media (prefers-reduced-motion: reduce) { .tabs .lente { transition: none; } }
