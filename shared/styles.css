@@ -206,10 +206,6 @@ body.con-fondo #result > .note {
 body.con-fondo .card { --muted: #474e5a; }
 @media (prefers-color-scheme: dark) { body.con-fondo .card { --muted: #b3bac6; } }
 
-/* Paso entre páginas: el navegador funde una con otra en vez de dejar la pantalla en blanco. */
-@view-transition { navigation: auto; }
-::view-transition-old(root), ::view-transition-new(root) { animation-duration: .2s; }
-@media (prefers-reduced-motion: reduce) { ::view-transition-old(root), ::view-transition-new(root) { animation: none; } }
 
 /* Rutina · Mi plan · Dieta (shared/pestanas.js): la barra se queda y la píldora cambia de color
    con suavidad; el resto entra con un fundido corto. */
