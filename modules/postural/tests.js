@@ -199,7 +199,7 @@ export const SECTIONS = [
       { src: "ejercicios/soh-anterior.png", alt: "Secuencia de la sentadilla profunda vista de frente en cinco fases: bipedestación, inicio del descenso, descenso progresivo, sentadilla profunda y retorno", caption: "Vista anterior: fases del movimiento", w: 900, h: 937, wide: true },
     ],
     intro:
-      "Pies a la anchura de los hombros y apuntando al frente, brazos estirados por encima de la cabeza. Haz 5 sentadillas lo más profundas posible, a ritmo lento. Obsérvalas de frente (Ant), de espaldas (Post) y de perfil (Lat), y marca en qué lado aparece cada compensación: I (izquierda) o D (derecha).",
+      "¿Por qué te pedimos esta sentadilla? Al bajar con los brazos arriba trabajan a la vez tobillos, rodillas, cadera, columna y hombros, y cualquier rigidez o debilidad sale a la luz en forma de compensación. Así puedes comprobar por ti mismo los defectos posturales que viste de pie: si tus pies se abren, tus rodillas se van hacia dentro o tu tronco se inclina, lo verás en tu propio movimiento. Marca en qué lado aparece cada compensación: I (izquierda) o D (derecha).",
     zones: [
       {
         id: "sohPies",

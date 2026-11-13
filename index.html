@@ -83,7 +83,7 @@
     <p class="portada-lema">Evalúa tu punto de partida. Mide tu cambio.</p>
     <div class="portada-cta">
       <a class="btn" href="modules/antropometria/index.html">Evaluación antropométrica</a>
-      <a class="btn ghost" href="modules/postural/index.html?v=202611130450">Evaluación postural</a>
+      <a class="btn ghost" href="modules/postural/index.html?v=202611130600">Evaluación postural</a>
     </div>
     <a class="desliza" href="#panel" aria-label="Ver tu panel">
       <span>Tu panel</span>
@@ -116,7 +116,7 @@
         <div id="antro"></div>
       </section>
       <section>
-        <div class="sec-head"><h2>Postura</h2><a href="modules/postural/index.html?v=202611130450">Repetir test →</a></div>
+        <div class="sec-head"><h2>Postura</h2><a href="modules/postural/index.html?v=202611130600">Repetir test →</a></div>
         <div id="postural"></div>
       </section>
     </div>
@@ -269,7 +269,7 @@
     }
     post.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
     if (!post.length) {
-      $("#postural").innerHTML = vacio("Haz la evaluación postural para conocer tus desequilibrios y seguir cómo los corriges.", "modules/postural/index.html?v=202611130450", "Hacer evaluación");
+      $("#postural").innerHTML = vacio("Haz la evaluación postural para conocer tus desequilibrios y seguir cómo los corriges.", "modules/postural/index.html?v=202611130600", "Hacer evaluación");
     } else {
       const primero = post[0], ultimo = post.at(-1);
       const nivel = ultimo.nota >= 7 ? 2 : ultimo.nota >= 5 ? 1 : 0;
