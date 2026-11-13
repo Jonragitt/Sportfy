@@ -133,3 +133,19 @@ input.vacio { border-color: var(--mal); }
   color: #fff; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.25); }
 .icon-btn svg { width: 22px; height: 22px; }
 .icon-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* Fondo de fotos de deporte (shared/fondo.js), como en el resto de la app. */
+body.con-fondo { background: #0b0b0d; }
+body.con-fondo::before {
+  content: ""; position: fixed; inset: 0; z-index: -1;
+  background: linear-gradient(180deg, rgba(0,0,0,.5) 0%, rgba(0,0,0,.74) 45%, rgba(0,0,0,.86) 100%);
+}
+.fondo-capa {
+  position: fixed; inset: 0; z-index: -2; pointer-events: none;
+  background: #0b0b0d center / cover no-repeat;
+  opacity: 0; transition: opacity 2.5s ease;
+}
+.fondo-capa.ver { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .fondo-capa { transition: none; } }
+body.con-fondo .top h1, body.con-fondo .top p, body.con-fondo .top a { color: #fff; text-shadow: 0 1px 6px rgba(0,0,0,.6); }
+body.con-fondo legend { background: var(--card); padding: 2px 10px; border-radius: 8px; }

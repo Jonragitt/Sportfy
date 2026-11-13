@@ -94,9 +94,9 @@ body.con-racha .reloj.solo { right: calc(max(12px, env(safe-area-inset-right)) +
 /* Pregunta de racha a pantalla completa: hay que contestarla para seguir. */
 html.racha-bloqueo, html.racha-bloqueo body { overflow: hidden; }
 .racha-modal { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; padding: 20px;
-  background: rgba(8,9,12,.82); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+  background: rgba(8,9,12,.45); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); }
 .racha-modal-caja { width: min(380px, 100%); text-align: center; color: #fff; padding: 28px 22px; border-radius: 22px;
-  background: linear-gradient(160deg, rgba(40,30,26,.95), rgba(18,19,24,.95)); border: 1px solid rgba(255,122,61,.5); box-shadow: 0 20px 60px rgba(0,0,0,.5); }
+  background: linear-gradient(160deg, rgba(40,30,26,.84), rgba(18,19,24,.84)); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); border: 1px solid rgba(255,122,61,.5); box-shadow: 0 20px 60px rgba(0,0,0,.5); }
 .racha-modal-llama { color: #ff7a3d; } .racha-modal-llama svg { width: 84px; height: 84px; }
 .racha-modal-n { margin: 4px 0 0; font-size: 1.1rem; font-weight: 800; color: #ffb38a; }
 .racha-modal-caja h2 { margin: 10px 0 6px; font-size: 1.6rem; color: #fff; }
@@ -109,9 +109,9 @@ html.racha-bloqueo, html.racha-bloqueo body { overflow: hidden; }
 
 /* Inicio de sesión (shared/cuenta.js). */
 .login-modal { position: fixed; inset: 0; z-index: 110; display: grid; place-items: center; padding: 20px; overflow-y: auto;
-  background: rgba(8,9,12,.86); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
+  background: rgba(8,9,12,.4); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); }
 .login-caja { width: min(400px, 100%); text-align: center; color: #fff; padding: 26px 22px 18px; border-radius: 22px;
-  background: linear-gradient(160deg, rgba(36,30,28,.96), rgba(16,17,22,.96)); border: 1px solid rgba(255,255,255,.16); box-shadow: 0 20px 60px rgba(0,0,0,.5); }
+  background: linear-gradient(160deg, rgba(36,30,28,.82), rgba(16,17,22,.82)); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); border: 1px solid rgba(255,255,255,.16); box-shadow: 0 20px 60px rgba(0,0,0,.5); }
 .login-logo { width: min(220px, 70%); height: auto; display: block; margin: 0 auto 10px; }
 .login-caja h2 { margin: 6px 0 6px; font-size: 1.6rem; color: #fff; }
 .login-sub { margin: 0 0 18px; font-size: 1rem; line-height: 1.5; color: rgba(255,255,255,.82); }
@@ -129,3 +129,7 @@ html.racha-bloqueo, html.racha-bloqueo body { overflow: hidden; }
 .login-btn[data-usar] small { position: static; background: none; color: rgba(255,255,255,.7); text-transform: none; letter-spacing: 0; padding: 0; font-weight: 600; }
 .login-error { margin: 12px 0 0; color: #ff9b85; font-weight: 600; font-size: .92rem; }
 .login-sin { margin-top: 14px; font: inherit; font-size: .95rem; font-weight: 600; color: rgba(255,255,255,.75); background: none; border: 0; text-decoration: underline; cursor: pointer; padding: 8px; }
+
+/* El reloj se ve también encima de las pantallas de inicio de sesión y de racha (solo para mirar). */
+body:has(.login-modal) .reloj, body:has(.racha-modal) .reloj { z-index: 120; pointer-events: none; }
+body:has(.login-modal) .reloj .reloj-panel, body:has(.racha-modal) .reloj .reloj-panel { display: none; }

@@ -48,20 +48,33 @@ export function fotosDelDia(tipo) {
 }
 
 /** Qué foto toca a la hora `ahora` si la página se abrió en `inicio`. */
-export const indiceFoto = (inicio, ahora, n) => Math.floor(Math.max(0, ahora - inicio) / CADA_MS) % n;
+export const indiceFoto = (inicio, ahora, n, salto = 0) => (salto + Math.floor(Math.max(0, ahora - inicio) / CADA_MS)) % n;
+
+/** Foto con la que se empieza al entrar: al azar, pero nunca la última que se vio. */
+export function saltoInicial(lista, ultima, azar = Math.random()) {
+  let r = Math.floor(azar * lista.length) % lista.length;
+  if (lista.length > 1 && lista[r].id === ultima) r = (r + 1) % lista.length;
+  return r;
+}
+const ULTIMA = "sportfy.fondoUltima", SALTO = "sportfy.fondoSalto";
 
 function leerRutina() { try { return JSON.parse(localStorage.getItem("sportfy.rutina")); } catch { return null; } }
-function inicioSesion() {
+// Al abrir la app empieza la cuenta del reloj y se elige con qué foto se entra. Al pasar de un
+// apartado a otro se sigue la misma cuenta, así que el cambio va cada 3 min desde que se abrió.
+function inicioSesion(lista) {
+  let ultima = null; try { ultima = localStorage.getItem(ULTIMA); } catch { /* sin almacenamiento */ }
   try {
-    const v = Number(sessionStorage.getItem(INICIO));
-    if (v > 0) return v;
-    const ahora = Date.now(); sessionStorage.setItem(INICIO, String(ahora)); return ahora;
-  } catch { return Date.now(); }
+    const v = Number(sessionStorage.getItem(INICIO)), s = sessionStorage.getItem(SALTO);
+    if (v > 0 && s != null) return { inicio: v, salto: Number(s) };
+    const r = { inicio: Date.now(), salto: saltoInicial(lista, ultima) };
+    sessionStorage.setItem(INICIO, String(r.inicio)); sessionStorage.setItem(SALTO, String(r.salto));
+    return r;
+  } catch { return { inicio: Date.now(), salto: saltoInicial(lista, ultima) }; }
 }
 
 function montar() {
   if (!document.body.classList.contains("con-fondo") || document.querySelector(".fondo-capa")) return;
-  const inicio = inicioSesion();
+  const { inicio, salto } = inicioSesion(fotosDelDia(tipoDelDia(leerRutina(), diaDelReloj())));
   const capas = [0, 1].map(() => {
     const c = document.createElement("div");
     c.className = "fondo-capa"; c.setAttribute("aria-hidden", "true");
@@ -74,6 +87,7 @@ function montar() {
     const img = new Image();
     img.onload = () => {
       actual = foto.url;
+      try { localStorage.setItem(ULTIMA, foto.id); } catch { /* sin almacenamiento */ }
       const sig = primera ? visible : 1 - visible;
       capas[sig].style.backgroundImage = `url("${foto.url}")`;
       capas[sig].dataset.foto = foto.id;
@@ -89,7 +103,7 @@ function montar() {
   const elegir = (primera = false) => {
     const lista = fotosDelDia(tipoDelDia(leerRutina(), diaDelReloj()));
     const ahora = Date.now();
-    poner(lista[indiceFoto(inicio, ahora, lista.length)], primera);
+    poner(lista[indiceFoto(inicio, ahora, lista.length, salto)], primera);
     clearTimeout(reloj);
     reloj = setTimeout(() => elegir(), CADA_MS - ((ahora - inicio) % CADA_MS) + 50);
   };

@@ -26,3 +26,11 @@ test("cambia cada 3 minutos desde que se abrió", () => {
   assert.equal(indiceFoto(0, 180000, 4), 1);
   assert.equal(indiceFoto(0, 4 * 180000, 4), 0);
 });
+
+test("cada vez que se entra empieza con otra foto", async () => {
+  const { saltoInicial } = await import("../fondo.js");
+  const lista = fotosDelDia("pierna");
+  assert.notEqual(lista[saltoInicial(lista, lista[0].id, 0)].id, lista[0].id);
+  assert.equal(saltoInicial(lista, "otra", 0.99), lista.length - 1);
+  assert.equal(indiceFoto(0, 180000, 4, 3), 0);
+});
