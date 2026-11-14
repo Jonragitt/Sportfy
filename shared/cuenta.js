@@ -310,13 +310,39 @@ function pintarEstado(e) {
 }
 export const estadoNube = () => ultimoEstado;
 
-/** Cerrar sesión: deja de sincronizar; el progreso sigue en este dispositivo y en la cuenta. */
+const RESPALDO = "forty5.respaldo"; // { uid, datos }: lo que no llegó a subirse al cerrar sesión
+
+/**
+ * Cerrar sesión: sube lo último a la cuenta, quita el progreso de este dispositivo y vuelve a la
+ * pantalla de inicio (evaluación + iniciar sesión). Al volver a entrar con la misma cuenta, todo
+ * baja de la nube y se pasa a Rutina / Mi plan / Dieta. Si algo no se pudo subir (sin conexión),
+ * se guarda aparte en este dispositivo y se recupera al volver a entrar con esa cuenta.
+ */
 export async function cerrarSesion() {
   const fb = await firebase();
+  const u = fb?.auth?.currentUser;
+  if (u) {
+    const n = nubeDe(fb, u.uid);
+    for (let i = 0; i < 20 && subiendo; i++) await new Promise((r) => setTimeout(r, 150)); // espera a una subida en curso
+    await subir(n).catch(() => {});
+    const local = progresoLocal();
+    const { subir: falta, borrar } = cambiosPendientes(local, leer(NUBE, { hashes: {} }).hashes);
+    if (falta.length || borrar.length) escribir(RESPALDO, { uid: u.uid, datos: local });
+  }
   if (fb) await fb.A.signOut(fb.auth).catch(() => {});
-  escribir(CUENTA, { tipo: "local", desde: new Date().toISOString() });
+  for (const k of Object.keys(progresoLocal())) localStorage.removeItem(k);
+  escribir(CUENTA, null);
   escribir(NUBE, null);
-  location.reload();
+  try { sessionStorage.clear(); } catch { /* sin almacenamiento */ }
+  location.replace(new URL("../index.html", import.meta.url).href);
+}
+
+/** Al entrar: si al cerrar sesión quedó algo sin subir de esta cuenta, vuelve a este dispositivo. */
+function recuperarRespaldo(uid) {
+  const r = leer(RESPALDO, null);
+  if (!r || r.uid !== uid) return;
+  if (!Object.keys(progresoLocal()).length) for (const [k, v] of Object.entries(r.datos ?? {})) localStorage.setItem(k, v);
+  escribir(RESPALDO, null);
 }
 export function iniciarSesion() { mostrarInicioSesion({ cerrable: true }); }
 
@@ -336,6 +362,7 @@ if (typeof document !== "undefined") {
         document.querySelector(".login-modal")?.remove();
         document.body.classList.add("con-cuenta");
         dispatchEvent(new CustomEvent("forty5:cuenta", { detail: { estado: "conectado" } }));
+        recuperarRespaldo(u.uid);
         sincronizar(nubeDe(fb, u.uid)).then(async () => {
           const meta = await fb.F.getDoc(fb.F.doc(fb.db, "usuarios", u.uid)).then((d) => d.data()).catch(() => null);
           if (leer(NOMBRE)) return bienvenidaSiFalta(fb, u, meta);
