@@ -83,7 +83,6 @@
     <p class="lead" id="intro"></p>
     <div id="contenido"></div>
     <div id="cuenta"></div>
-    <div id="traspaso"></div>
   </main>
 
 
@@ -338,10 +337,6 @@
     addEventListener("forty5:nombre", () => pintarCuenta());
     addEventListener("forty5:cuenta", (e) => { estado = e.detail?.estado ?? null; pintarCuenta(); });
     pintarCuenta();
-  </script>
-  <script type="module">
-    import { montarTraspaso } from "./shared/traspaso.js?v=202611142000";
-    montarTraspaso(document.getElementById("traspaso"));
   </script>
   <script type="module" src="shared/fondo.js?v=202611132140"></script>
 </body>
