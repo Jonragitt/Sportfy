@@ -80,6 +80,17 @@
       <a href="index.html" id="tab-inicio">Inicio</a>
       <a href="perfil.html" aria-current="page">Perfil</a>
     </nav>
+    <script>
+      // Con plan, Mi perfil va sin barra de pestañas: se quita ya, antes de pintar, para que no
+      // asome medio segundo la barra «Inicio · Perfil».
+      try {
+        const ev = JSON.parse(localStorage.getItem("sportfy.evaluaciones") || "[]");
+        if (ev.length && !localStorage.getItem("sportfy.rondaInicio")) {
+          document.currentScript.previousElementSibling.remove();
+          document.querySelector(".esquina.menu").href = "rutina.html";
+        }
+      } catch {}
+    </script>
     <p class="lead" id="intro"></p>
     <div id="contenido"></div>
     <div id="cuenta"></div>
