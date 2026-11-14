@@ -128,17 +128,50 @@ export function tocaVoz(ultima = ultimaVoz(), t = ahora()) { return !ultima || t
 export function saludar(nombre = nombreGuardado()) {
   try { sessionStorage.setItem(YA, "1"); } catch { /* sin almacenamiento */ }
   try { localStorage.setItem(REGISTRO, JSON.stringify({ voz: ahora() })); } catch { /* sin almacenamiento */ }
-  const a = new Audio(); // se crea dentro del toque, para que el navegador deje que suene
+  // Se reproduce con Web Audio (no con <audio>): así el iPhone no lo pone en el centro de
+  // control y no se puede volver a reproducir desde allí. El contexto se crea dentro del toque
+  // para que el navegador deje que suene, y se cierra al terminar.
+  const Ctx = window.AudioContext || window.webkitAudioContext;
+  const ctx = Ctx ? new Ctx() : null;
+  ctx?.resume?.().catch(() => {});
+  const a = ctx ? null : new Audio();
   (async () => {
     for (const clave of audiosSaludo(nombre)) {
       let b = null;
       try { b = await audioDe(clave); } catch { b = null; }
       if (!b) continue; // no grabado o no se ha podido bajar: el siguiente
-      a.src = URL.createObjectURL(b);
-      try { await a.play(); return; } catch (e) { if (e?.name === "NotAllowedError") return; }
+      try {
+        if (ctx) { await sonarUnaVez(ctx, b); return; }
+        a.src = URL.createObjectURL(b);
+        a.addEventListener("ended", () => soltarAudio(a), { once: true });
+        await a.play(); return;
+      } catch (e) { if (e?.name === "NotAllowedError") { ctx?.close?.(); return; } }
     }
+    ctx?.close?.().catch(() => {});
     hablar(nombre); // ningún audio grabado: voz del dispositivo
   })();
+}
+
+/** Suena una sola vez con Web Audio y cierra el contexto al acabar (nada que reanudar después). */
+async function sonarUnaVez(ctx, blob) {
+  const buf = await ctx.decodeAudioData(await blob.arrayBuffer());
+  const src = ctx.createBufferSource();
+  src.buffer = buf; src.connect(ctx.destination);
+  src.onended = () => { try { src.disconnect(); } catch { /* ya desconectado */ } ctx.close?.().catch(() => {}); };
+  if (ctx.state === "suspended") await ctx.resume();
+  src.start();
+}
+
+/** Sin Web Audio: al terminar se vacía el <audio> y se quita del control multimedia del sistema. */
+function soltarAudio(a) {
+  try { URL.revokeObjectURL(a.src); a.removeAttribute("src"); a.load(); } catch { /* nada */ }
+  const ms = navigator.mediaSession;
+  if (ms) {
+    try { ms.metadata = null; ms.playbackState = "none"; } catch { /* nada */ }
+    for (const acc of ["play", "pause", "seekbackward", "seekforward", "previoustrack", "nexttrack", "seekto"]) {
+      try { ms.setActionHandler(acc, null); } catch { /* acción no admitida */ }
+    }
+  }
 }
 
 function hablar(nombre) {
