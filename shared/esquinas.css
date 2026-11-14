@@ -158,6 +158,6 @@ body:has(.login-modal) .reloj .reloj-panel, body:has(.racha-modal) .reloj .reloj
 /* En el móvil, discreto: una píldora pequeña arriba a la izquierda, bajo los botones, que no tapa el contenido. */
 @media (max-width: 640px) {
   .saludo-texto { top: calc(env(safe-area-inset-top) + 64px); left: 12px; max-width: calc(100vw - 24px); padding: 7px 14px; border-radius: 999px;
-    background: rgba(10,10,12,.72); font-size: 1.05rem; font-weight: 700; line-height: 1.2; text-shadow: none; }
+    background: rgba(10,10,12,.72); font-size: 1.05rem; font-weight: 700; line-height: 1.2; text-shadow: none; transition: opacity .45s ease, transform .45s ease; }
 }
 @media (prefers-reduced-motion: reduce) { .saludo-texto { animation: none; transition: opacity .4s; } .saludo-texto.fuera { transform: none; } }
