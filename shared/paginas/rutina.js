@@ -183,12 +183,13 @@ export function montar() {
         const v = VIDEOS[b.id];
         if (!v) return "";
         const cred = `${v.fuente} · ${v.licencia}${v.autor ? " · " + v.autor : ""}`;
-        return `<figure class="guia-video"><video src="shared/videos/${esc(v.archivo)}" data-grande="shared/videos/${esc(v.grande)}" muted loop playsinline autoplay disablepictureinpicture disableremoteplayback preload="auto" aria-label="Vídeo de ${esc(b.nombre)}"></video>
-          <button type="button" class="guia-video-ampliar" aria-label="Ampliar vídeo" data-ampliar>⤢</button>
+        // En la ficha va un icono grande de vídeo; al tocarlo se abre el vídeo en grande, en bucle.
+        return `<figure class="guia-video"><button type="button" class="guia-video-icono" data-grande="shared/videos/${esc(v.grande)}" data-ampliar aria-label="Ver el vídeo de ${esc(b.nombre)}">${ICONO_VIDEO}<span>Ver vídeo</span></button>
           <figcaption title="${esc(v.titulo)}"><a href="${esc(v.url)}" target="_blank" rel="noopener">${esc(cred)}</a></figcaption></figure>`;
       };
       // Ningún modo de pararlo: sin controles, sin menú del navegador y, si algo lo pausa
       // (pestaña en segundo plano, ahorro de batería…), vuelve a arrancar solo.
+      const ICONO_VIDEO = `<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="3" y="9" width="42" height="30" rx="8" fill="none" stroke="currentColor" stroke-width="3.2"/><path d="M20 17.5v13l11-6.5z" fill="currentColor"/></svg>`;
       function sinParar(v) {
         const seguir = () => { if (v.isConnected && v.paused) v.play?.().catch(() => {}); };
         seguir();
@@ -197,7 +198,7 @@ export function montar() {
         document.addEventListener("visibilitychange", seguir);
       }
       function ampliarVideo(fig) {
-        const v = fig.querySelector("video"), cap = fig.querySelector("figcaption").innerHTML;
+        const v = fig.querySelector("[data-grande]"), cap = fig.querySelector("figcaption").innerHTML;
         const capa = document.createElement("div");
         capa.className = "video-grande no-deslizar";
         capa.innerHTML = `<div class="video-grande-caja"><video src="${v.dataset.grande}" autoplay loop playsinline muted disablepictureinpicture></video>
@@ -251,10 +252,6 @@ export function montar() {
         </div>`;
         // En bucle como un GIF: no se para hasta pasar al siguiente ejercicio (si el navegador lo
         // pausa, por ejemplo al volver a la pestaña, vuelve a arrancar).
-        caja.querySelectorAll(".guia-video video").forEach((v) => {
-          sinParar(v);
-          v.addEventListener("click", () => ampliarVideo(v.closest("figure")));
-        });
         caja.querySelector("[data-ampliar]")?.addEventListener("click", (e) => ampliarVideo(e.currentTarget.closest("figure")));
         const ir = (n) => { escribir(GUIA, { dia: g.dia, paso: n }); pintarGuia(true); };
         // Termina la sesión: "si" si estaba en plazo, "recuperado" si estaba fallada.
