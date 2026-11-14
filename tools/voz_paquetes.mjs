@@ -1,4 +1,4 @@
-// Junta los MP3 de shared/voz/ en pocos paquetes (shared/voz/paquetes/<momento>-<inicial>.bin) y un
+// Junta los MP3 de shared/voz/ en pocos paquetes (shared/voz/paquetes/<momento>-<inicial>.mp3) y un
 // índice (indice.json: clave → [paquete, inicio, bytes]). Así la página sirve 72 archivos en vez de 594
 // (el artefacto de claude.ai admite unos 500 por versión) y cada saludo descarga solo su paquete.
 // Uso: node tools/voz_paquetes.mjs   (después de grabar o regrabar audios)
@@ -26,7 +26,7 @@ for (const [grupo, claves] of grupos) {
     indice[clave] = [grupo, inicio, b.length];
     trozos.push(b); inicio += b.length;
   }
-  fs.writeFileSync(path.join(SALIDA, `${grupo}.bin`), Buffer.concat(trozos));
+  fs.writeFileSync(path.join(SALIDA, `${grupo}.mp3`), Buffer.concat(trozos));
 }
 fs.writeFileSync(path.join(SALIDA, "indice.json"), JSON.stringify(indice));
 console.log(`${Object.keys(indice).length} audios en ${grupos.size} paquetes`);

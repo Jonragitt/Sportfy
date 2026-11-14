@@ -48,7 +48,7 @@ test("los paquetes contienen exactamente los MP3 grabados", async () => {
   const ind = JSON.parse(fs.readFileSync(new URL("paquetes/indice.json", dir)));
   for (const clave of ["manana-jonas", "tarde-jose-luis", "noche-0"]) {
     const [p, ini, n] = ind[clave];
-    const trozo = fs.readFileSync(new URL(`paquetes/${p}.bin`, dir)).subarray(ini, ini + n);
+    const trozo = fs.readFileSync(new URL(`paquetes/${p}.mp3`, dir)).subarray(ini, ini + n);
     assert.ok(trozo.equals(fs.readFileSync(new URL(`${clave}.mp3`, dir))), clave);
   }
 });

@@ -51,7 +51,7 @@ const cargarIndice = () => (indice ??= fetch(new URL(`indice.json?v=${VOZ_V}`, P
   .then((r) => (r.ok ? r.json() : {})).catch(() => { indice = null; return {}; }));
 function paquete(nombre) {
   if (!paquetes.has(nombre)) {
-    const p = fetch(new URL(`${nombre}.bin?v=${VOZ_V}`, PAQUETES)).then((r) => { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); });
+    const p = fetch(new URL(`${nombre}.mp3?v=${VOZ_V}`, PAQUETES)).then((r) => { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); });
     p.catch(() => paquetes.delete(nombre));
     paquetes.set(nombre, p);
   }
