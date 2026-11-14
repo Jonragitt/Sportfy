@@ -178,7 +178,7 @@ export function montar() {
       let celebrando = false;
       // Vídeos libres por ejercicio (shared/videos/videos.json): pequeño a la derecha, ampliable.
       let VIDEOS = {};
-      fetch("shared/videos/videos.json?v=202611142300").then((x) => x.json()).then((v) => { VIDEOS = v; pintarGuia(); }).catch(() => {});
+      fetch("shared/videos/videos.json?v=202611142355").then((x) => x.json()).then((v) => { VIDEOS = v; pintarGuia(); }).catch(() => {});
       const videoDe = (b) => {
         const v = VIDEOS[b.id];
         if (!v) return "";
