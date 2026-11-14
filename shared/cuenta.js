@@ -120,7 +120,7 @@ function aplicarNube({ meta, datos }) {
 
 let sincronizando = false;
 /** Con sesión iniciada: baja lo nuevo de la nube o sube lo de aquí, y luego sube cada cambio. */
-async function sincronizar(n) {
+async function sincronizar(n, { respaldo = false } = {}) {
   if (sincronizando) return;
   sincronizando = true;
   try {
@@ -130,12 +130,16 @@ async function sincronizar(n) {
     const hayLocal = Object.keys(progresoLocal()).length > 0;
     if (!est) {
       // Primera vez en este dispositivo con esta cuenta.
-      if (hayNube && hayLocal && JSON.stringify(nube.datos) !== JSON.stringify(progresoLocal())) return elegirProgreso(n, nube);
-      if (hayNube) return aplicarNube(nube);
-      // Deja creada la ficha de la persona aunque aún no tenga progreso que subir.
-      const version = Date.now();
-      await n.escribir([], [], version);
-      escribir(NUBE, { version, hashes: {} });
+      // Manda siempre lo de la cuenta (no se pregunta). Solo si al cerrar sesión quedó algo de esta
+      // misma cuenta sin subir (respaldo), eso es lo más nuevo y se sube encima.
+      if (hayNube && !(respaldo && hayLocal)) return aplicarNube(nube);
+      if (hayNube) escribir(NUBE, { version: 0, hashes: Object.fromEntries(Object.keys(nube.datos).map((k) => [k, "-"])) });
+      else {
+        // Cuenta nueva: se queda lo de este dispositivo y se sube (y se crea la ficha de la persona).
+        const version = Date.now();
+        await n.escribir([], [], version);
+        escribir(NUBE, { version, hashes: {} });
+      }
     } else if ((nube.meta?.actualizado ?? 0) > (est.version ?? 0)) {
       return aplicarNube(nube); // otro dispositivo guardó después: manda la nube
     }
@@ -280,29 +284,6 @@ async function bienvenidaSiFalta(fb, u, meta) {
   } catch { /* sin servidor de correo (p. ej. en claude.ai): se reintenta en otra visita */ }
 }
 
-/** Si en este dispositivo había progreso y en la cuenta también, la persona elige. */
-function elegirProgreso(n, nube) {
-  const modal = document.createElement("div");
-  modal.className = "login-modal no-deslizar";
-  modal.setAttribute("role", "alertdialog"); modal.setAttribute("aria-modal", "true");
-  const fecha = nube.meta?.actualizado ? new Date(nube.meta.actualizado).toLocaleDateString("es-ES", { day: "numeric", month: "long" }) : null;
-  modal.innerHTML = `<div class="login-caja">
-    <h2>Tienes progreso en dos sitios</h2>
-    <p class="login-sub">Tu cuenta ya tiene progreso guardado${fecha ? ` (del ${fecha})` : ""} y este dispositivo también. ¿Con cuál te quedas?</p>
-    <div class="login-btns">
-      <button type="button" class="login-btn principal" data-usar="nube"><span>Usar el de mi cuenta</span></button>
-      <button type="button" class="login-btn" data-usar="local"><span>Usar el de este dispositivo</span><small>sustituye al de la cuenta</small></button>
-    </div></div>`;
-  const soltar = bloquear(modal);
-  document.body.append(modal);
-  modal.querySelector('[data-usar="nube"]').addEventListener("click", () => aplicarNube(nube));
-  modal.querySelector('[data-usar="local"]').addEventListener("click", async () => {
-    escribir(NUBE, { version: 0, hashes: Object.fromEntries(Object.keys(nube.datos).map((k) => [k, "-"])) });
-    soltar(); await subir(n);
-    vigilar(n);
-  });
-}
-
 // Pequeño aviso de estado (guardado en la nube, sin permiso…) para Mi perfil.
 let ultimoEstado = null;
 function pintarEstado(e) {
@@ -341,9 +322,10 @@ export async function cerrarSesion() {
 /** Al entrar: si al cerrar sesión quedó algo sin subir de esta cuenta, vuelve a este dispositivo. */
 function recuperarRespaldo(uid) {
   const r = leer(RESPALDO, null);
-  if (!r || r.uid !== uid) return;
+  if (!r || r.uid !== uid) return false;
   if (!Object.keys(progresoLocal()).length) for (const [k, v] of Object.entries(r.datos ?? {})) localStorage.setItem(k, v);
   escribir(RESPALDO, null);
+  return true;
 }
 export function iniciarSesion() { mostrarInicioSesion({ cerrable: true }); }
 
@@ -363,8 +345,8 @@ if (typeof document !== "undefined") {
         document.querySelector(".login-modal")?.remove();
         document.body.classList.add("con-cuenta");
         dispatchEvent(new CustomEvent("forty5:cuenta", { detail: { estado: "conectado" } }));
-        recuperarRespaldo(u.uid);
-        sincronizar(nubeDe(fb, u.uid)).then(async () => {
+        const respaldo = recuperarRespaldo(u.uid);
+        sincronizar(nubeDe(fb, u.uid), { respaldo }).then(async () => {
           const meta = await fb.F.getDoc(fb.F.doc(fb.db, "usuarios", u.uid)).then((d) => d.data()).catch(() => null);
           if (leer(NOMBRE)) return bienvenidaSiFalta(fb, u, meta);
           pedirNombre({ sugerido: limpiarNombre((u.displayName || "").split(" ")[0]), alGuardar: () => bienvenidaSiFalta(fb, u, meta) });
