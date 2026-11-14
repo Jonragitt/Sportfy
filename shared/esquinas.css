@@ -112,6 +112,14 @@ html.racha-bloqueo, html.racha-bloqueo body { overflow: hidden; }
   background: rgba(8,9,12,.4); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); }
 .login-caja { width: min(400px, 100%); text-align: center; color: #fff; padding: 26px 22px 18px; border-radius: 22px;
   background: linear-gradient(160deg, rgba(36,30,28,.82), rgba(16,17,22,.82)); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); border: 1px solid rgba(255,255,255,.16); box-shadow: 0 20px 60px rgba(0,0,0,.5); }
+/* Iniciar sesión: sin oscurecer ni difuminar; la página se ve y se desliza detrás (está inert, no se puede tocar). */
+.login-modal.login-ligero { background: none; -webkit-backdrop-filter: none; backdrop-filter: none; pointer-events: none; overflow: visible;
+  place-items: end center; padding: 0 12px max(12px, env(safe-area-inset-bottom)); }
+.login-ligero .login-caja { pointer-events: auto; padding: 18px 18px 10px; max-height: calc(100dvh - 24px); overflow-y: auto; }
+.login-ligero .login-logo { width: min(150px, 45%); margin-bottom: 4px; }
+.login-ligero .login-caja h2 { font-size: 1.3rem; margin: 2px 0 4px; }
+.login-ligero .login-sub { font-size: .92rem; margin-bottom: 12px; }
+.login-ligero .login-sin { margin-top: 6px; }
 .login-logo { width: min(220px, 70%); height: auto; display: block; margin: 0 auto 10px; }
 .login-caja h2 { margin: 6px 0 6px; font-size: 1.6rem; color: #fff; }
 .login-sub { margin: 0 0 18px; font-size: 1rem; line-height: 1.5; color: rgba(255,255,255,.82); }
