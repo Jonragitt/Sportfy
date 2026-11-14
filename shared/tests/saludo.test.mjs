@@ -27,10 +27,28 @@ test("el audio no se repite hasta pasadas 2 horas del último", () => {
   assert.equal(tocaVoz(t, t + SIN_VOZ_MS - 1), false);
   assert.equal(tocaVoz(t, t + SIN_VOZ_MS), true);
 });
-import { audiosSaludo, claveNombre, clavesNombre } from "../saludo.js";
+import { audiosSaludo, audioDe, claveNombre, clavesNombre } from "../saludo.js";
 test("audios de Epachuko: primero con tu nombre, luego sin nombre", () => {
   assert.equal(claveNombre("  José  Luis "), "jose-luis");
   assert.deepEqual(clavesNombre("José Luis Pérez"), ["jose-luis-perez", "jose-luis", "jose"]);
-  assert.deepEqual(audiosSaludo("Jonás", "manana", 0), ["voz/manana-jonas.mp3", "voz/manana-0.mp3"]);
-  assert.deepEqual(audiosSaludo("", "madrugada", 0.9), ["voz/noche-1.mp3"]);
+  assert.deepEqual(audiosSaludo("Jonás", "manana", 0), ["manana-jonas", "manana-0"]);
+  assert.deepEqual(audiosSaludo("", "madrugada", 0.9), ["noche-1"]);
+});
+
+test("audioDe recorta el audio de su paquete con el índice", async () => {
+  const buf = new Uint8Array([9, 9, 1, 2, 3, 9]).buffer;
+  const b = await audioDe("manana-jonas", { "manana-jonas": ["manana-j", 2, 3] }, async (p) => { assert.equal(p, "manana-j"); return buf; });
+  assert.deepEqual([...new Uint8Array(await b.arrayBuffer())], [1, 2, 3]);
+  assert.equal(await audioDe("manana-nadie", {}, async () => buf), null);
+});
+
+test("los paquetes contienen exactamente los MP3 grabados", async () => {
+  const fs = await import("node:fs");
+  const dir = new URL("../voz/", import.meta.url);
+  const ind = JSON.parse(fs.readFileSync(new URL("paquetes/indice.json", dir)));
+  for (const clave of ["manana-jonas", "tarde-jose-luis", "noche-0"]) {
+    const [p, ini, n] = ind[clave];
+    const trozo = fs.readFileSync(new URL(`paquetes/${p}.bin`, dir)).subarray(ini, ini + n);
+    assert.ok(trozo.equals(fs.readFileSync(new URL(`${clave}.mp3`, dir))), clave);
+  }
 });

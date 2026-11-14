@@ -7,9 +7,11 @@
 // Un saludo por visita (sessionStorage), no en cada cambio de página.
 //
 // Voz de Epachuko (grabada con el Estudio de voz, ver shared/voz/LEEME.md), por orden:
-//   1. shared/voz/<momento>-<nombre>.mp3  («¡Buenos días, Jonás!», para los nombres más comunes)
-//   2. shared/voz/<momento>-<0|1|2>.mp3   (frase sin nombre, si el tuyo no está grabado)
+//   1. <momento>-<nombre>  («¡Buenos días, Jonás!», para los nombres más comunes)
+//   2. <momento>-<0|1>     (frase sin nombre, si el tuyo no está grabado)
 //   3. la voz en español del propio dispositivo, que sí dice cualquier nombre.
+// Los MP3 van juntos en shared/voz/paquetes/ (tools/voz_paquetes.mjs): se baja solo el paquete
+// de tu inicial y se recorta tu audio con el índice.
 import { fechaActual } from "./reloj.js?v=202611130400";
 
 const CLAVE_NOMBRE = "sportfy.nombre";
@@ -35,10 +37,38 @@ export function clavesNombre(n) {
   const p = claveNombre(n).split("-").filter(Boolean);
   return [...new Set([p.join("-"), p.slice(0, 2).join("-"), p[0]].filter(Boolean))];
 }
-/** Audios a probar, en orden, para un nombre y un momento del día. */
+/** Audios a probar, en orden, para un nombre y un momento del día («manana-jonas», «manana-0»). */
 export function audiosSaludo(nombre, m = momento(), azar = Math.random()) {
   const g = m === "madrugada" ? "noche" : m, sin = SALUDO_SIN_NOMBRE[g];
-  return [...clavesNombre(nombre).map((k) => `voz/${g}-${k}.mp3`), `voz/${g}-${Math.floor(azar * sin.length) % sin.length}.mp3`];
+  return [...clavesNombre(nombre).map((k) => `${g}-${k}`), `${g}-${Math.floor(azar * sin.length) % sin.length}`];
+}
+
+const VOZ_V = "202611141900"; // cambiar al regrabar
+const PAQUETES = new URL("./voz/paquetes/", import.meta.url);
+let indice = null;
+const paquetes = new Map();
+const cargarIndice = () => (indice ??= fetch(new URL(`indice.json?v=${VOZ_V}`, PAQUETES))
+  .then((r) => (r.ok ? r.json() : {})).catch(() => { indice = null; return {}; }));
+function paquete(nombre) {
+  if (!paquetes.has(nombre)) {
+    const p = fetch(new URL(`${nombre}.bin?v=${VOZ_V}`, PAQUETES)).then((r) => { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); });
+    p.catch(() => paquetes.delete(nombre));
+    paquetes.set(nombre, p);
+  }
+  return paquetes.get(nombre);
+}
+/** Recorta del índice dado (clave → [paquete, inicio, bytes]) el audio de una clave, o null si no está grabado. */
+export async function audioDe(clave, ind = cargarIndice(), bajar = paquete) {
+  const i = (await ind)[clave];
+  if (!i) return null;
+  const buf = await bajar(i[0]);
+  return new Blob([buf.slice(i[1], i[1] + i[2])], { type: "audio/mpeg" });
+}
+/** Baja con antelación el paquete que va a sonar, para que el audio salga nada más tocar. */
+async function precargar(nombre) {
+  const ind = await cargarIndice();
+  const c = audiosSaludo(nombre).find((k) => ind[k]);
+  if (c) paquete(ind[c][0]).catch(() => {});
 }
 
 /** Parte del día según la hora: madrugada (0–6), mañana (6–13), tarde (13–21) y noche (21–24). */
@@ -98,17 +128,17 @@ export function tocaVoz(ultima = ultimaVoz(), t = ahora()) { return !ultima || t
 export function saludar(nombre = nombreGuardado()) {
   try { sessionStorage.setItem(YA, "1"); } catch { /* sin almacenamiento */ }
   try { localStorage.setItem(REGISTRO, JSON.stringify({ voz: ahora() })); } catch { /* sin almacenamiento */ }
-  const lista = audiosSaludo(nombre);
-  const probar = () => {
-    const ruta = lista.shift();
-    if (!ruta) return hablar(nombre); // ningún audio grabado: voz del dispositivo
-    const a = new Audio(new URL(`./${ruta}`, import.meta.url));
-    let fallo = false;
-    const siguiente = () => { if (!fallo) { fallo = true; probar(); } }; // no existe: el siguiente
-    a.addEventListener("error", siguiente, { once: true });
-    a.play().catch((e) => { if (e?.name !== "NotAllowedError") siguiente(); });
-  };
-  probar();
+  const a = new Audio(); // se crea dentro del toque, para que el navegador deje que suene
+  (async () => {
+    for (const clave of audiosSaludo(nombre)) {
+      let b = null;
+      try { b = await audioDe(clave); } catch { b = null; }
+      if (!b) continue; // no grabado o no se ha podido bajar: el siguiente
+      a.src = URL.createObjectURL(b);
+      try { await a.play(); return; } catch (e) { if (e?.name === "NotAllowedError") return; }
+    }
+    hablar(nombre); // ningún audio grabado: voz del dispositivo
+  })();
 }
 
 function hablar(nombre) {
@@ -139,6 +169,7 @@ export function saludoAlEntrar() {
   if (ya || !nombreGuardado()) return;
   if (!tocaVoz()) { saludoTexto(); return; }
   if ("speechSynthesis" in window) speechSynthesis.getVoices(); // carga las voces con antelación
+  precargar(nombreGuardado()).catch(() => {});
   const quitar = () => ["pointerdown", "keydown"].forEach((t) => removeEventListener(t, alTocar, true));
   function alTocar(e) {
     if (e.target?.closest?.(".login-modal")) return; // la pantalla del nombre ya saluda al terminar
