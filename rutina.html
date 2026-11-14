@@ -73,8 +73,8 @@
     .guia-fallada .guia-cab, .guia-fallada .lado { color: #ff9b9b; }
     .guia-fallada .guia-barra i.ya, .guia-fallada .guia-pauta span.grande { background: #d63031; }
     .guia-btns.con-rec { grid-template-columns: auto auto 1fr; }
-    .guia-btns .btn.rec { background: #2f7de1; border-color: #2f7de1; color: #fff; display: inline-flex; align-items: center; gap: 6px; }
-    .guia-btns .btn.rec .flecha-rec, .guia-recuperada .flecha-rec { width: 1.1em; height: 1.1em; }
+    .guia-btns .btn.rec { background: #2f7de1; border-color: #2f7de1; color: #fff; display: inline-grid; place-content: center; padding-left: 14px; padding-right: 14px; }
+    .guia-btns .btn.rec .flecha-rec { width: 1.35em; height: 1.35em; display: block; }
     .guia-recuperada .guia-llama { color: #6fb0ff; }
     .guia-recuperada .guia-llama .flecha-rec { width: 3rem; height: 3rem; }
     .guia-cuerpo::after { content: ""; display: block; clear: both; }
@@ -120,7 +120,7 @@
   </main>
 
 
-  <script type="module" data-pagina="shared/paginas/rutina.js?v=202611142300">import { montar } from "./shared/paginas/rutina.js?v=202611142300"; montar();</script>
+  <script type="module" data-pagina="shared/paginas/rutina.js?v=202611142330">import { montar } from "./shared/paginas/rutina.js?v=202611142330"; montar();</script>
   <script type="module" src="shared/deslizar.js?v=202611132045"></script>
   <script type="module" src="shared/reloj.js?v=202611130400"></script>
   <script type="module" src="shared/racha.js?v=202611142300"></script>
