@@ -12,7 +12,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="Forty5">
-  <link rel="stylesheet" href="shared/esquinas.css?v=202611141930">
+  <link rel="stylesheet" href="shared/esquinas.css?v=202611142300">
   <link rel="icon" href="shared/logo/icono.svg" type="image/svg+xml">
   <link rel="stylesheet" href="shared/styles.css?v=202611131830">
   <style>
@@ -69,6 +69,25 @@
     .guia-btns .btn { font-size: 1.1rem; padding: 14px 16px; }
     .guia-btns .btn.secondary { background: rgba(255,255,255,.12); color: #fff; border-color: rgba(255,255,255,.3); }
     .guia-plazo { font-size: .82rem !important; opacity: .8; }
+    body.con-fondo .card.guia.guia-fallada, .card.guia.guia-fallada { border-color: #d63031; background: linear-gradient(160deg, rgba(214,48,49,.42), rgba(20,20,24,.92) 55%); box-shadow: 0 10px 34px rgba(214,48,49,.4); --muted: #ffd0d0; }
+    .guia-fallada .guia-cab, .guia-fallada .lado { color: #ff9b9b; }
+    .guia-fallada .guia-barra i.ya, .guia-fallada .guia-pauta span.grande { background: #d63031; }
+    .guia-btns.con-rec { grid-template-columns: auto auto 1fr; }
+    .guia-btns .btn.rec { background: #2f7de1; border-color: #2f7de1; color: #fff; display: inline-flex; align-items: center; gap: 6px; }
+    .guia-btns .btn.rec .flecha-rec, .guia-recuperada .flecha-rec { width: 1.1em; height: 1.1em; }
+    .guia-recuperada .guia-llama { color: #6fb0ff; }
+    .guia-recuperada .guia-llama .flecha-rec { width: 3rem; height: 3rem; }
+    .guia-cuerpo::after { content: ""; display: block; clear: both; }
+    .guia-video { float: right; width: min(40%, 168px); margin: 2px 0 6px 12px; position: relative; }
+    .guia-video video { -webkit-touch-callout: none; user-select: none; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 10px; background: #000; display: block; cursor: pointer; border: 1px solid rgba(255,255,255,.25); }
+    .guia-video-ampliar { position: absolute; top: 4px; right: 4px; width: 26px; height: 26px; border-radius: 7px; border: 0; background: rgba(0,0,0,.6); color: #fff; font-size: .95rem; line-height: 1; cursor: pointer; display: grid; place-content: center; }
+    .guia-video figcaption { margin-top: 3px; font-size: .6rem; line-height: 1.2; opacity: .7; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .guia-video figcaption a, .video-grande a { color: inherit; }
+    .video-grande { position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,.82); display: grid; place-items: center; padding: 16px; }
+    .video-grande-caja { width: min(100%, 860px); text-align: center; color: #fff; }
+    .guia-video video::-webkit-media-controls, .video-grande video::-webkit-media-controls { display: none !important; }
+    .video-grande-caja video { -webkit-touch-callout: none; pointer-events: none; width: 100%; max-height: 72vh; border-radius: 12px; background: #000; }
+    .video-grande-caja p { font-size: .8rem; opacity: .8; margin: 8px 0 12px; }
     .guia-hecha { text-align: center; }
     .guia-hecha .guia-llama { font-size: 3rem; line-height: 1; }
     .guia-anim { animation: guiaEntra .35s cubic-bezier(.2,.8,.2,1); }
@@ -101,10 +120,10 @@
   </main>
 
 
-  <script type="module" data-pagina="shared/paginas/rutina.js?v=202611131700">import { montar } from "./shared/paginas/rutina.js?v=202611131700"; montar();</script>
+  <script type="module" data-pagina="shared/paginas/rutina.js?v=202611142300">import { montar } from "./shared/paginas/rutina.js?v=202611142300"; montar();</script>
   <script type="module" src="shared/deslizar.js?v=202611132045"></script>
   <script type="module" src="shared/reloj.js?v=202611130400"></script>
-  <script type="module" src="shared/racha.js?v=202611131500"></script>
+  <script type="module" src="shared/racha.js?v=202611142300"></script>
   <script type="module" src="shared/cuenta.js?v=202611142000"></script>
   <script type="module" src="shared/fondo.js?v=202611132140"></script>
 </body>

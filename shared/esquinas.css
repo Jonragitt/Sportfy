@@ -80,14 +80,16 @@ body.con-racha .reloj.solo { right: calc(max(12px, env(safe-area-inset-right)) +
 .racha-sem, .racha-cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; text-align: center; }
 .racha-sem span { font-size: .7rem; font-weight: 700; opacity: .6; }
 .racha-cal span { height: 29px; display: grid; place-content: center; border-radius: 8px; font-size: .78rem; font-weight: 600; color: rgba(255,255,255,.75); }
-.racha-cal .si { background: rgba(255,122,61,.28); }
-.racha-cal .mal { background: rgba(214,48,49,.45); color: #fff; font-weight: 800; }
-.racha-cal .toca { box-shadow: inset 0 0 0 1.5px #ff7a3d; color: #fff; }
+.racha-cal .cumplido { background: #2fb36b; color: #fff; font-weight: 800; }
+.racha-cal .fallado { background: #d63031; color: #fff; font-weight: 800; }
+.racha-cal .recuperado { background: #2f7de1; color: #fff; }
+.racha-cal .recuperado .flecha-rec { width: 17px; height: 17px; display: block; }
+.racha-cal .pendiente { box-shadow: inset 0 0 0 1.5px #ff7a3d; color: #fff; }
 .racha-cal .futuro { box-shadow: inset 0 0 0 1px rgba(255,255,255,.3); }
 .racha-cal .hoy { outline: 2px solid #fff; outline-offset: -2px; color: #fff; }
 .racha-ley { display: flex; flex-wrap: wrap; gap: 4px 10px; margin-top: 8px; font-size: .72rem; opacity: .85; }
 .racha-ley i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 4px; vertical-align: -1px; }
-.racha-ley i.si { background: rgba(255,122,61,.6); } .racha-ley i.mal { background: rgba(214,48,49,.8); } .racha-ley i.toca { box-shadow: inset 0 0 0 1.5px #ff7a3d; }
+.racha-ley i.cumplido { background: #2fb36b; } .racha-ley i.fallado { background: #d63031; } .racha-ley i.recuperado { background: #2f7de1; } .racha-ley i.pendiente { box-shadow: inset 0 0 0 1.5px #ff7a3d; }
 .racha-datos { margin: 8px 0 0; font-size: .8rem; }
 .racha-hoy { width: 100%; margin-top: 8px; font: inherit; font-weight: 700; padding: 9px; border: 0; border-radius: 10px; background: #e4572e; color: #fff; cursor: pointer; }
 

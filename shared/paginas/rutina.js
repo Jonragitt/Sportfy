@@ -1,6 +1,6 @@
 // Código de la pestaña rutina.html (shared/pestanas.js lo vuelve a montar al volver a ella sin recargar).
 import { sincronizar, evaluaciones, rondaEnCurso } from "../evaluaciones.js?v=202611130100";
-import { marcarRacha, diaGuiado, deIso, iso } from "../racha.js?v=202611131500";
+import { marcarRacha, fichaActual, deIso, iso, FLECHA } from "../racha.js?v=202611142300";
 import { fechaActual, diaSemana, fechaLarga, esHoy } from "../reloj.js?v=202611130400";
 import { semanaDelCiclo, MATERIAL, SEMANAS, FOCOS, DIAS_SEMANA } from "../rutina.js?v=202611130440";
 import { calcularTodo, leerPreferencias, guardarPreferencias, necesitaPreferencias } from "../motor.js?v=202611130440";
@@ -171,20 +171,54 @@ export function montar() {
       pintar();
 
       // Entrenamiento guiado: un ejercicio cada vez, «Siguiente» hasta «Terminado», que suma la
-      // racha del día. Sale desde las 12 de la noche del día de gym hasta que acaba el día siguiente.
+      // racha del día. El motor de racha (fichaActual) decide qué sesión sale y en qué estado:
+      // pendiente (naranja, hasta las 22:00), hecha, o fallada (roja; con «Recuperado» si detrás
+      // viene cardio o reposo). A las 9:00 la ficha pasa al día siguiente.
       const GUIA = "sportfy.guiado";
       let celebrando = false;
+      // Vídeos libres por ejercicio (shared/videos/videos.json): pequeño a la derecha, ampliable.
+      let VIDEOS = {};
+      fetch("shared/videos/videos.json?v=202611142300").then((x) => x.json()).then((v) => { VIDEOS = v; pintarGuia(); }).catch(() => {});
+      const videoDe = (b) => {
+        const v = VIDEOS[b.id];
+        if (!v) return "";
+        const cred = `${v.fuente} · ${v.licencia}${v.autor ? " · " + v.autor : ""}`;
+        return `<figure class="guia-video"><video src="shared/videos/${esc(v.archivo)}" data-grande="shared/videos/${esc(v.grande)}" muted loop playsinline autoplay disablepictureinpicture disableremoteplayback preload="auto" aria-label="Vídeo de ${esc(b.nombre)}"></video>
+          <button type="button" class="guia-video-ampliar" aria-label="Ampliar vídeo" data-ampliar>⤢</button>
+          <figcaption title="${esc(v.titulo)}"><a href="${esc(v.url)}" target="_blank" rel="noopener">${esc(cred)}</a></figcaption></figure>`;
+      };
+      // Ningún modo de pararlo: sin controles, sin menú del navegador y, si algo lo pausa
+      // (pestaña en segundo plano, ahorro de batería…), vuelve a arrancar solo.
+      function sinParar(v) {
+        const seguir = () => { if (v.isConnected && v.paused) v.play?.().catch(() => {}); };
+        seguir();
+        ["pause", "ended", "suspend", "stalled"].forEach((ev) => v.addEventListener(ev, seguir));
+        v.addEventListener("contextmenu", (e) => e.preventDefault());
+        document.addEventListener("visibilitychange", seguir);
+      }
+      function ampliarVideo(fig) {
+        const v = fig.querySelector("video"), cap = fig.querySelector("figcaption").innerHTML;
+        const capa = document.createElement("div");
+        capa.className = "video-grande no-deslizar";
+        capa.innerHTML = `<div class="video-grande-caja"><video src="${v.dataset.grande}" autoplay loop playsinline muted disablepictureinpicture></video>
+          <p>${cap}</p><button type="button" class="btn" data-cerrar>Cerrar</button></div>`;
+        const cerrar = () => capa.remove();
+        capa.addEventListener("click", (e) => { if (e.target === capa || e.target.closest("[data-cerrar]")) cerrar(); });
+        addEventListener("keydown", function esc(e) { if (e.key === "Escape") { cerrar(); removeEventListener("keydown", esc); } });
+        document.body.append(capa);
+        sinParar(capa.querySelector("video"));
+      }
+      const horaPlazo = (d) => `${String(d.getHours()).padStart(2, "0")}:00`;
       function pintarGuia(anim = false) {
         if (celebrando) return;
         const caja = $("#guia");
-        const g = diaGuiado(leer("sportfy.racha", null), prefs.diasSemana ?? []);
-        const hoyK = iso(new Date());
-        if (!g) {
-          caja.innerHTML = leer("sportfy.racha", {})?.dias?.[hoyK] === "si" && (prefs.diasSemana ?? []).includes(diaSemana(new Date()))
-            ? `<div class="card guia guia-hecha"><div class="guia-llama">🔥</div><p class="guia-nombre" style="font-size:1.25rem">Racha de hoy hecha</p><p>Buen trabajo. El próximo día de gym te esperará aquí el primer ejercicio.</p></div>` : "";
+        const g = fichaActual(leer("sportfy.racha", null), prefs.diasSemana ?? []);
+        if (!g) { caja.innerHTML = ""; return; }
+        if (g.estado === "hecha" || g.estado === "recuperada") {
+          caja.innerHTML = `<div class="card guia guia-hecha ${g.estado === "recuperada" ? "guia-recuperada" : ""}"><div class="guia-llama">${g.estado === "hecha" ? "🔥" : FLECHA}</div><p class="guia-nombre" style="font-size:1.25rem">${g.estado === "hecha" ? "Racha del día hecha" : "Sesión recuperada"}</p><p>Buen trabajo. A las 9:00 del próximo día de gym te esperará aquí el primer ejercicio.</p></div>`;
           return;
         }
-        const f = deIso(g.dia);
+        const f = deIso(g.dia), fallada = g.estado === "fallada";
         const r = calcularTodo({ apartados, prefs, actividad, semana: semanaDelCiclo(inicio, f) }).rutina;
         const ses = r.sesiones.find((x) => x.diaSemana === diaSemana(f));
         if (!ses?.bloques.length) { caja.innerHTML = ""; return; }
@@ -192,12 +226,17 @@ export function montar() {
         const est = leer(GUIA, {});
         const paso = est.dia === g.dia ? Math.min(Math.max(0, est.paso ?? 0), total - 1) : 0;
         const b = ses.bloques[paso], ultimo = paso === total - 1;
-        const plazo = g.ayer ? "Es la sesión de ayer: termínala antes de las 12 de esta noche o perderás la racha."
-          : "Tienes hasta mañana a las 12 de la noche para terminarla.";
-        caja.innerHTML = `<div class="card guia">
-          <div class="guia-cab"><span>${g.ayer ? "Sesión de ayer" : "Entrenamiento de hoy"} · ${esc(ses.nombre)}</span><span>${paso + 1} / ${total}</span></div>
+        const esHoyG = g.dia === iso(new Date());
+        const plazo = !fallada ? `Tienes hasta las ${horaPlazo(g.plazo)} de ${esHoyG ? "hoy" : "ese día"} para terminarla o perderás la racha.`
+          : g.puedeRecuperar ? "Has perdido la racha, pero puedes recuperar la sesión: hazla y pulsa «Recuperado»."
+          : "Has perdido la racha. A las 9:00 la ficha pasa a la sesión siguiente.";
+        const DIAS = ["lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo"];
+        const titulo = fallada ? `Fallada · ${DIAS[diaSemana(f)]}` : esHoyG ? "Entrenamiento de hoy" : `Sesión del ${DIAS[diaSemana(f)]}`;
+        caja.innerHTML = `<div class="card guia ${fallada ? "guia-fallada" : ""}">
+          <div class="guia-cab"><span>${esc(titulo)} · ${esc(ses.nombre)}</span><span>${paso + 1} / ${total}</span></div>
           <div class="guia-barra" aria-hidden="true">${ses.bloques.map((_, i) => `<i class="${i <= paso ? "ya" : ""}"></i>`).join("")}</div>
-          <div class="${anim ? "guia-anim" : ""}">
+          <div class="guia-cuerpo ${anim ? "guia-anim" : ""}">
+            ${videoDe(b)}
             <p class="guia-nombre">${esc(b.nombre)}</p>
             <div class="guia-pauta"><span class="grande">${b.series} × ${esc(b.reps)}</span>${b.rir != null ? `<span>RIR ${b.rir}</span>` : ""}<span>Descanso ${esc(b.superserieDe ? "al terminar el par" : b.descanso)}</span></div>
             ${b.superserie ? `<p><b>Superserie:</b> hazlo seguido del siguiente ejercicio.</p>` : ""}
@@ -205,30 +244,45 @@ export function montar() {
             ${b.lado ? `<p class="lado">${esc(b.lado)}</p>` : ""}
             ${paso === 0 ? `<p class="guia-plazo">Antes de empezar, calienta: ${esc(ses.calentamiento.general)}</p>` : ""}
           </div>
-          <div class="guia-btns">${paso > 0 ? `<button class="btn secondary" type="button" id="guia-atras" aria-label="Ejercicio anterior">‹</button>` : "<span></span>"}
-            <button class="btn" type="button" id="guia-sig">${ultimo ? "Terminado ✓" : "Siguiente ›"}</button></div>
+          <div class="guia-btns ${g.puedeRecuperar ? "con-rec" : ""}">${paso > 0 ? `<button class="btn secondary" type="button" id="guia-atras" aria-label="Ejercicio anterior">‹</button>` : "<span></span>"}
+            ${g.puedeRecuperar ? `<button class="btn rec" type="button" id="guia-rec">${FLECHA} Recuperado</button>` : ""}
+            <button class="btn" type="button" id="guia-sig">${ultimo ? (g.puedeRecuperar ? "Terminado · recuperar" : fallada ? "Terminado" : "Terminado ✓") : "Siguiente ›"}</button></div>
           <p class="guia-plazo">${plazo}</p>
         </div>`;
+        // En bucle como un GIF: no se para hasta pasar al siguiente ejercicio (si el navegador lo
+        // pausa, por ejemplo al volver a la pestaña, vuelve a arrancar).
+        caja.querySelectorAll(".guia-video video").forEach((v) => {
+          sinParar(v);
+          v.addEventListener("click", () => ampliarVideo(v.closest("figure")));
+        });
+        caja.querySelector("[data-ampliar]")?.addEventListener("click", (e) => ampliarVideo(e.currentTarget.closest("figure")));
         const ir = (n) => { escribir(GUIA, { dia: g.dia, paso: n }); pintarGuia(true); };
-        $("#guia-atras")?.addEventListener("click", () => ir(paso - 1));
-        $("#guia-sig").addEventListener("click", () => {
-          if (!ultimo) return ir(paso + 1);
-          // Terminado: suma la racha de ese día y marca la sesión como hecha esa semana.
+        // Termina la sesión: "si" si estaba en plazo, "recuperado" si estaba fallada.
+        const terminar = (valor) => {
           const lunes = new Date(f.getFullYear(), f.getMonth(), f.getDate() - diaSemana(f));
           const h = hechos(), k = iso(lunes), lista = new Set(h[k] ?? []);
           lista.add(ses.dia); h[k] = [...lista]; escribir("sportfy.sesionesHechas", h);
           try { localStorage.removeItem(GUIA); } catch { /* sin almacenamiento */ }
-          marcarRacha(g.dia, "si");
+          marcarRacha(g.dia, valor);
           const n = Number(document.querySelector(".racha-n")?.textContent) || 1;
           celebrando = true;
-          caja.innerHTML = `<div class="card guia guia-hecha guia-anim"><div class="guia-llama">🔥</div>
-            <p class="guia-nombre">¡Racha del día hecha!</p><p>${n} ${n === 1 ? "día" : "días"} de racha. Sesión completada.</p></div>`;
+          caja.innerHTML = valor === "si"
+            ? `<div class="card guia guia-hecha guia-anim"><div class="guia-llama">🔥</div><p class="guia-nombre">¡Racha del día hecha!</p><p>${n} ${n === 1 ? "día" : "días"} de racha. Sesión completada.</p></div>`
+            : `<div class="card guia guia-hecha guia-recuperada guia-anim"><div class="guia-llama">${FLECHA}</div><p class="guia-nombre">¡Sesión recuperada!</p><p>Queda marcada en azul en el calendario. La racha vuelve a contar desde hoy.</p></div>`;
           pintar();
           setTimeout(() => { celebrando = false; pintarGuia(); }, 3500);
+        };
+        $("#guia-atras")?.addEventListener("click", () => ir(paso - 1));
+        $("#guia-rec")?.addEventListener("click", () => terminar("recuperado"));
+        $("#guia-sig").addEventListener("click", () => {
+          if (!ultimo) return ir(paso + 1);
+          if (!fallada) return terminar("si");
+          if (g.puedeRecuperar) return terminar("recuperado");
+          ir(0);
         });
       }
       pintarGuia();
       addEventListener("forty5:racha", () => pintarGuia());
-      setInterval(() => pintarGuia(), 60000); // a las 12 de la noche cambia el día que toca
+      setInterval(() => pintarGuia(), 60000); // a las 22:00 falla y a las 9:00 cambia la ficha
     }
 }

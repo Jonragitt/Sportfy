@@ -1,0 +1,344 @@
+{
+ "sentadillaBarra": {
+  "archivo": "sentadillaBarra.mp4",
+  "grande": "sentadillaBarra-grande.mp4",
+  "titulo": "Barbell Back Squat",
+  "url": "https://www.dvidshub.net/video/517475/barbell-back-squat",
+  "fuente": "DVIDS",
+  "licencia": "Dominio público (Gobierno de EE. UU.)",
+  "autor": "U.S. Marine Corps Training and Education Command (MAJ Joshua Pena)"
+ },
+ "sentadillaGoblet": {
+  "archivo": "sentadillaGoblet.mp4",
+  "grande": "sentadillaGoblet-grande.mp4",
+  "titulo": "Kettlebell Goblet Squat",
+  "url": "https://www.dvidshub.net/video/548733/kettlebell-goblet-squat",
+  "fuente": "DVIDS",
+  "licencia": "Dominio público (Gobierno de EE. UU.)",
+  "autor": "U.S. Marine Corps Training and Education Command (CPT Matthew Holfinger)"
+ },
+ "sentadillaPC": {
+  "archivo": "sentadillaPC.mp4",
+  "grande": "sentadillaPC-grande.mp4",
+  "titulo": "7 Foundational Movements - Squat",
+  "url": "https://www.dvidshub.net/video/737860/7-foundational-movements-squat",
+  "fuente": "DVIDS",
+  "licencia": "Dominio público (Gobierno de EE. UU.)",
+  "autor": "Marine Corps Base Quantico (Cpl Quinn Hurt)"
+ },
+ "pmrBarra": {
+  "archivo": "pmrBarra.mp4",
+  "grande": "pmrBarra-grande.mp4",
+  "titulo": "Barbell Romanian Deadlift",
+  "url": "https://www.dvidshub.net/video/639927/barbell-romanian-deadlift",
+  "fuente": "DVIDS",
+  "licencia": "Dominio público (Gobierno de EE. UU.)",
+  "autor": "U.S. Marine Corps Training and Education Command (CPT Matthew Holfinger)"
+ },
+ "pmrMancuernas": {
+  "archivo": "pmrMancuernas.mp4",
+  "grande": "pmrMancuernas-grande.mp4",
+  "titulo": "Dumbbell Romanian Deadlift",
+  "url": "https://www.dvidshub.net/video/639938/dumbbell-romanian-deadlift",
+  "fuente": "DVIDS",
+  "licencia": "Dominio público (Gobierno de EE. UU.)",
+  "autor": "U.S. Marine Corps Training and Education Command (CPT Matthew Holfinger)"
+ },
+ "hipThrust": {
+  "archivo": "hipThrust.mp4",
+  "grande": "hipThrust-grande.mp4",
+  "titulo": "TRX Hip Press",
+  "url": "https://www.dvidshub.net/video/692907/trx-hip-press",
+  "fuente": "DVIDS",
+  "licencia": "Dominio público (Gobierno de EE. UU.)",
+  "autor": "U.S. Marine Corps Training and Education Command (CPT Matthew Holfinger)"
+ },
+ "pesoMuerto": {
+  "archivo": "pesoMuerto.mp4",
+  "grande": "pesoMuerto-grande.mp4",
+  "titulo": "Barbell Dead Lift",
+  "url": "https://www.dvidshub.net/video/517483/barbell-dead-lift",
+  "fuente": "DVIDS",
+  "licencia": "Dominio público (Gobierno de EE. UU.)",
+  "autor": "U.S. Marine Corps Training and Education Command (MAJ Joshua Pena)"
+ },
+ "bulgara": {
+  "archivo": "bulgara.mp4",
+  "grande": "bulgara-grande.mp4",
+  "titulo": "Dumbbell Bulgarian Split Squat",
+  "url": "https://www.dvidshub.net/video/517507/dumbbell-bulgarian-split-squat",
+  "fuente": "DVIDS",
+  "licencia": "Dominio público (Gobierno de EE. UU.)",
+  "autor": "U.S. Marine Corps Training and Education Command (MAJ Joshua Pena)"
+ },
+ "zancadaAtras": {
+  "archivo": "zancadaAtras.mp4",
+  "grande": "zancadaAtras-grande.mp4",
+  "titulo": "Barbell Reverse Lunge",
+  "url": "https://www.dvidshub.net/video/549287/barbell-reverse-lunge",
+  "fuente": "DVIDS",
+  "licencia": "Dominio público (Gobierno de EE. UU.)",
+  "autor": "U.S. Marine Corps Training and Education Command (CPT Matthew Holfinger)"
+ },
+ "stepUp": {
+  "archivo": "stepUp.mp4",
+  "grande": "stepUp-grande.mp4",
+  "titulo": "Woman exercising by climbing a platform",
+  "url": "https://mixkit.co/free-stock-video/woman-exercising-by-climbing-a-platform-44426/",
+  "fuente": "Mixkit",
+  "licencia": "Mixkit Free License",
+  "autor": "@rubenvelasco"
+ },
+ "pressBanca": {
+  "archivo": "pressBanca.mp4",
+  "grande": "pressBanca-grande.mp4",
+  "titulo": "Bench press - exercise demonstration video",
+  "url": "https://commons.wikimedia.org/wiki/File:Bench_press_-_exercise_demonstration_video.webm",
+  "fuente": "Wikimedia Commons",
+  "licencia": "CC BY 3.0",
+  "autor": "FitnessScape"
+ },
+ "pressMancuernas": {
+  "archivo": "pressMancuernas.mp4",
+  "grande": "pressMancuernas-grande.mp4",
+  "titulo": "Dumbbell Bench Press",
+  "url": "https://www.dvidshub.net/video/636920/dumbbell-bench-press",
+  "fuente": "DVIDS",
+  "licencia": "Dominio público (Gobierno de EE. UU.)",
+  "autor": "U.S. Marine Corps Training and Education Command (CPT Matthew Holfinger)"
+ },
+ "pressInclinado": {
+  "archivo": "pressInclinado.mp4",
+  "grande": "pressInclinado-grande.mp4",
+  "titulo": "Dumbbell Incline Bench Press",
+  "url": "https://www.dvidshub.net/video/636927/dumbbell-incline-bench-press",
+  "fuente": "DVIDS",
+  "licencia": "Dominio público (Gobierno de EE. UU.)",
+  "autor": "U.S. Marine Corps Training and Education Command (CPT Matthew Holfinger)"
+ },
+ "flexiones": {
+  "archivo": "flexiones.mp4",
+  "grande": "flexiones-grande.mp4",
+  "titulo": "Army Combat Fitness Test- Hand-Release Push-Up (HRP) (Event 3)",
+  "url": "https://commons.wikimedia.org/wiki/File:Army_Combat_Fitness_Test-_Hand-Release_Push-Up_(HRP)_(Event_3).webm",
+  "fuente": "Wikimedia Commons",
+  "licencia": "Public domain",
+  "autor": "Ejército de EE. UU. (ACFT)"
+ },
+ "pressMilitar": {
+  "archivo": "pressMilitar.mp4",
+  "grande": "pressMilitar-grande.mp4",
+  "titulo": "Dumbbell Shoulder Press",
+  "url": "https://www.dvidshub.net/video/636933/dumbbell-shoulder-press",
+  "fuente": "DVIDS",
+  "licencia": "Dominio público (Gobierno de EE. UU.)",
+  "autor": "U.S. Marine Corps Training and Education Command (CPT Matthew Holfinger)"
+ },
+ "pressArnold": {
+  "archivo": "pressArnold.mp4",
+  "grande": "pressArnold-grande.mp4",
+  "titulo": "Dumbbel Arnold Press",
+  "url": "https://www.dvidshub.net/video/636919/dumbbel-arnold-press",
+  "fuente": "DVIDS",
+  "licencia": "Dominio público (Gobierno de EE. UU.)",
+  "autor": "U.S. Marine Corps Training and Education Command (CPT Matthew Holfinger)"
+ },
+ "remoMancuerna": {
+  "archivo": "remoMancuerna.mp4",
+  "grande": "remoMancuerna-grande.mp4",
+  "titulo": "Dumbbell Bent Over Rows",
+  "url": "https://www.dvidshub.net/video/636921/dumbbell-bent-over-rows",
+  "fuente": "DVIDS",
+  "licencia": "Dominio público (Gobierno de EE. UU.)",
+  "autor": "U.S. Marine Corps Training and Education Command (CPT Matthew Holfinger)"
+ },
+ "remoPolea": {
+  "archivo": "remoPolea.mp4",
+  "grande": "remoPolea-grande.mp4",
+  "titulo": "Seated Band Row",
+  "url": "https://www.dvidshub.net/video/640249/seated-band-row",
+  "fuente": "DVIDS",
+  "licencia": "Dominio público (Gobierno de EE. UU.)",
+  "autor": "U.S. Marine Corps Training and Education Command (CPT Matthew Holfinger)"
+ },
+ "remoBarra": {
+  "archivo": "remoBarra.mp4",
+  "grande": "remoBarra-grande.mp4",
+  "titulo": "Barbell Bent Over Row",
+  "url": "https://www.dvidshub.net/video/639914/barbell-bent-over-row",
+  "fuente": "DVIDS",
+  "licencia": "Dominio público (Gobierno de EE. UU.)",
+  "autor": "U.S. Marine Corps Training and Education Command (CPT Matthew Holfinger)"
+ },
+ "remoInvertido": {
+  "archivo": "remoInvertido.mp4",
+  "grande": "remoInvertido-grande.mp4",
+  "titulo": "Smith Machine Inverted Row",
+  "url": "https://www.dvidshub.net/video/640257/smith-machine-inverted-row",
+  "fuente": "DVIDS",
+  "licencia": "Dominio público (Gobierno de EE. UU.)",
+  "autor": "U.S. Marine Corps Training and Education Command (CPT Matthew Holfinger)"
+ },
+ "remoBanda": {
+  "archivo": "remoBanda.mp4",
+  "grande": "remoBanda-grande.mp4",
+  "titulo": "Band Bent Over Rows",
+  "url": "https://www.dvidshub.net/video/636827/band-bent-over-rows",
+  "fuente": "DVIDS",
+  "licencia": "Dominio público (Gobierno de EE. UU.)",
+  "autor": "U.S. Marine Corps Training and Education Command (CPT Matthew Holfinger)"
+ },
+ "jalon": {
+  "archivo": "jalon.mp4",
+  "grande": "jalon-grande.mp4",
+  "titulo": "Band Lat Pulldown",
+  "url": "https://www.dvidshub.net/video/639891/band-lat-pulldown",
+  "fuente": "DVIDS",
+  "licencia": "Dominio público (Gobierno de EE. UU.)",
+  "autor": "U.S. Marine Corps Training and Education Command (CPT Matthew Holfinger)"
+ },
+ "dominadas": {
+  "archivo": "dominadas.mp4",
+  "grande": "dominadas-grande.mp4",
+  "titulo": "Dead Hang Pullup",
+  "url": "https://www.dvidshub.net/video/639937/dead-hang-pullup",
+  "fuente": "DVIDS",
+  "licencia": "Dominio público (Gobierno de EE. UU.)",
+  "autor": "U.S. Marine Corps Training and Education Command (CPT Matthew Holfinger)"
+ },
+ "jalonBanda": {
+  "archivo": "jalonBanda.mp4",
+  "grande": "jalonBanda-grande.mp4",
+  "titulo": "Band Lat Pulldown",
+  "url": "https://www.dvidshub.net/video/639891/band-lat-pulldown",
+  "fuente": "DVIDS",
+  "licencia": "Dominio público (Gobierno de EE. UU.)",
+  "autor": "U.S. Marine Corps Training and Education Command (CPT Matthew Holfinger)"
+ },
+ "pajaros": {
+  "archivo": "pajaros.mp4",
+  "grande": "pajaros-grande.mp4",
+  "titulo": "Band Bent Over Lateral Raises",
+  "url": "https://www.dvidshub.net/video/636824/band-bent-over-lateral-raises",
+  "fuente": "DVIDS",
+  "licencia": "Dominio público (Gobierno de EE. UU.)",
+  "autor": "U.S. Marine Corps Training and Education Command (CPT Matthew Holfinger)"
+ },
+ "abduccionMaquina": {
+  "archivo": "abduccionMaquina.mp4",
+  "grande": "abduccionMaquina-grande.mp4",
+  "titulo": "Hip Abduction",
+  "url": "https://www.dvidshub.net/video/551391/hip-abduction",
+  "fuente": "DVIDS",
+  "licencia": "Dominio público (Gobierno de EE. UU.)",
+  "autor": "U.S. Marine Corps Training and Education Command (CPT Matthew Holfinger)"
+ },
+ "aductores": {
+  "archivo": "aductores.mp4",
+  "grande": "aductores-grande.mp4",
+  "titulo": "Hip Adduction",
+  "url": "https://www.dvidshub.net/video/551395/hip-adduction",
+  "fuente": "DVIDS",
+  "licencia": "Dominio público (Gobierno de EE. UU.)",
+  "autor": "U.S. Marine Corps Training and Education Command (CPT Matthew Holfinger)"
+ },
+ "curlFemoral": {
+  "archivo": "curlFemoral.mp4",
+  "grande": "curlFemoral-grande.mp4",
+  "titulo": "TRX Hmastring Curl",
+  "url": "https://www.dvidshub.net/video/692901/trx-hmastring-curl",
+  "fuente": "DVIDS",
+  "licencia": "Dominio público (Gobierno de EE. UU.)",
+  "autor": "U.S. Marine Corps Training and Education Command (CPT Matthew Holfinger)"
+ },
+ "gemelo": {
+  "archivo": "gemelo.mp4",
+  "grande": "gemelo-grande.mp4",
+  "titulo": "Explosive Calf Raise",
+  "url": "https://www.dvidshub.net/video/636502/explosive-calf-raise",
+  "fuente": "DVIDS",
+  "licencia": "Dominio público (Gobierno de EE. UU.)",
+  "autor": "U.S. Marine Corps Training and Education Command (CPT Matthew Holfinger)"
+ },
+ "plancha": {
+  "archivo": "plancha.mp4",
+  "grande": "plancha-grande.mp4",
+  "titulo": "Plank",
+  "url": "https://www.dvidshub.net/video/640237/plank",
+  "fuente": "DVIDS",
+  "licencia": "Dominio público (Gobierno de EE. UU.)",
+  "autor": "U.S. Marine Corps Training and Education Command (CPT Matthew Holfinger)"
+ },
+ "planchaLateral": {
+  "archivo": "planchaLateral.mp4",
+  "grande": "planchaLateral-grande.mp4",
+  "titulo": "Side Plank",
+  "url": "https://www.dvidshub.net/video/640254/side-plank",
+  "fuente": "DVIDS",
+  "licencia": "Dominio público (Gobierno de EE. UU.)",
+  "autor": "U.S. Marine Corps Training and Education Command (CPT Matthew Holfinger)"
+ },
+ "granjero": {
+  "archivo": "granjero.mp4",
+  "grande": "granjero-grande.mp4",
+  "titulo": "Kettlebell Farmer Carry",
+  "url": "https://www.dvidshub.net/video/679688/kettlebell-farmer-carry",
+  "fuente": "DVIDS",
+  "licencia": "Dominio público (Gobierno de EE. UU.)",
+  "autor": "U.S. Marine Corps Training and Education Command (CPT Matthew Holfinger)"
+ },
+ "ruedaAbdominal": {
+  "archivo": "ruedaAbdominal.mp4",
+  "grande": "ruedaAbdominal-grande.mp4",
+  "titulo": "Healthy couple doing exercises at a park",
+  "url": "https://mixkit.co/free-stock-video/healthy-couple-doing-exercises-at-a-park-40149/",
+  "fuente": "Mixkit",
+  "licencia": "Mixkit Free License",
+  "autor": "@rubenvelasco"
+ },
+ "curlBiceps": {
+  "archivo": "curlBiceps.mp4",
+  "grande": "curlBiceps-grande.mp4",
+  "titulo": "Dumbbell Curl",
+  "url": "https://www.dvidshub.net/video/636923/dumbbell-curl",
+  "fuente": "DVIDS",
+  "licencia": "Dominio público (Gobierno de EE. UU.)",
+  "autor": "U.S. Marine Corps Training and Education Command (CPT Matthew Holfinger)"
+ },
+ "curlBanda": {
+  "archivo": "curlBanda.mp4",
+  "grande": "curlBanda-grande.mp4",
+  "titulo": "Band Standing Curl",
+  "url": "https://www.dvidshub.net/video/636835/band-standing-curl",
+  "fuente": "DVIDS",
+  "licencia": "Dominio público (Gobierno de EE. UU.)",
+  "autor": "U.S. Marine Corps Training and Education Command (CPT Matthew Holfinger)"
+ },
+ "tricepsPolea": {
+  "archivo": "tricepsPolea.mp4",
+  "grande": "tricepsPolea-grande.mp4",
+  "titulo": "Band Tricep Pressdown",
+  "url": "https://www.dvidshub.net/video/639904/band-tricep-pressdown",
+  "fuente": "DVIDS",
+  "licencia": "Dominio público (Gobierno de EE. UU.)",
+  "autor": "U.S. Marine Corps Training and Education Command (CPT Matthew Holfinger)"
+ },
+ "tricepsMancuerna": {
+  "archivo": "tricepsMancuerna.mp4",
+  "grande": "tricepsMancuerna-grande.mp4",
+  "titulo": "Dumbbell Tricep Extensions",
+  "url": "https://www.dvidshub.net/video/636941/dumbbell-tricep-extensions",
+  "fuente": "DVIDS",
+  "licencia": "Dominio público (Gobierno de EE. UU.)",
+  "autor": "U.S. Marine Corps Training and Education Command (CPT Matthew Holfinger)"
+ },
+ "prensa": {
+  "archivo": "prensa.mp4",
+  "grande": "prensa-grande.mp4",
+  "titulo": "Woman using a leg press machine in the gym",
+  "url": "https://mixkit.co/free-stock-video/woman-using-a-leg-press-machine-in-the-gym-100520/",
+  "fuente": "Mixkit",
+  "licencia": "Mixkit Free License",
+  "autor": "@mixkit"
+ }
+}
