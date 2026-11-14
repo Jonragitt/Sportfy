@@ -37,6 +37,18 @@
     .selector button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
     .comida { border-top: 1px solid var(--border); padding: 12px 0 0; margin-top: 12px; }
     .comida:first-of-type { border-top: 0; margin-top: 4px; padding-top: 4px; }
+    .comida-foto { float: right; width: 76px; height: 76px; margin: 2px 0 6px 12px; padding: 0; border: 0; border-radius: 14px; overflow: hidden; cursor: zoom-in; background: var(--border); box-shadow: 0 2px 8px rgba(0,0,0,.18); transition: width .25s ease, height .25s ease; }
+    .comida-foto img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .comida::after { content: ""; display: block; clear: both; }
+    .foto-grande { position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,.88); display: grid; place-items: center; padding: 16px; cursor: zoom-out; }
+    .foto-grande figure { margin: 0; text-align: center; color: #fff; }
+    .foto-grande img { width: min(86vw, 82vh, 640px); height: auto; aspect-ratio: 1; object-fit: cover; border-radius: 16px; display: block; }
+    .foto-grande figcaption { font-size: .78rem; opacity: .75; margin-top: 8px; }
+    @media (max-width: 640px), (orientation: portrait) and (max-width: 900px) {
+      .comida { display: flex; flex-direction: column; }
+      .comida-foto { float: none; order: 99; align-self: flex-start; width: 112px; height: 84px; margin: 8px 0 0; }
+      .comida-foto.abierta { width: min(100%, 300px); height: 225px; cursor: zoom-out; }
+    }
     .comida-head { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
     .comida-head h3 { margin: 0; font-size: 1.05rem; }
     .comida-head span { font-weight: 800; white-space: nowrap; }
@@ -76,7 +88,7 @@
     <div id="contenido"></div>
   </main>
 
-  <script type="module" data-pagina="shared/paginas/dieta.js?v=202611131700">import { montar } from "./shared/paginas/dieta.js?v=202611131700"; montar();</script>
+  <script type="module" data-pagina="shared/paginas/dieta.js?v=202611150010">import { montar } from "./shared/paginas/dieta.js?v=202611150010"; montar();</script>
   <script type="module" src="shared/deslizar.js?v=202611132045"></script>
   <script type="module" src="shared/reloj.js?v=202611130400"></script>
   <script type="module" src="shared/racha.js?v=202611142300"></script>

@@ -87,6 +87,7 @@ export function montar() {
             <label class="note" style="display:block;margin-top:12px">Comidas al día <select id="comidas"><option value="4" ${d.comidas === 4 ? "selected" : ""} ${d.comidas === 5 && comidas === 4 ? "disabled" : ""}>4 comidas</option><option value="5" ${d.comidas === 5 ? "selected" : ""}>5 comidas</option></select></label>
             ${d.comidas !== comidas ? `<p class="note" style="margin:4px 0 0">Por tu salud te recomendamos 5 comidas al día.</p>` : ""}
             ${dia.comidas.map((c) => `<div class="comida">
+              <button type="button" class="comida-foto" data-foto="${esc(c.opcion)}" aria-label="Ver foto: ${esc(c.plato)}"><img src="shared/comidas/${esc(c.opcion)}.jpg" alt="" loading="lazy" width="160" height="160"></button>
               <div class="comida-head"><h3>${esc(c.nombre)}</h3><span>${fmt(c.kcal)} kcal</span></div>
               <p class="macros">P ${c.proteina} g · H ${c.hidratos} g · G ${c.grasa} g</p>
               <label class="opcion">Opción <select data-comida="${esc(c.nombre)}">
@@ -119,7 +120,26 @@ export function montar() {
           if (sel.value) eleccion[sel.dataset.comida] = sel.value; else delete eleccion[sel.dataset.comida];
           escribir("sportfy.dieta.opciones", eleccion); pintar();
         }));
+        document.querySelectorAll("[data-foto]").forEach((b) => b.addEventListener("click", () => verFoto(b)));
         $("#comidas").addEventListener("change", (e) => { comidas = Number(e.target.value); escribir("sportfy.dieta.comidas", comidas); pintar(); });
+      }
+      // Foto del plato: pequeña junto a las kcal. En pantallas anchas se abre en grande encima;
+      // en el móvil (vertical) va debajo del texto y al tocarla crece un poco en su sitio.
+      let FOTOS = {};
+      fetch("shared/comidas/fotos.json?v=202611150010").then((r) => r.json()).then((f) => { FOTOS = f; }).catch(() => {});
+      const movil = () => matchMedia("(max-width: 640px), (orientation: portrait) and (max-width: 900px)").matches;
+      function verFoto(b) {
+        if (movil()) { const img = b.querySelector("img"); if (b.classList.toggle("abierta")) img.src = `shared/comidas/${b.dataset.foto}-grande.jpg`; return; }
+        const id = b.dataset.foto, cr = FOTOS[id];
+        const capa = document.createElement("div");
+        capa.className = "foto-grande no-deslizar";
+        capa.innerHTML = `<figure><img src="shared/comidas/${esc(id)}-grande.jpg" alt="${esc(b.getAttribute("aria-label").replace(/^Ver foto: /, ""))}">
+          ${cr ? `<figcaption>Foto: ${esc(cr.autor)} · ${esc(cr.fuente)}</figcaption>` : ""}</figure>`;
+        const cerrar = () => { capa.remove(); removeEventListener("keydown", esc_); };
+        const esc_ = (e) => { if (e.key === "Escape") cerrar(); };
+        capa.addEventListener("click", cerrar);
+        addEventListener("keydown", esc_);
+        document.body.append(capa);
       }
       pintar();
     }
