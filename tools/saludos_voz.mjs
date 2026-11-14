@@ -12,11 +12,17 @@ Joaquín Santiago Eduardo Víctor Roberto Jaime Mario Ignacio Alfonso Hugo Marco
 Samuel Guillermo Héctor Cristian Marc Aitor Unai Iker Rodrigo Tomás Gabriel Emilio Julián Esteban Felipe
 María Carmen Ana Isabel Laura Cristina Marta Lucía Paula Sara Elena Raquel Pilar Rocío Andrea Beatriz Patricia Silvia
 Julia Irene Alba Claudia Sofía Carla Nuria Natalia Mónica Rosa Teresa Inés Eva Noelia Lorena Sandra Verónica Alicia
-Marina Clara Daniela Valeria Martina Emma Lola Carlota Alejandra Noa Aitana Ainhoa Miriam Esther Victoria`.split(/\s+/);
+Marina Clara Daniela Valeria Martina Emma Lola Carlota Alejandra Noa Aitana Ainhoa Miriam Esther Victoria
+Javi Dani Alex Pepe Paco Fran Nacho Manu Rafa Edu Santi Juanma Chema Toni Álex Isa Mari Maite Bea Cris Lu Patri Vero Rocío
+Marco Bruno Thiago Liam Pol Biel Izan Erik Gael Enzo Dylan Kevin Jonathan Brian Óliver Arturo Gerardo Ricardo Agustín
+Nerea Ainara Lara Vega Olivia Chloe Abril Jimena Mía Candela Ariadna Leire Iratxe Yolanda Susana Ángela Rebeca Gloria Celia Diana Tamara`.split(/\s+/)
+  .concat(["José Luis", "Juan Carlos", "José Antonio", "José Manuel", "Juan José", "Juan Antonio", "Miguel Ángel", "Francisco Javier",
+    "Juan Manuel", "José María", "Luis Miguel", "María José", "María Jesús", "María Carmen", "Ana Isabel", "María Luisa", "Ana María", "Mari Carmen"]);
 
 const lecciones = [];
+const unicos = [...new Map(NOMBRES.map((n) => [claveNombre(n), n])).values()];
 for (const [m, frase] of Object.entries(SALUDO_CON_NOMBRE))
-  for (const n of NOMBRES) lecciones.push({ id: `${m}-${claveNombre(n)}`, titulo: `${m} · ${n}`, texto: frase.replace("{n}", n) });
+  for (const n of unicos) lecciones.push({ id: `${m}-${claveNombre(n)}`, titulo: `${m} · ${n}`, texto: frase.replace("{n}", n) });
 for (const [m, frases] of Object.entries(SALUDO_SIN_NOMBRE))
   frases.forEach((t, i) => lecciones.push({ id: `${m}-${i}`, titulo: `${m} · sin nombre ${i + 1}`, texto: t }));
 fs.writeFileSync(new URL("../shared/voz/saludos.json", import.meta.url), JSON.stringify({ nombre: "Saludos de Forty5", lecciones }, null, 1));

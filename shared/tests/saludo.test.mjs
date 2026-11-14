@@ -27,9 +27,10 @@ test("el audio no se repite hasta pasadas 2 horas del último", () => {
   assert.equal(tocaVoz(t, t + SIN_VOZ_MS - 1), false);
   assert.equal(tocaVoz(t, t + SIN_VOZ_MS), true);
 });
-import { audiosSaludo, claveNombre } from "../saludo.js";
+import { audiosSaludo, claveNombre, clavesNombre } from "../saludo.js";
 test("audios de Epachuko: primero con tu nombre, luego sin nombre", () => {
-  assert.equal(claveNombre("  Jonás Ramos"), "jonas");
+  assert.equal(claveNombre("  José  Luis "), "jose-luis");
+  assert.deepEqual(clavesNombre("José Luis Pérez"), ["jose-luis-perez", "jose-luis", "jose"]);
   assert.deepEqual(audiosSaludo("Jonás", "manana", 0), ["voz/manana-jonas.mp3", "voz/manana-0.mp3"]);
   assert.deepEqual(audiosSaludo("", "madrugada", 0.9), ["voz/noche-1.mp3"]);
 });

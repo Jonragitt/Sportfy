@@ -24,12 +24,21 @@ export const SALUDO_SIN_NOMBRE = {
   tarde: ["¡Buenas tardes! ¿Vamos a por ello?", "¡Buenas tardes! Hoy se entrena."],
   noche: ["¡Buenas noches! Último empujón del día.", "¡Buenas noches! Bien hecho por venir."],
 };
-/** "Jonás Ramos" → "jonas" (nombre de archivo del audio: primer nombre, sin tildes ni mayúsculas). */
-export const claveNombre = (n) => String(n ?? "").trim().split(/\s+/)[0].normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z]/g, "");
+/** "Jonás" → "jonas", "José Luis" → "jose-luis" (nombre de archivo: sin tildes ni mayúsculas). */
+export const claveNombre = (n) => String(n ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase()
+  .replace(/[^a-z\s]/g, "").trim().split(/\s+/).filter(Boolean).join("-");
+/**
+ * Cómo reconoce el motor tu nombre: primero el nombre entero («José Luis Pérez» → «jose-luis-perez»,
+ * «jose-luis»), y si no está grabado, el primer nombre («jose»).
+ */
+export function clavesNombre(n) {
+  const p = claveNombre(n).split("-").filter(Boolean);
+  return [...new Set([p.join("-"), p.slice(0, 2).join("-"), p[0]].filter(Boolean))];
+}
 /** Audios a probar, en orden, para un nombre y un momento del día. */
 export function audiosSaludo(nombre, m = momento(), azar = Math.random()) {
-  const g = m === "madrugada" ? "noche" : m, k = claveNombre(nombre), sin = SALUDO_SIN_NOMBRE[g];
-  return [k && `voz/${g}-${k}.mp3`, `voz/${g}-${Math.floor(azar * sin.length) % sin.length}.mp3`].filter(Boolean);
+  const g = m === "madrugada" ? "noche" : m, sin = SALUDO_SIN_NOMBRE[g];
+  return [...clavesNombre(nombre).map((k) => `voz/${g}-${k}.mp3`), `voz/${g}-${Math.floor(azar * sin.length) % sin.length}.mp3`];
 }
 
 /** Parte del día según la hora: madrugada (0–6), mañana (6–13), tarde (13–21) y noche (21–24). */

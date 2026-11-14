@@ -6,7 +6,7 @@
 // - Sin configuración, la pantalla los muestra como "muy pronto" y todo se queda en el dispositivo.
 // Todo lo que la app guarda en localStorage bajo "sportfy." se sube a la nube y se baja en otro
 // dispositivo al iniciar sesión. Las claves de la cuenta van bajo "forty5." y no se sincronizan.
-import { saludar, saludoAlEntrar } from "./saludo.js?v=202611141530";
+import { saludar, saludoAlEntrar } from "./saludo.js?v=202611141555";
 import { FIREBASE_CONFIG, APPLE_ACTIVO } from "./firebase-config.js?v=202611130630";
 
 const NOMBRE = "sportfy.nombre";  // cómo quiere la persona que la llamemos (se sincroniza)
