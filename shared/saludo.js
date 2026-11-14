@@ -6,8 +6,10 @@
 //   frase como texto grande a la izquierda («¡Buenos días, Pepito!») y se va sola.
 // Un saludo por visita (sessionStorage), no en cada cambio de página.
 //
-// Voz: si hay audios grabados en CLIPS (shared/voz/<momento>-<n>.mp3) se usan esos; si no, la
-// voz en español del propio dispositivo (síntesis de voz del navegador) dice la frase con tu nombre.
+// Voz de Epachuko (grabada con el Estudio de voz, ver shared/voz/LEEME.md), por orden:
+//   1. shared/voz/<momento>-<nombre>.mp3  («¡Buenos días, Jonás!», para los nombres más comunes)
+//   2. shared/voz/<momento>-<0|1|2>.mp3   (frase sin nombre, si el tuyo no está grabado)
+//   3. la voz en español del propio dispositivo, que sí dice cualquier nombre.
 import { fechaActual } from "./reloj.js?v=202611130400";
 
 const CLAVE_NOMBRE = "sportfy.nombre";
@@ -15,8 +17,20 @@ const YA = "forty5.saludado"; // sessionStorage: ya se ha saludado en esta visit
 const REGISTRO = "sportfy.saludo"; // { voz: milisegundos del último saludo con voz }
 export const SIN_VOZ_MS = 2 * 60 * 60 * 1000; // 2 horas de reloj sin repetir el audio
 
-/** Audios grabados por momento del día: { manana: ["voz/manana-1.mp3"], … }. Vacío = voz del dispositivo. */
-export const CLIPS = {};
+/** Frases que graba Epachuko (tools/saludos_voz.mjs las pasa a shared/voz/saludos.json). La madrugada usa las de noche. */
+export const SALUDO_CON_NOMBRE = { manana: "¡Buenos días, {n}!", tarde: "¡Buenas tardes, {n}!", noche: "¡Buenas noches, {n}!" };
+export const SALUDO_SIN_NOMBRE = {
+  manana: ["¡Buenos días! A por el día.", "¡Buenos días! Hoy es un gran día para entrenar."],
+  tarde: ["¡Buenas tardes! ¿Vamos a por ello?", "¡Buenas tardes! Hoy se entrena."],
+  noche: ["¡Buenas noches! Último empujón del día.", "¡Buenas noches! Bien hecho por venir."],
+};
+/** "Jonás Ramos" → "jonas" (nombre de archivo del audio: primer nombre, sin tildes ni mayúsculas). */
+export const claveNombre = (n) => String(n ?? "").trim().split(/\s+/)[0].normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z]/g, "");
+/** Audios a probar, en orden, para un nombre y un momento del día. */
+export function audiosSaludo(nombre, m = momento(), azar = Math.random()) {
+  const g = m === "madrugada" ? "noche" : m, k = claveNombre(nombre), sin = SALUDO_SIN_NOMBRE[g];
+  return [k && `voz/${g}-${k}.mp3`, `voz/${g}-${Math.floor(azar * sin.length) % sin.length}.mp3`].filter(Boolean);
+}
 
 /** Parte del día según la hora: madrugada (0–6), mañana (6–13), tarde (13–21) y noche (21–24). */
 export function momento(f = fechaActual()) {
@@ -75,11 +89,20 @@ export function tocaVoz(ultima = ultimaVoz(), t = ahora()) { return !ultima || t
 export function saludar(nombre = nombreGuardado()) {
   try { sessionStorage.setItem(YA, "1"); } catch { /* sin almacenamiento */ }
   try { localStorage.setItem(REGISTRO, JSON.stringify({ voz: ahora() })); } catch { /* sin almacenamiento */ }
-  const m = momento(), clips = CLIPS[m];
-  if (clips?.length) {
-    const a = new Audio(new URL(`./${clips[Math.floor(Math.random() * clips.length)]}`, import.meta.url));
-    return a.play().catch(() => {});
-  }
+  const lista = audiosSaludo(nombre);
+  const probar = () => {
+    const ruta = lista.shift();
+    if (!ruta) return hablar(nombre); // ningún audio grabado: voz del dispositivo
+    const a = new Audio(new URL(`./${ruta}`, import.meta.url));
+    let fallo = false;
+    const siguiente = () => { if (!fallo) { fallo = true; probar(); } }; // no existe: el siguiente
+    a.addEventListener("error", siguiente, { once: true });
+    a.play().catch((e) => { if (e?.name !== "NotAllowedError") siguiente(); });
+  };
+  probar();
+}
+
+function hablar(nombre) {
   if (!("speechSynthesis" in window)) return;
   const u = new SpeechSynthesisUtterance(fraseSaludo(nombre));
   u.lang = "es-ES"; u.rate = 1.02; u.pitch = 1;

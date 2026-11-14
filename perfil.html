@@ -309,7 +309,7 @@
   <script type="module" src="shared/racha.js?v=202611131500"></script>
   <script type="module">
     // Tarjeta "Tu cuenta": con quién has iniciado sesión y si el progreso está guardado en la nube.
-    import { cuenta, googleAppleListos, iniciarSesion, cerrarSesion, nombre, cambiarNombre } from "./shared/cuenta.js?v=202611141510";
+    import { cuenta, googleAppleListos, iniciarSesion, cerrarSesion, nombre, cambiarNombre } from "./shared/cuenta.js?v=202611141530";
     const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
     const TEXTO = { guardado: "✓ Progreso guardado en la nube", error: "No se ha podido guardar ahora; se reintentará solo.", conectado: "Conectando con la nube…" };
     let estado = null;
@@ -340,7 +340,7 @@
     pintarCuenta();
   </script>
   <script type="module">
-    import { montarTraspaso } from "./shared/traspaso.js?v=202611141510";
+    import { montarTraspaso } from "./shared/traspaso.js?v=202611141530";
     montarTraspaso(document.getElementById("traspaso"));
   </script>
   <script type="module" src="shared/fondo.js?v=202611132140"></script>
