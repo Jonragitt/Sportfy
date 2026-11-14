@@ -129,7 +129,20 @@ html.racha-bloqueo, html.racha-bloqueo body { overflow: hidden; }
 .login-btn[data-usar] small { position: static; background: none; color: rgba(255,255,255,.7); text-transform: none; letter-spacing: 0; padding: 0; font-weight: 600; }
 .login-error { margin: 12px 0 0; color: #ff9b85; font-weight: 600; font-size: .92rem; }
 .login-sin { margin-top: 14px; font: inherit; font-size: .95rem; font-weight: 600; color: rgba(255,255,255,.75); background: none; border: 0; text-decoration: underline; cursor: pointer; padding: 8px; }
+.nombre-input { width: 100%; box-sizing: border-box; min-height: 52px; padding: 12px 16px; border-radius: 14px; border: 1.5px solid rgba(255,255,255,.35); background: rgba(255,255,255,.08); color: #fff; font: inherit; font-size: 1.1rem; font-weight: 600; text-align: center; outline: none; }
+.nombre-input::placeholder { color: rgba(255,255,255,.5); font-weight: 500; }
+.nombre-input:focus { border-color: #e4572e; box-shadow: 0 0 0 3px rgba(228,87,46,.3); }
 
 /* El reloj se ve también encima de las pantallas de inicio de sesión y de racha (solo para mirar). */
 body:has(.login-modal) .reloj, body:has(.racha-modal) .reloj { z-index: 120; pointer-events: none; }
 body:has(.login-modal) .reloj .reloj-panel, body:has(.racha-modal) .reloj .reloj-panel { display: none; }
+
+/* Saludo escrito (shared/saludo.js): frase grande a la izquierda que aparece y se va sola. */
+.saludo-texto { position: fixed; z-index: 90; left: 0; top: 38dvh; padding: 22px 48px 22px max(20px, env(safe-area-inset-left));
+  margin: 0; max-width: min(15ch, 88vw); border-radius: 0 28px 28px 0;
+  background: linear-gradient(90deg, rgba(10,10,12,.82) 0%, rgba(10,10,12,.62) 70%, rgba(10,10,12,0) 100%); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); font-size: clamp(2.1rem, 9vw, 3.6rem); font-weight: 800; line-height: 1.05; letter-spacing: -.01em; text-align: left;
+  color: #fff; text-shadow: 0 2px 18px rgba(0,0,0,.65), 0 1px 3px rgba(0,0,0,.5); text-wrap: balance; pointer-events: none;
+  animation: saludo-entra .55s cubic-bezier(.2,.8,.2,1) both; transition: opacity .9s ease, transform .9s ease; }
+.saludo-texto.fuera { opacity: 0; transform: translateX(-24px); }
+@keyframes saludo-entra { from { opacity: 0; transform: translateX(-28px); } }
+@media (prefers-reduced-motion: reduce) { .saludo-texto { animation: none; transition: opacity .4s; } .saludo-texto.fuera { transform: none; } }

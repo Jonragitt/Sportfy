@@ -6,8 +6,10 @@
 // - Sin configuración, la pantalla los muestra como "muy pronto" y todo se queda en el dispositivo.
 // Todo lo que la app guarda en localStorage bajo "sportfy." se sube a la nube y se baja en otro
 // dispositivo al iniciar sesión. Las claves de la cuenta van bajo "forty5." y no se sincronizan.
+import { saludar, saludoAlEntrar } from "./saludo.js?v=202611141510";
 import { FIREBASE_CONFIG, APPLE_ACTIVO } from "./firebase-config.js?v=202611130630";
 
+const NOMBRE = "sportfy.nombre";  // cómo quiere la persona que la llamemos (se sincroniza)
 const CUENTA = "forty5.cuenta";   // { tipo: "google" | "apple" | "local", nombre, desde }
 const NUBE = "forty5.nube";       // { version, hashes: { clave: hash } }
 const SOLO_AQUI = new Set(["sportfy.fechaVista", "sportfy.fondoUltima"]); // cosas de este dispositivo
@@ -214,7 +216,67 @@ export function mostrarInicioSesion({ cerrable = false } = {}) {
   modal.querySelector('[data-via="local"]').addEventListener("click", () => {
     if (!cerrable) escribir(CUENTA, { tipo: "local", desde: new Date().toISOString() });
     soltar();
+    if (!cerrable && !leer(NOMBRE)) pedirNombre();
   });
+}
+
+/**
+ * "¿Cómo te llamas?": se pide una vez a cada persona (tras iniciar sesión o al seguir sin cuenta).
+ * Con el nombre la app te saluda por voz y, si has iniciado sesión, te llega el correo de bienvenida.
+ */
+export function pedirNombre({ sugerido = "", alGuardar } = {}) {
+  if (document.querySelector(".login-modal")) return;
+  const modal = document.createElement("div");
+  modal.className = "login-modal no-deslizar";
+  modal.setAttribute("role", "dialog"); modal.setAttribute("aria-modal", "true"); modal.setAttribute("aria-labelledby", "nombre-titulo");
+  modal.innerHTML = `<form class="login-caja nombre-caja">
+    <img class="login-logo" src="${new URL("./logo/forty5-titulo.png", import.meta.url)}" alt="Forty5" width="900" height="214">
+    <h2 id="nombre-titulo">¿Cómo te llamas?</h2>
+    <p class="login-sub">Así te saludaremos al entrar y sabremos cómo dirigirnos a ti.</p>
+    <input class="nombre-input" name="nombre" type="text" autocomplete="given-name" autocapitalize="words" maxlength="30" required placeholder="Tu nombre">
+    <p class="login-error" hidden></p>
+    <div class="login-btns" style="margin-top:14px"><button type="submit" class="login-btn principal"><span>Continuar</span></button></div>
+  </form>`;
+  const soltar = bloquear(modal);
+  document.body.append(modal);
+  const input = modal.querySelector(".nombre-input");
+  input.value = sugerido;
+  input.focus();
+  modal.querySelector("form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const nombre = limpiarNombre(input.value);
+    if (!nombre) { const p = modal.querySelector(".login-error"); p.textContent = "Escribe tu nombre para continuar."; p.hidden = false; return; }
+    escribir(NOMBRE, nombre);
+    soltar();
+    saludar(nombre); // el toque en «Continuar» deja que suene
+    dispatchEvent(new CustomEvent("forty5:nombre", { detail: { nombre } }));
+    alGuardar?.(nombre);
+  });
+}
+/** "  jonás  ramos " → "Jonás Ramos" (solo se pone en mayúscula la primera letra de cada palabra). */
+export function limpiarNombre(t) {
+  return String(t ?? "").replace(/\s+/g, " ").trim().slice(0, 30)
+    .split(" ").map((p) => p.charAt(0).toLocaleUpperCase("es") + p.slice(1)).join(" ");
+}
+export const nombre = () => leer(NOMBRE, "");
+export function cambiarNombre(n) { const v = limpiarNombre(n); if (v) { escribir(NOMBRE, v); dispatchEvent(new CustomEvent("forty5:nombre", { detail: { nombre: v } })); } return v; }
+
+// ---------- Correo de bienvenida ----------
+// Se manda una sola vez por cuenta, cuando ya hay sesión iniciada y nombre. Lo envía la función de
+// Netlify netlify/functions/bienvenida.mjs (comprueba la sesión con el token de Firebase y manda el
+// correo a la dirección de esa cuenta). En la ficha usuarios/<uid> queda "bienvenida" con la fecha.
+async function bienvenidaSiFalta(fb, u, meta) {
+  const n = leer(NOMBRE);
+  if (!n || !u.email || meta?.bienvenida) return;
+  const { db, F } = fb, ficha = F.doc(db, "usuarios", u.uid);
+  await F.setDoc(ficha, { nombre: n, correo: u.email }, { merge: true }).catch(() => {});
+  try {
+    const r = await fetch("/.netlify/functions/bienvenida", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token: await u.getIdToken(), nombre: n }),
+    });
+    if (r.ok) await F.setDoc(ficha, { bienvenida: Date.now() }, { merge: true });
+  } catch { /* sin servidor de correo (p. ej. en claude.ai): se reintenta en otra visita */ }
 }
 
 /** Si en este dispositivo había progreso y en la cuenta también, la persona elige. */
@@ -261,6 +323,8 @@ export function iniciarSesion() { mostrarInicioSesion({ cerrable: true }); }
 if (typeof document !== "undefined") {
   const arrancar = async () => {
     const c = cuenta();
+    saludoAlEntrar();
+    if (c?.tipo === "local" && !leer(NOMBRE)) pedirNombre();
     const fb = await firebase();
     if (!fb) { if (!c) mostrarInicioSesion(); return; }
     fb.A.getRedirectResult(fb.auth).catch(() => {});
@@ -272,7 +336,11 @@ if (typeof document !== "undefined") {
         document.querySelector(".login-modal")?.remove();
         document.body.classList.add("con-cuenta");
         dispatchEvent(new CustomEvent("forty5:cuenta", { detail: { estado: "conectado" } }));
-        sincronizar(nubeDe(fb, u.uid));
+        sincronizar(nubeDe(fb, u.uid)).then(async () => {
+          const meta = await fb.F.getDoc(fb.F.doc(fb.db, "usuarios", u.uid)).then((d) => d.data()).catch(() => null);
+          if (leer(NOMBRE)) return bienvenidaSiFalta(fb, u, meta);
+          pedirNombre({ sugerido: limpiarNombre((u.displayName || "").split(" ")[0]), alGuardar: () => bienvenidaSiFalta(fb, u, meta) });
+        });
       } else if (primera && (!c || c.tipo !== "local")) {
         mostrarInicioSesion();
       }
