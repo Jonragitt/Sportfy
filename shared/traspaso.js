@@ -2,7 +2,7 @@
 // Cada web guarda lo suyo en el navegador, así que en la de origen se genera un código con todo
 // el progreso ("sportfy.*") y en la de destino se pega. Si allí hay sesión iniciada, cuenta.js lo
 // sube solo a la nube en unos segundos.
-import { progresoLocal } from "./cuenta.js?v=202611141945";
+import { progresoLocal } from "./cuenta.js?v=202611141930";
 
 const B64 = { de: (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0)) };
 const trozos = (u8) => { let s = ""; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode(...u8.subarray(i, i + 0x8000)); return btoa(s); };

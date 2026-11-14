@@ -233,6 +233,7 @@ export function pedirNombre({ sugerido = "", alGuardar } = {}) {
   modal.innerHTML = `<form class="login-caja nombre-caja">
     <img class="login-logo" src="${new URL("./logo/forty5-titulo.png", import.meta.url)}" alt="Forty5" width="900" height="214">
     <h2 id="nombre-titulo">¿Cómo te llamas?</h2>
+    <p class="login-sub">Así te saludaremos al entrar y sabremos cómo dirigirnos a ti.</p>
     <input class="nombre-input" name="nombre" type="text" autocomplete="given-name" autocapitalize="words" maxlength="30" required placeholder="Tu nombre">
     <p class="login-error" hidden></p>
     <div class="login-btns" style="margin-top:14px"><button type="submit" class="login-btn principal"><span>Continuar</span></button></div>
