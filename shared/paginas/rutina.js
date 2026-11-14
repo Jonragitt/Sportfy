@@ -202,12 +202,23 @@ export function montar() {
         const capa = document.createElement("div");
         capa.className = "video-grande no-deslizar";
         capa.innerHTML = `<div class="video-grande-caja"><video src="${v.dataset.grande}" autoplay loop playsinline muted disablepictureinpicture></video>
+          <input type="range" class="video-barra" min="0" max="1000" value="0" step="1" aria-label="Avanzar o retroceder el vídeo">
           <p>${cap}</p><button type="button" class="btn" data-cerrar>Cerrar</button></div>`;
         const cerrar = () => capa.remove();
         capa.addEventListener("click", (e) => { if (e.target === capa || e.target.closest("[data-cerrar]")) cerrar(); });
         addEventListener("keydown", function esc(e) { if (e.key === "Escape") { cerrar(); removeEventListener("keydown", esc); } });
         document.body.append(capa);
-        sinParar(capa.querySelector("video"));
+        const vid = capa.querySelector("video"), barra = capa.querySelector(".video-barra");
+        sinParar(vid);
+        // Barra para adelantar o atrasar: mueve el punto del vídeo, pero nunca lo pausa.
+        let arrastrando = false;
+        const fin = () => { arrastrando = false; };
+        barra.addEventListener("pointerdown", () => { arrastrando = true; });
+        barra.addEventListener("pointerup", fin);
+        barra.addEventListener("pointercancel", fin);
+        barra.addEventListener("change", fin);
+        barra.addEventListener("input", () => { if (vid.duration) vid.currentTime = (barra.value / 1000) * vid.duration; });
+        vid.addEventListener("timeupdate", () => { if (!arrastrando && vid.duration) barra.value = Math.round((vid.currentTime / vid.duration) * 1000); });
       }
       const horaPlazo = (d) => `${String(d.getHours()).padStart(2, "0")}:00`;
       function pintarGuia(anim = false) {
