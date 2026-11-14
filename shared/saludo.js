@@ -44,6 +44,7 @@ export function audiosSaludo(nombre, m = momento(), azar = Math.random()) {
 }
 
 const VOZ_V = "202611141900"; // cambiar al regrabar
+const VOLUMEN = 0.45; // volumen del saludo de Epachuko (1 = original); jonás lo quiso más bajo
 const PAQUETES = new URL("./voz/paquetes/", import.meta.url);
 let indice = null;
 const paquetes = new Map();
@@ -135,6 +136,7 @@ export function saludar(nombre = nombreGuardado()) {
   const ctx = Ctx ? new Ctx() : null;
   ctx?.resume?.().catch(() => {});
   const a = ctx ? null : new Audio();
+  if (a) a.volume = VOLUMEN;
   (async () => {
     for (const clave of audiosSaludo(nombre)) {
       let b = null;
@@ -156,8 +158,9 @@ export function saludar(nombre = nombreGuardado()) {
 async function sonarUnaVez(ctx, blob) {
   const buf = await ctx.decodeAudioData(await blob.arrayBuffer());
   const src = ctx.createBufferSource();
-  src.buffer = buf; src.connect(ctx.destination);
-  src.onended = () => { try { src.disconnect(); } catch { /* ya desconectado */ } ctx.close?.().catch(() => {}); };
+  const gan = ctx.createGain(); gan.gain.value = VOLUMEN;
+  src.buffer = buf; src.connect(gan); gan.connect(ctx.destination);
+  src.onended = () => { try { src.disconnect(); gan.disconnect(); } catch { /* ya desconectado */ } ctx.close?.().catch(() => {}); };
   if (ctx.state === "suspended") await ctx.resume();
   src.start();
 }
