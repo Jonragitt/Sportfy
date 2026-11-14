@@ -155,4 +155,9 @@ body:has(.login-modal) .reloj .reloj-panel, body:has(.racha-modal) .reloj .reloj
   animation: saludo-entra .55s cubic-bezier(.2,.8,.2,1) both; transition: opacity .9s ease, transform .9s ease; }
 .saludo-texto.fuera { opacity: 0; transform: translateX(-24px); }
 @keyframes saludo-entra { from { opacity: 0; transform: translateX(-28px); } }
+/* En el móvil, discreto: una píldora pequeña arriba a la izquierda, bajo los botones, que no tapa el contenido. */
+@media (max-width: 640px) {
+  .saludo-texto { top: calc(env(safe-area-inset-top) + 64px); left: 12px; max-width: calc(100vw - 24px); padding: 7px 14px; border-radius: 999px;
+    background: rgba(10,10,12,.72); font-size: 1.05rem; font-weight: 700; line-height: 1.2; text-shadow: none; }
+}
 @media (prefers-reduced-motion: reduce) { .saludo-texto { animation: none; transition: opacity .4s; } .saludo-texto.fuera { transform: none; } }

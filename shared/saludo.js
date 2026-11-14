@@ -191,8 +191,9 @@ export function saludoTexto(nombre = nombreGuardado()) {
   el.className = "saludo-texto"; el.setAttribute("role", "status");
   el.textContent = fraseSaludo(nombre).replace(/^(¡?[^!.?]*[!.?]).*$/, "$1"); // solo «¡Buenos días, Pepito!»
   document.body.append(el);
-  setTimeout(() => el.classList.add("fuera"), 4200);
-  setTimeout(() => el.remove(), 5200);
+  const corto = matchMedia("(max-width: 640px)").matches; // en el móvil dura menos
+  setTimeout(() => el.classList.add("fuera"), corto ? 2600 : 4200);
+  setTimeout(() => el.remove(), corto ? 3600 : 5200);
 }
 
 /** Prepara el saludo de esta visita: con voz al primer toque o, si sonó hace menos de 2 h, por escrito. */
