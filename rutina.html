@@ -53,6 +53,9 @@
     .vol div { border: 1px solid var(--border); border-radius: 10px; padding: 6px 10px; font-size: .85rem; }
     .vol b { display: block; font-size: 1.1rem; }
     .aviso { margin: 10px 0 0; padding: 10px 12px; border-radius: 10px; font-size: .9rem; background: color-mix(in srgb, var(--mid) 15%, transparent); }
+    /* Fichas de descanso y cardio iluminadas en naranja, como la ficha del entreno. */
+    body.con-fondo .card.luz, .card.luz { border: 2px solid var(--accent); background: linear-gradient(160deg, rgba(228,87,46,.32), rgba(20,20,24,.92) 55%); color: #fff; box-shadow: 0 10px 34px rgba(228,87,46,.35); --muted: #ffd9c7; }
+    .card.luz .hoy-fecha { color: #ffb08f; }
     body.con-fondo .card.guia, .card.guia { position: relative; border: 2px solid var(--accent); background: linear-gradient(160deg, rgba(228,87,46,.32), rgba(20,20,24,.92) 55%); color: #fff; box-shadow: 0 10px 34px rgba(228,87,46,.35); padding: 18px 18px 16px; --muted: #ffd9c7; -webkit-backdrop-filter: none; backdrop-filter: none; }
     .guia-cab { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-size: .78rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: #ffb38a; }
     .guia-cab span:last-child { white-space: nowrap; }
@@ -123,7 +126,7 @@
   </main>
 
 
-  <script type="module" data-pagina="shared/paginas/rutina.js?v=202611150210">import { montar } from "./shared/paginas/rutina.js?v=202611150210"; montar();</script>
+  <script type="module" data-pagina="shared/paginas/rutina.js?v=202611150300">import { montar } from "./shared/paginas/rutina.js?v=202611150300"; montar();</script>
   <script type="module" src="shared/deslizar.js?v=202611132045"></script>
   <script type="module" src="shared/reloj.js?v=202611130400"></script>
   <script type="module" src="shared/racha.js?v=202611142300"></script>

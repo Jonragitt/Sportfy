@@ -57,7 +57,7 @@ export function montar() {
             ${dia === sHoy.dia && semana === auto && reposo == null ? `<a class="btn" href="#sesion">Ver la sesión ↓</a>` : `<button class="btn" type="button" id="ir-hoy">Ver la sesión de ${esHoy() ? "hoy" : "ese día"}</button>`}</div>`;
         }
         const cardio = rHoy.cardioExtra?.diasSemana?.includes(ds);
-        return `<div class="card hoy-toca"><p class="hoy-fecha">${esc(cuando)}</p>
+        return `<div class="card hoy-toca luz"><p class="hoy-fecha">${esc(cuando)}</p>
           <p class="hoy-titulo">${cardio ? "Cardio" : "Descanso"}</p>
           <p class="hoy-sub">${cardio ? esc(rHoy.cardioExtra.tipo) + "." : esc(rHoy.recuperacionActiva ?? "Sin pesas: descansa, camina y duerme bien para recuperar.")}</p>
           ${rHoy.cardioExtra?.pasos ? `<p class="note" style="margin:0">Y ${esc(rHoy.cardioExtra.pasos)}.</p>` : ""}</div>`;
@@ -117,7 +117,7 @@ export function montar() {
 
         if (reposo != null) {
           const cardio = r.cardioExtra?.diasSemana?.includes(reposo);
-          html.push(`<div class="card" id="sesion" style="scroll-margin-top:130px">
+          html.push(`<div class="card luz" id="sesion" style="scroll-margin-top:130px">
             <h2 style="margin:0">${esc(DIAS_SEMANA[reposo])} · ${cardio ? "Cardio" : "Reposo"}</h2>
             <p style="margin:8px 0 0">${cardio ? `No hay pesas. Toca cardio: ${esc(r.cardioExtra.tipo)}.` : "No hay nada que hacer en el gimnasio: descansar también es parte del plan, porque es cuando el músculo se recupera y crece."}</p>
             ${r.recuperacionActiva ? `<p class="note" style="margin:8px 0 0"><b>Si te apetece moverte:</b> ${esc(r.recuperacionActiva)}</p>` : ""}
