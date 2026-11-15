@@ -48,7 +48,7 @@ export function montar() {
         const sHoy = rHoy.sesiones.find((x) => x.diaSemana === ds);
         const cuando = `${esHoy() ? "Hoy" : "El"} ${fechaLarga(f)} · Semana ${auto} · ${rHoy.semana.nombre}`;
         if (!rHoy.diasSemana.length) return `<div class="card hoy-toca"><p class="hoy-fecha">${esc(cuando)}</p>
-          <p class="hoy-titulo">Elige tus días</p><p class="hoy-sub">Para saber qué sesión toca cada día, marca en qué días entrenas.</p><a class="btn" href="preferencias.html">Elegir días</a></div>`;
+          <p class="hoy-titulo">Elige tus días</p><p class="hoy-sub">Para saber qué sesión toca cada día, marca en qué días entrenas.</p><a class="btn" href="preferencias.html" data-ajustes aria-expanded="false">Elegir días</a></div>`;
         if (sHoy) {
           const hecha = hechosSemana.includes(sHoy.dia);
           return `<div class="card hoy-toca"><p class="hoy-fecha">${esc(cuando)}</p>
@@ -83,7 +83,7 @@ export function montar() {
             ${r.ladoDebil ? `<span class="tag l0">Lado débil: ${r.ladoDebil === "I" ? "izquierdo" : "derecho"}</span>` : ""}
             ${r.focos.map((f) => `<span class="tag l2">Prioridad: ${esc(FOCOS[f].nombre.toLowerCase())}</span>`).join("")}
           </div>
-          <p class="note" style="margin:8px 0 0">${r.sesiones.map((x) => `<b>${esc(x.diaNombre ?? `Día ${x.dia}`)}</b>`).join(", ")} · <a href="preferencias.html">Cambiar días, zonas o salud</a></p>
+          <p class="note" style="margin:8px 0 0">${r.sesiones.map((x) => `<b>${esc(x.diaNombre ?? `Día ${x.dia}`)}</b>`).join(", ")} · <a href="preferencias.html" data-ajustes aria-expanded="false">Cambiar días, zonas o salud</a></p>
           ${r.consejos.map((c) => `<p class="aviso">${esc(c)}</p>`).join("")}
           ${r.condiciones.length ? `<p class="aviso"><b>Adaptada a tu salud:</b> ${r.condiciones.map((c) => `${esc(c.nombre)}${c.medico ? " (consulta médica previa)" : ""}`).join(", ")}.</p>` : ""}
           <div class="semanas" role="group" aria-label="Semana del ciclo">${SEMANAS.map((w) => `<button type="button" data-semana="${w.n}" aria-pressed="${w.n === semana}">Sem. ${w.n}${w.n === auto ? " · hoy" : ""}<small>${esc(w.nombre)}</small></button>`).join("")}</div>

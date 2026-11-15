@@ -1,17 +1,20 @@
-// Rutina, Mi plan y Dieta como una sola página: al cambiar de pestaña no se recarga nada.
+// Rutina, Mi plan, Dieta y Mi perfil como una sola página: al cambiar de pestaña no se recarga nada.
 // Se trae el HTML de la otra pestaña (precargado), se cambia solo el <main> y sus estilos, y se
 // ejecutan sus scripts. El fondo, el reloj, la racha y las esquinas se quedan tal cual, así que
 // no hay fundido a negro ni parón. Si algo falla, se navega a la página normal.
 // Script clásico en el <head>: tiene que cargarse antes que los de la página para saber qué
 // escuchas e intervalos pone cada pestaña y quitarlos al salir de ella.
 (() => {
-  const PAGINAS = ["rutina.html", "analisis.html", "dieta.html"];
+  const PAGINAS = ["rutina.html", "analisis.html", "dieta.html", "perfil.html"];
   // Netlify sirve las páginas sin ".html" (/rutina): se normaliza para reconocerlas igual.
   const nombre = (u) => { const n = new URL(u, location.href).pathname.split("/").pop() || "index.html"; return n.includes(".") ? n : n + ".html"; };
   let actual = nombre(location.href);
   // Netlify también reescribe los enlaces (href="/analisis"), así que se compara por nombre.
   const conPlan = (t) => !!t && [...t.querySelectorAll("a[href]")].some((a) => nombre(a.href) === "analisis.html");
   if (!PAGINAS.includes(actual)) return;
+  // Mi perfil va sin barra de pestañas cuando ya hay plan: ahí se mira si hay evaluaciones guardadas.
+  const planGuardado = () => { try { return JSON.parse(localStorage.getItem("sportfy.evaluaciones") || "[]").length > 0 && !localStorage.getItem("sportfy.rondaInicio"); } catch { return false; } };
+  const hayPlan = () => conPlan(document.querySelector(".tabs.arriba")) || (actual === "perfil.html" && planGuardado());
 
   // Lo que pone el código de la propia pestaña (scripts dentro del .html) se apunta para quitarlo
   // al cambiar; lo de los módulos compartidos (shared/*.js) se queda.
@@ -46,7 +49,7 @@
     return cache.get(p);
   };
 
-  let ocupado = false, montando = null;
+  let ocupado = false, montando = null, previa = null;
   function cambiar(doc, p) {
     limpiar();
     montando = null;
@@ -56,6 +59,11 @@
     const ya = [...document.head.querySelectorAll("style")].map((s) => s.textContent);
     for (const t of nuevos) if (!ya.includes(t)) { const s = document.createElement("style"); s.textContent = t; document.head.append(s); }
     document.title = doc.title;
+    // Mi perfil no lleva la cabecera fija ni el botón de perfil (ya está en él).
+    document.body.classList.toggle("con-cabecera", doc.body.classList.contains("con-cabecera"));
+    const conPerfil = !!doc.querySelector(".esquina.perfil");
+    document.querySelectorAll(".esquina.perfil").forEach((e) => { e.style.display = conPerfil ? "" : "none"; });
+    document.querySelector(".reloj")?.classList.toggle("solo", !conPerfil);
     // La cabecera (logo, título y pestañas) es la misma: se conserva y solo cambian el título y
     // la pestaña marcada, así no se mueve nada.
     const cabVieja = document.querySelector("main .cabecera");
@@ -73,6 +81,7 @@
     const viejo = document.querySelector("main");
     main.style.minHeight = `${viejo.offsetHeight}px`; // mismo alto hasta que pinte la pestaña nueva
     viejo.replaceWith(main);
+    if (!(cabVieja && cabNueva)) { medir(); vigilarCabecera(); montarLente(); } // cabecera nueva (de o hacia Mi perfil)
     colocarLente(); // la píldora se desliza hasta la pestaña nueva
     actual = p;
     // Scripts: los compartidos ya están cargados; los de la pestaña se ejecutan de nuevo.
@@ -80,6 +89,7 @@
     for (const viejo of doc.body.querySelectorAll("script")) {
       // El código de cada pestaña está en shared/paginas/*.js y exporta montar(): se importa y se
       // monta otra vez (sin scripts en línea, que algunos visores como claude.ai bloquean).
+      if (viejo.closest("main")) continue; // los de dentro del <main> son para la carga normal de la página
       const pagina = viejo.dataset.pagina;
       if (pagina) { montando = import(new URL(pagina, location.href).href).then((m) => m.montar()); continue; }
       const src = viejo.getAttribute("src");
@@ -99,15 +109,27 @@
   async function ir(p) {
     if (!PAGINAS.includes(p) || p === actual || ocupado) return;
     ocupado = true;
+    const antes = actual;
     let doc;
     try { doc = await traer(p); } catch { location.href = p; return; }
     try {
       await cambiar(doc, p);
     } catch { location.href = p; return; } finally { ocupado = false; }
+    if (p === "perfil.html") previa = antes;
     dispatchEvent(new CustomEvent("forty5:pestana", { detail: p }));
   }
   window.forty5IrPestana = (p) => { if (PAGINAS.includes(actual) && PAGINAS.includes(p)) { ir(p); return true; } return false; };
   window.forty5PestanaActual = () => actual;
+  // Flecha de volver en Mi perfil: a la pestaña de la que se vino, sin recargar.
+  window.forty5Volver = () => { if (actual !== "perfil.html" || !previa) return false; ir(previa); return true; };
+  // Vuelve a montar la pestaña actual sin recargar (p. ej. tras cambiar las preferencias), en el mismo sitio.
+  window.forty5Remontar = () => {
+    if (!PAGINAS.includes(actual) || ocupado) return false;
+    const y = scrollY;
+    ocupado = true;
+    traer(actual).then((doc) => cambiar(doc, actual)).then(() => scrollTo(0, y), () => location.reload()).finally(() => { ocupado = false; });
+    return true;
+  };
 
   // ---------- Píldora arrastrable (como en Apunty) ----------
   const barra = () => document.querySelector(".tabs.arriba");
@@ -176,23 +198,35 @@
     const u = new URL(a.href, location.href);
     if (u.origin !== location.origin || u.hash) return;
     const p = nombre(u.href);
-    if (!PAGINAS.includes(p) || !conPlan(document.querySelector(".tabs.arriba"))) return; // sin plan, navegación normal
+    if (!PAGINAS.includes(p) || !hayPlan()) return; // sin plan, navegación normal
     e.preventDefault();
     ir(p);
   });
 
   // Alto de la cabecera fija, para que el contenido empiece justo debajo.
-  const medir = () => { const c = document.querySelector(".cabecera"); if (c) document.documentElement.style.setProperty("--alto-cabecera", `${Math.ceil(c.getBoundingClientRect().height)}px`); };
+  function medir() { medirAhora(); }
+  const medirAhora = () => { const c = document.querySelector(".cabecera"); if (c) document.documentElement.style.setProperty("--alto-cabecera", `${Math.ceil(c.getBoundingClientRect().height)}px`); };
+  let observador = null;
+  function vigilarCabecera() {
+    if (!window.ResizeObserver) return;
+    observador ??= new ResizeObserver(medir);
+    observador.disconnect();
+    const c = document.querySelector(".cabecera"); if (c) observador.observe(c);
+  }
   addEventListener("resize", () => { medir(); colocarLente(true); });
   document.addEventListener("DOMContentLoaded", () => {
     medir();
     montarLente();
     document.fonts?.ready.then(() => colocarLente(true));
-    if (window.ResizeObserver) { const c = document.querySelector(".cabecera"); if (c) new ResizeObserver(medir).observe(c); }
+    vigilarCabecera();
     document.querySelectorAll("body script:not([src])").forEach((s) => { s.dataset.pestana = ""; });
     // En la web propia la dirección se queda en la raíz (forty5.netlify.app/), que vuelve a abrir el
     // plan; dentro del visor de claude.ai (un marco) no se toca.
     if (window.top === window) { try { history.replaceState(null, "", new URL("./", location.href).href); } catch { /* sin historial */ } }
-    for (const p of PAGINAS) if (p !== actual) traer(p).catch(() => {});
+    // Se precargan las otras pestañas y su código (importarlo no lo monta), para que abran al momento.
+    for (const p of PAGINAS) if (p !== actual) traer(p).then((doc) => {
+      const pag = doc.body.querySelector("script[data-pagina]")?.dataset.pagina;
+      if (pag) import(new URL(pag, location.href).href).catch(() => {});
+    }).catch(() => {});
   });
 })();
