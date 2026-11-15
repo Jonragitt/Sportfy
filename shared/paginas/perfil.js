@@ -4,7 +4,7 @@ import { pendientes } from "../perfil.js";
 import { sincronizar, evaluaciones, rondaEnCurso, repetirEvaluacion, reiniciarTodo, editarDatos, compararEvaluaciones, notaTotal } from "../evaluaciones.js?v=202611130100";
 import { leerPreferencias } from "../motor.js?v=202611130440";
 import { DIAS_SEMANA, FOCOS, CONDICIONES, MATERIAL } from "../rutina.js?v=202611130440";
-import { cuenta, googleAppleListos, iniciarSesion, cerrarSesion, nombre, cambiarNombre } from "../cuenta.js?v=202611150025";
+import { cuenta, googleAppleListos, iniciarSesion, cerrarSesion, nombre, cambiarNombre, novedades, cambiarNovedades } from "../cuenta.js?v=202611160000";
 
 export function montar() {
   // Volver atrás: si se ha llegado sin recargar, se vuelve a la pestaña de antes.
@@ -243,6 +243,9 @@ export function montar() {
         ${conSesion
           ? `<p style="margin:4px 0 0">Has iniciado sesión con <b>${c.tipo === "apple" ? "Apple" : "Google"}</b>${c.nombre ? ` como <b>${esc(c.nombre)}</b>` : ""}${c.correo ? ` (${esc(c.correo)})` : ""}.</p>
              <p class="note" style="margin:6px 0 0">${esc(TEXTO[estado] ?? "Tu progreso se guarda en la nube y lo tendrás en cualquier dispositivo.")}</p>
+             <label style="display:flex;gap:10px;align-items:flex-start;margin:12px 0 0;cursor:pointer;line-height:1.35">
+               <input type="checkbox" id="novedades" ${novedades() ? "checked" : ""} style="width:20px;height:20px;margin:1px 0 0;flex:none;accent-color:var(--accent,#e4572e)">
+               <span>Quiero recibir por correo novedades y consejos de Forty5${c.correo ? ` en <b>${esc(c.correo)}</b>` : ""}.</span></label>
              <button class="btn secondary" type="button" id="cerrar-sesion" style="margin-top:12px">Cerrar sesión</button>`
           : `<p style="margin:4px 0 0">Ahora tu progreso solo está en este dispositivo. Inicia sesión para guardarlo y no perderlo si cambias de móvil.</p>
              ${googleAppleListos() ? "" : `<p class="note" style="margin:6px 0 0">El inicio de sesión con Google estará disponible muy pronto.</p>`}
@@ -250,6 +253,7 @@ export function montar() {
       </div>`;
       document.getElementById("form-nombre").addEventListener("submit", (e) => { e.preventDefault(); const v = cambiarNombre(document.getElementById("mi-nombre").value); if (v) document.getElementById("mi-nombre").value = v; });
       document.getElementById("cerrar-sesion")?.addEventListener("click", cerrarSesion);
+      document.getElementById("novedades")?.addEventListener("change", (e) => cambiarNovedades(e.target.checked));
       document.getElementById("iniciar-sesion")?.addEventListener("click", iniciarSesion);
     }
     addEventListener("forty5:nombre", () => pintarCuenta());

@@ -9,6 +9,7 @@
 import { saludar, saludoAlEntrar } from "./saludo.js?v=202611150025";
 import { FIREBASE_CONFIG, APPLE_ACTIVO } from "./firebase-config.js?v=202611130630";
 
+const NOVEDADES = "sportfy.novedades"; // true si ha pedido recibir novedades por correo (lista de Brevo)
 const NOMBRE = "sportfy.nombre";  // cómo quiere la persona que la llamemos (se sincroniza)
 const CUENTA = "forty5.cuenta";   // { tipo: "google" | "apple" | "local", nombre, desde }
 const NUBE = "forty5.nube";       // { version, hashes: { clave: hash } }
@@ -229,7 +230,7 @@ export function mostrarInicioSesion({ cerrable = false } = {}) {
  * "¿Cómo te llamas?": se pide una vez a cada persona (tras iniciar sesión o al seguir sin cuenta).
  * Con el nombre la app te saluda por voz y, si has iniciado sesión, te llega el correo de bienvenida.
  */
-export function pedirNombre({ sugerido = "", alGuardar } = {}) {
+export function pedirNombre({ sugerido = "", alGuardar, conNovedades = false } = {}) {
   if (document.querySelector(".login-modal")) return;
   const modal = document.createElement("div");
   modal.className = "login-modal no-deslizar";
@@ -239,6 +240,9 @@ export function pedirNombre({ sugerido = "", alGuardar } = {}) {
     <h2 id="nombre-titulo">¿Cómo te llamas?</h2>
     <p class="login-sub">Así te saludaremos al entrar y sabremos cómo dirigirnos a ti.</p>
     <input class="nombre-input" name="nombre" type="text" autocomplete="given-name" autocapitalize="words" maxlength="30" required placeholder="Tu nombre">
+    ${conNovedades ? `<label class="novedades-check" style="display:flex;gap:10px;align-items:flex-start;margin:14px 2px 0;text-align:left;font-size:.9rem;line-height:1.35;cursor:pointer">
+      <input type="checkbox" name="novedades" style="width:20px;height:20px;margin:1px 0 0;flex:none;accent-color:#e4572e">
+      <span>Quiero recibir por correo novedades y consejos de Forty5. Puedes darte de baja cuando quieras.</span></label>` : ""}
     <p class="login-error" hidden></p>
     <div class="login-btns" style="margin-top:14px"><button type="submit" class="login-btn principal"><span>Continuar</span></button></div>
   </form>`;
@@ -252,6 +256,7 @@ export function pedirNombre({ sugerido = "", alGuardar } = {}) {
     const nombre = limpiarNombre(input.value);
     if (!nombre) { const p = modal.querySelector(".login-error"); p.textContent = "Escribe tu nombre para continuar."; p.hidden = false; return; }
     escribir(NOMBRE, nombre);
+    if (conNovedades) escribir(NOVEDADES, modal.querySelector("[name=novedades]").checked);
     soltar();
     saludar(nombre); // el toque en «Continuar» deja que suene
     dispatchEvent(new CustomEvent("forty5:nombre", { detail: { nombre } }));
@@ -282,6 +287,33 @@ async function bienvenidaSiFalta(fb, u, meta) {
     });
     if (r.ok) await F.setDoc(ficha, { bienvenida: Date.now() }, { merge: true });
   } catch { /* sin servidor de correo (p. ej. en claude.ai): se reintenta en otra visita */ }
+}
+
+// ---------- Lista de novedades (solo con permiso) ----------
+// Quien marca «Quiero recibir novedades» se apunta a una lista de Brevo con la función de Netlify
+// netlify/functions/novedades.mjs; al desmarcarlo se quita. En usuarios/<uid> queda
+// novedades: { alta, fecha } como constancia del permiso. Si no se pudo avisar, se reintenta al volver.
+export const novedades = () => leer(NOVEDADES, null);
+async function novedadesSiFalta(fb, u, meta) {
+  const v = leer(NOVEDADES, null);
+  if (v == null || !u?.email || meta?.novedades?.alta === v) return;
+  try {
+    const r = await fetch("/.netlify/functions/novedades", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token: await u.getIdToken(), nombre: leer(NOMBRE) ?? "", alta: v }),
+    });
+    if (r.ok) {
+      const novedades = { alta: v, fecha: Date.now() };
+      await fb.F.setDoc(fb.F.doc(fb.db, "usuarios", u.uid), { novedades }, { merge: true });
+      if (meta) meta.novedades = novedades;
+    }
+  } catch { /* sin servidor (p. ej. en claude.ai): se reintenta en otra visita */ }
+}
+let fichaActual = null; // { fb, u, meta } de la sesión abierta
+/** Marca o desmarca «Quiero recibir novedades» (desde Mi perfil). */
+export function cambiarNovedades(v) {
+  escribir(NOVEDADES, !!v);
+  if (fichaActual) novedadesSiFalta(fichaActual.fb, fichaActual.u, fichaActual.meta);
 }
 
 // Pequeño aviso de estado (guardado en la nube, sin permiso…) para Mi perfil.
@@ -348,8 +380,10 @@ if (typeof document !== "undefined") {
         const respaldo = recuperarRespaldo(u.uid);
         sincronizar(nubeDe(fb, u.uid), { respaldo }).then(async () => {
           const meta = await fb.F.getDoc(fb.F.doc(fb.db, "usuarios", u.uid)).then((d) => d.data()).catch(() => null);
-          if (leer(NOMBRE)) return bienvenidaSiFalta(fb, u, meta);
-          pedirNombre({ sugerido: limpiarNombre((u.displayName || "").split(" ")[0]), alGuardar: () => bienvenidaSiFalta(fb, u, meta) });
+          fichaActual = { fb, u, meta };
+          if (leer(NOMBRE)) { novedadesSiFalta(fb, u, meta); return bienvenidaSiFalta(fb, u, meta); }
+          pedirNombre({ sugerido: limpiarNombre((u.displayName || "").split(" ")[0]), conNovedades: true,
+            alGuardar: () => { novedadesSiFalta(fb, u, meta); bienvenidaSiFalta(fb, u, meta); } });
         });
       } else if (primera && (!c || c.tipo !== "local")) {
         mostrarInicioSesion();
