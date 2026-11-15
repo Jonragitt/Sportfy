@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { calcularDieta, ejemplo } from "../dieta.js";
+import { calcularDieta, ejemplo, menusSemanales, menuDeLaSemana } from "../dieta.js";
 import { calcularPlan } from "../plan.js";
 
 const plan = calcularPlan({ sexo: "hombre", edad: 35, altura: 178, peso: 92, grasa: 28 }, "perdidaGrasa", { diasFuerza: 3, diasCardio: 3 });
@@ -65,4 +65,14 @@ test("cada opción de comida da raciones que cuadran con sus macros y se puede e
   assert.notEqual(lunes, martes);
   // Con hipertensión no se proponen fiambres.
   assert.ok(opcionesDe("Media mañana", ["hipertension"]).every((o) => o.id !== "bocadillo"));
+});
+
+test("dos menús semanales de 7 días que no coinciden el mismo día y se alternan cada semana", () => {
+  const [s1, s2] = menusSemanales(plan, { diasEntreno: [0, 2, 4], comidas: 5 });
+  assert.equal(s1.length, 7); assert.equal(s2.length, 7);
+  assert.equal(s1[0].tipo, "entreno"); assert.equal(s1[1].tipo, "descanso");
+  for (let d = 0; d < 7; d++) assert.notDeepEqual(s1[d].comidas.map((c) => c.opcion), s2[d].comidas.map((c) => c.opcion));
+  const lunes = new Date(2026, 10, 16), otro = new Date(2026, 10, 23), domingo = new Date(2026, 10, 22);
+  assert.notEqual(menuDeLaSemana(lunes), menuDeLaSemana(otro));
+  assert.equal(menuDeLaSemana(lunes), menuDeLaSemana(domingo));
 });

@@ -196,7 +196,7 @@ export function ajustarPorSalud(plan, condiciones = [], peso = null) {
  * opciones: { diasEntreno: [0..6], comidas: 4|5, condiciones: [ids], eleccion: {comida: idOpción},
  *   dia: 0 (lunes)..6 }. Sin elección, la opción de cada comida rota sola según el día.
  */
-export function calcularDieta(planBase, { diasEntreno = [], comidas = 5, condiciones = [], peso = null, eleccion = {}, dia = (new Date().getDay() + 6) % 7 } = {}) {
+export function calcularDieta(planBase, { diasEntreno = [], comidas = 5, condiciones = [], peso = null, eleccion = {}, dia = (new Date().getDay() + 6) % 7, rotacion = 0 } = {}) {
   if (!planBase) return null;
   const salud = ajustarPorSalud(planBase, condiciones, peso);
   const plan = salud.plan;
@@ -221,7 +221,8 @@ export function calcularDieta(planBase, { diasEntreno = [], comidas = 5, condici
     const ops = opcionesDe(nombre, condiciones);
     const elegida = ops.find((o) => o.id === eleccion[nombre]);
     // Rotación por día, sin repetir en el mismo día un plato que ya salga en otra comida.
-    let k = (dia + i) % ops.length;
+    // rotacion 1 (menú de la semana 2) va media vuelta por delante: el mismo día no coincide con la semana 1.
+    let k = (dia + i + (rotacion ? Math.max(1, Math.floor(ops.length / 2)) : 0)) % ops.length;
     for (let n = 0; n < ops.length && usadas.has(ops[k].id); n++) k = (k + 1) % ops.length;
     const op = elegida ?? ops[k];
     usadas.add(op.id);
@@ -292,4 +293,26 @@ function consejos(plan) {
   if (plan.diferencia > 0) c.push("Estás en superávit: si te cuesta llegar a las calorías, añade frutos secos, aceite de oliva o batidos en lugar de comer más volumen.");
   c.push("Pésate en ayunas 2–3 veces por semana y fíjate en la media: el motor ajusta las calorías cuando repites la evaluación.");
   return c;
+}
+
+/**
+ * Dos menús semanales fijos que se alternan: semana 1 y semana 2. Cada uno trae los 7 días
+ * (lunes = 0) con sus comidas, igual que un día de calcularDieta, marcados como entreno o descanso.
+ * opciones: las mismas de calcularDieta (sin eleccion ni dia, que aquí los pone el menú).
+ */
+export function menusSemanales(planBase, opciones = {}) {
+  if (!planBase) return null;
+  const entreno = new Set(opciones.diasEntreno ?? []);
+  return [0, 1].map((rotacion) => Array.from({ length: 7 }, (_, dia) => {
+    const d = calcularDieta(planBase, { ...opciones, eleccion: {}, dia, rotacion });
+    const tipo = entreno.has(dia) ? "entreno" : "descanso";
+    return { dia, tipo, ...(tipo === "entreno" ? d.diaEntreno : d.diaDescanso) };
+  }));
+}
+
+/** Qué menú toca en una fecha (0 = semana 1, 1 = semana 2): alterna cada semana, de lunes a domingo. */
+export function menuDeLaSemana(fecha = new Date()) {
+  const lunes = new Date(fecha.getFullYear(), fecha.getMonth(), fecha.getDate() - (fecha.getDay() + 6) % 7);
+  const semanas = Math.round((lunes - new Date(2026, 0, 5)) / (7 * 864e5)); // 5-ene-2026 fue lunes
+  return ((semanas % 2) + 2) % 2;
 }

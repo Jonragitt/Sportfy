@@ -2,7 +2,7 @@
 import { sincronizar, evaluaciones } from "../evaluaciones.js?v=202611130100";
 import { calcularTodo, leerPreferencias, necesitaPreferencias } from "../motor.js?v=202611130440";
 import { fechaActual, diaSemana, fechaLarga, esHoy } from "../reloj.js?v=202611130400";
-import { calcularDieta } from "../dieta.js?v=202611130410";
+import { calcularDieta, menusSemanales, menuDeLaSemana } from "../dieta.js?v=202611150140";
 import { DIAS_SEMANA } from "../rutina.js?v=202611130440";
 
 export function montar() {
@@ -35,6 +35,34 @@ export function montar() {
       let comidas = leer("sportfy.dieta.comidas", 5);
       let eleccion = leer("sportfy.dieta.opciones", {});
 
+      // Una comida con su foto, kcal, macros, plato, cantidades y preparación.
+      // elegir = true añade el desplegable de opciones (solo en «Tu día de comidas»).
+      const htmlComida = (c, elegir) => `<div class="comida">
+              <button type="button" class="comida-foto" data-foto="${esc(c.opcion)}" aria-label="Ver foto: ${esc(c.plato)}"><img src="shared/comidas/${esc(c.opcion)}.jpg" alt="" loading="lazy" width="160" height="160"></button>
+              <div class="comida-head"><h3>${esc(c.nombre)}</h3><span>${fmt(c.kcal)} kcal</span></div>
+              <p class="macros">P ${c.proteina} g · H ${c.hidratos} g · G ${c.grasa} g</p>
+              ${elegir ? `<label class="opcion">Opción <select data-comida="${esc(c.nombre)}">
+                <option value="" ${c.auto ? "selected" : ""}>Variar cada día</option>
+                ${c.opciones.map((o) => `<option value="${esc(o.id)}" ${!c.auto && o.id === c.opcion ? "selected" : ""}>${esc(o.nombre)}</option>`).join("")}
+              </select></label>` : ""}
+              <p class="plato">${esc(c.plato)}${elegir && c.auto ? ` <span class="note">· ${esHoy() ? "hoy" : "ese día"}</span>` : ""}</p>
+              <ul>${c.ejemplo.map((e) => `<li>${esc(e.nombre)}: <b>${esc(e.texto)}</b></li>`).join("")}${["Comida", "Cena"].includes(c.nombre) ? "<li>Verdura al gusto, fresca o congelada (medio plato)</li>" : ""}</ul>
+              ${c.preparacion ? `<p class="note" style="margin:4px 0 0">🍳 ${esc(c.preparacion)}</p>` : ""}
+            </div>`;
+      const htmlLeyenda = (x) => {
+        const t = x.proteina * 4 + x.hidratos * 4 + x.grasa * 9, q = (g, k) => Math.round(g * k / t * 100);
+        return `<div class="macro-bar" aria-hidden="true"><i style="width:${q(x.proteina, 4)}%"></i><i style="width:${q(x.grasa, 9)}%"></i><i style="width:${q(x.hidratos, 4)}%"></i></div>
+            <div class="leyenda">
+              <span><b>${fmt(x.kcal)} kcal</b></span>
+              <span><i class="punto" style="background:var(--accent)"></i>Proteína <b>${x.proteina} g</b></span>
+              <span><i class="punto" style="background:var(--mid)"></i>Grasas <b>${x.grasa} g</b></span>
+              <span><i class="punto" style="background:var(--good)"></i>Hidratos <b>${x.hidratos} g</b></span>
+            </div>`;
+      };
+      const CORTO = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
+      let plegado = leer("sportfy.dieta.plegado", false);
+      let menuAbierto = null, diaAbierto = null;
+
       function pintar() {
         if (!p) {
           $("#contenido").innerHTML = `<div class="card"><p style="margin:0">Para calcular tu dieta necesitamos la evaluación antropométrica con edad, altura y peso.</p></div>`;
@@ -45,9 +73,9 @@ export function montar() {
         const ETIQ = { sodio: "Sodio", potasio: "Potasio", fibra: "Fibra", saturadas: "Grasas saturadas", calcio: "Calcio", vitaminaD: "Vitamina D", hierro: "Hierro", acidoFolico: "Ácido fólico", omega3: "Omega-3" };
         const objetivos = Object.entries(d.objetivosSalud).map(([k, v]) => `<li><b>${ETIQ[k] ?? k}:</b> ${esc(typeof v === "number" ? `${v} g/día` : v)}</li>`).join("");
         const dia = tipo === "entreno" ? d.diaEntreno : d.diaDescanso;
-        const total = dia.proteina * 4 + dia.hidratos * 4 + dia.grasa * 9;
-        const pct = (g, k) => Math.round(g * k / total * 100);
         const nombresEntreno = (rutina.diasSemana ?? []).map((i) => DIAS_SEMANA[i]);
+        const menus = menusSemanales(p, { diasEntreno: rutina.diasSemana ?? [], comidas, peso, condiciones: (rutina.condiciones ?? []).map((c) => c.id) });
+        const semanaHoy = menuDeLaSemana(fechaActual());
         const tipoHoy = (rutina.diasSemana ?? []).includes(hoy) ? "entreno" : "descanso";
         const diaHoy = tipoHoy === "entreno" ? d.diaEntreno : d.diaDescanso;
         const sesionHoy = (rutina.sesiones ?? []).find((x) => x.diaSemana === hoy);
@@ -71,34 +99,37 @@ export function montar() {
           </div>
 
           <div class="card" id="menu" style="scroll-margin-top:130px">
-            <h2 style="margin:0 0 6px">Tu día de comidas</h2>
+            <button type="button" class="plegar" id="plegar-menu" aria-expanded="${!plegado}"><h2>Tu día de comidas</h2><span class="flecha-pl" aria-hidden="true">▾</span></button>
+            <div class="plegable"${plegado ? " hidden" : ""}>
             <div class="selector" role="group" aria-label="Tipo de día">
               <button type="button" data-tipo="entreno" aria-pressed="${tipo === "entreno"}">Día de entreno</button>
               <button type="button" data-tipo="descanso" aria-pressed="${tipo === "descanso"}">Día de descanso</button>
             </div>
             <p class="note" style="margin:8px 0 0">${d.ciclado ? `Los días de fuerza (${esc(nombresEntreno.join(", "))}) llevan más hidratos y los de descanso menos; la proteína es la misma todos los días y la media semanal cuadra con tu plan.` : d.cambios.length && (rutina.diasSemana ?? []).length ? "Por tu salud, los hidratos se reparten igual todos los días, entrenes o no." : "Todos los días comes lo mismo: tu plan no tiene días de fuerza definidos."}</p>
-            <div class="macro-bar" aria-hidden="true"><i style="width:${pct(dia.proteina, 4)}%"></i><i style="width:${pct(dia.grasa, 9)}%"></i><i style="width:${pct(dia.hidratos, 4)}%"></i></div>
-            <div class="leyenda">
-              <span><b>${fmt(dia.kcal)} kcal</b></span>
-              <span><i class="punto" style="background:var(--accent)"></i>Proteína <b>${dia.proteina} g</b></span>
-              <span><i class="punto" style="background:var(--mid)"></i>Grasas <b>${dia.grasa} g</b></span>
-              <span><i class="punto" style="background:var(--good)"></i>Hidratos <b>${dia.hidratos} g</b></span>
-            </div>
+            ${htmlLeyenda(dia)}
             <label class="note" style="display:block;margin-top:12px">Comidas al día <select id="comidas"><option value="4" ${d.comidas === 4 ? "selected" : ""} ${d.comidas === 5 && comidas === 4 ? "disabled" : ""}>4 comidas</option><option value="5" ${d.comidas === 5 ? "selected" : ""}>5 comidas</option></select></label>
             ${d.comidas !== comidas ? `<p class="note" style="margin:4px 0 0">Por tu salud te recomendamos 5 comidas al día.</p>` : ""}
-            ${dia.comidas.map((c) => `<div class="comida">
-              <button type="button" class="comida-foto" data-foto="${esc(c.opcion)}" aria-label="Ver foto: ${esc(c.plato)}"><img src="shared/comidas/${esc(c.opcion)}.jpg" alt="" loading="lazy" width="160" height="160"></button>
-              <div class="comida-head"><h3>${esc(c.nombre)}</h3><span>${fmt(c.kcal)} kcal</span></div>
-              <p class="macros">P ${c.proteina} g · H ${c.hidratos} g · G ${c.grasa} g</p>
-              <label class="opcion">Opción <select data-comida="${esc(c.nombre)}">
-                <option value="" ${c.auto ? "selected" : ""}>Variar cada día</option>
-                ${c.opciones.map((o) => `<option value="${esc(o.id)}" ${!c.auto && o.id === c.opcion ? "selected" : ""}>${esc(o.nombre)}</option>`).join("")}
-              </select></label>
-              <p class="plato">${esc(c.plato)}${c.auto ? ` <span class="note">· ${esHoy() ? "hoy" : "ese día"}</span>` : ""}</p>
-              <ul>${c.ejemplo.map((e) => `<li>${esc(e.nombre)}: <b>${esc(e.texto)}</b></li>`).join("")}${["Comida", "Cena"].includes(c.nombre) ? "<li>Verdura al gusto, fresca o congelada (medio plato)</li>" : ""}</ul>
-              ${c.preparacion ? `<p class="note" style="margin:4px 0 0">🍳 ${esc(c.preparacion)}</p>` : ""}
-            </div>`).join("")}
+            ${dia.comidas.map((c) => htmlComida(c, true)).join("")}
             <p class="note" style="margin:10px 0 0">Cada comida tiene varias opciones sencillas y baratas: elige la que te apetezca o deja «Variar cada día» y el menú irá cambiando solo. Las cantidades se recalculan para que cuadren con tus macros.</p>
+            </div>
+          </div>
+
+          <div class="card" id="semanal" style="scroll-margin-top:130px">
+            <h2 style="margin:0 0 6px">Menú semanal</h2>
+            <p class="note" style="margin:0 0 10px">Dos menús fijos que se alternan: una semana el 1 y la siguiente el 2. ${esHoy() ? "Esta semana" : "Esa semana"} toca el <b>menú ${semanaHoy + 1}</b>. Toca un menú para ver sus días y un día para ver sus comidas.</p>
+            ${menus.map((sem, m) => `<div class="menu-sem${menuAbierto === m ? " abierto" : ""}">
+              <button type="button" class="menu-sem-btn" data-menu="${m}" aria-expanded="${menuAbierto === m}">
+                <span>Menú semana ${m + 1}${m === semanaHoy ? ` <span class="tag l2">${esHoy() ? "esta semana" : "esa semana"}</span>` : ""}</span><span class="flecha-pl" aria-hidden="true">▾</span></button>
+              ${menuAbierto === m ? `<div class="dias-sem" role="group" aria-label="Días del menú ${m + 1}">
+                ${sem.map((x) => `<button type="button" class="dia-sem ${x.tipo}${m === semanaHoy && x.dia === hoy ? " hoy" : ""}" data-dia="${x.dia}" aria-pressed="${diaAbierto === x.dia}">
+                  <b>${CORTO[x.dia]}</b><small class="largo">${x.tipo === "entreno" ? "Entreno" : "Descanso"}</small><small class="corto">${x.tipo === "entreno" ? "Gym" : "Desc."}</small></button>`).join("")}
+              </div>
+              ${diaAbierto !== null ? `<div class="dia-detalle">
+                <h3 style="margin:4px 0 6px">${esc(DIAS_SEMANA[diaAbierto])} · ${sem[diaAbierto].tipo === "entreno" ? "día de entreno" : "día de descanso"}</h3>
+                ${htmlLeyenda(sem[diaAbierto])}
+                ${sem[diaAbierto].comidas.map((c) => htmlComida(c, false)).join("")}
+              </div>` : `<p class="note" style="margin:8px 0 0">Elige un día.</p>`}` : ""}
+            </div>`).join("")}
           </div>
 
           ${tipo === "entreno" ? `<div class="card"><h2 style="margin:0 0 6px">Alrededor del entreno</h2>
@@ -119,6 +150,14 @@ export function montar() {
         document.querySelectorAll("[data-comida]").forEach((sel) => sel.addEventListener("change", () => {
           if (sel.value) eleccion[sel.dataset.comida] = sel.value; else delete eleccion[sel.dataset.comida];
           escribir("sportfy.dieta.opciones", eleccion); pintar();
+        }));
+        $("#plegar-menu").addEventListener("click", () => { plegado = !plegado; escribir("sportfy.dieta.plegado", plegado); pintar(); });
+        document.querySelectorAll("[data-menu]").forEach((b) => b.addEventListener("click", () => {
+          const m = Number(b.dataset.menu); menuAbierto = menuAbierto === m ? null : m;
+          diaAbierto = menuAbierto === null ? null : (menuAbierto === semanaHoy ? hoy : 0); pintar();
+        }));
+        document.querySelectorAll("[data-dia]").forEach((b) => b.addEventListener("click", () => {
+          const d = Number(b.dataset.dia); diaAbierto = diaAbierto === d ? null : d; pintar();
         }));
         document.querySelectorAll("[data-foto]").forEach((b) => b.addEventListener("click", () => verFoto(b)));
         $("#comidas").addEventListener("change", (e) => { comidas = Number(e.target.value); escribir("sportfy.dieta.comidas", comidas); pintar(); });

@@ -37,6 +37,30 @@
     .selector button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
     .comida { border-top: 1px solid var(--border); padding: 12px 0 0; margin-top: 12px; }
     .comida:first-of-type { border-top: 0; margin-top: 4px; padding-top: 4px; }
+    .plegar { all: unset; box-sizing: border-box; width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px; cursor: pointer; margin: 0 0 6px; }
+    .plegar h2 { margin: 0; }
+    .plegar:focus-visible, .menu-sem-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 8px; }
+    .flecha-pl { font-size: 1.1rem; color: var(--muted); transition: transform .2s ease; }
+    .plegar[aria-expanded="false"] { margin: 0; }
+    .plegar[aria-expanded="false"] .flecha-pl { transform: rotate(-90deg); }
+    .menu-sem { border: 1px solid var(--border); border-radius: 14px; margin-top: 10px; overflow: hidden; }
+    .menu-sem-btn { all: unset; box-sizing: border-box; width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 12px 14px; font-weight: 800; cursor: pointer; }
+    .menu-sem-btn .tag { margin-left: 6px; font-size: .72rem; vertical-align: middle; }
+    .menu-sem-btn[aria-expanded="false"] .flecha-pl { transform: rotate(-90deg); }
+    .menu-sem.abierto { border-color: var(--accent); }
+    .menu-sem.abierto > :not(.menu-sem-btn) { padding: 0 14px; }
+    .menu-sem.abierto > :last-child { padding-bottom: 14px; }
+    .dias-sem { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
+    .dia-sem { display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 8px 2px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font: inherit; cursor: pointer; min-width: 0; }
+    .dia-sem b { font-size: .92rem; }
+    .dia-sem small { font-size: .62rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+    .dia-sem.entreno small { color: var(--accent); font-weight: 700; }
+    .dia-sem.hoy { box-shadow: inset 0 0 0 2px var(--good); }
+    .dia-sem[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .dia-sem[aria-pressed="true"] small { color: rgba(255,255,255,.9) !important; }
+    .dia-detalle { margin-top: 10px; }
+    .dia-sem .corto { display: none; }
+    @media (max-width: 560px) { .dia-sem .largo { display: none; } .dia-sem .corto { display: block; } }
     .comida-foto { float: right; width: 76px; height: 76px; margin: 2px 0 6px 12px; padding: 0; border: 0; border-radius: 14px; overflow: hidden; cursor: zoom-in; background: var(--border); box-shadow: 0 2px 8px rgba(0,0,0,.18); transition: width .25s ease, height .25s ease; }
     .comida-foto img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .comida::after { content: ""; display: block; clear: both; }
@@ -88,7 +112,7 @@
     <div id="contenido"></div>
   </main>
 
-  <script type="module" data-pagina="shared/paginas/dieta.js?v=202611150010">import { montar } from "./shared/paginas/dieta.js?v=202611150010"; montar();</script>
+  <script type="module" data-pagina="shared/paginas/dieta.js?v=202611150140">import { montar } from "./shared/paginas/dieta.js?v=202611150140"; montar();</script>
   <script type="module" src="shared/deslizar.js?v=202611132045"></script>
   <script type="module" src="shared/reloj.js?v=202611130400"></script>
   <script type="module" src="shared/racha.js?v=202611142300"></script>
