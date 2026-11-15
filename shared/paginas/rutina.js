@@ -240,7 +240,7 @@ export function montar() {
         const b = ses.bloques[paso], ultimo = paso === total - 1;
         const esHoyG = g.dia === iso(new Date());
         const plazo = !fallada ? `Tienes hasta las ${horaPlazo(g.plazo)} de ${esHoyG ? "hoy" : "ese día"} para terminarla o perderás la racha.`
-          : g.puedeRecuperar ? "Has perdido la racha, pero puedes recuperar la sesión: hazla y pulsa el botón azul de recuperar."
+          : g.puedeRecuperar ? "Has perdido la racha, pero puedes recuperar la sesión: hazla entera y pulsa Terminado al final."
           : "Has perdido la racha. A las 9:00 la ficha pasa a la sesión siguiente.";
         const DIAS = ["lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo"];
         const titulo = fallada ? `Fallada · ${DIAS[diaSemana(f)]}` : esHoyG ? "Entrenamiento de hoy" : `Sesión del ${DIAS[diaSemana(f)]}`;
@@ -256,9 +256,8 @@ export function montar() {
             ${b.lado ? `<p class="lado">${esc(b.lado)}</p>` : ""}
             ${paso === 0 ? `<p class="guia-plazo">Antes de empezar, calienta: ${esc(ses.calentamiento.general)}</p>` : ""}
           </div>
-          <div class="guia-btns ${g.puedeRecuperar ? "con-rec" : ""}">${paso > 0 ? `<button class="btn secondary" type="button" id="guia-atras" aria-label="Ejercicio anterior">‹</button>` : "<span></span>"}
-            ${g.puedeRecuperar ? `<button class="btn rec" type="button" id="guia-rec" aria-label="Recuperado" title="Recuperado">${FLECHA}</button>` : ""}
-            <button class="btn" type="button" id="guia-sig">${ultimo ? (g.puedeRecuperar ? "Terminado · recuperar" : fallada ? "Terminado" : "Terminado ✓") : "Siguiente ›"}</button></div>
+          <div class="guia-btns">${paso > 0 ? `<button class="btn secondary" type="button" id="guia-atras" aria-label="Ejercicio anterior">‹</button>` : "<span></span>"}
+            <button class="btn" type="button" id="guia-sig">${ultimo ? (fallada ? "Terminado" : "Terminado ✓") : "Siguiente ›"}</button></div>
           <p class="guia-plazo">${plazo}</p>
         </div>`;
         // En bucle como un GIF: no se para hasta pasar al siguiente ejercicio (si el navegador lo
@@ -281,7 +280,6 @@ export function montar() {
           setTimeout(() => { celebrando = false; pintarGuia(); }, 3500);
         };
         $("#guia-atras")?.addEventListener("click", () => ir(paso - 1));
-        $("#guia-rec")?.addEventListener("click", () => terminar("recuperado"));
         $("#guia-sig").addEventListener("click", () => {
           if (!ultimo) return ir(paso + 1);
           if (!fallada) return terminar("si");
